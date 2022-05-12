@@ -387,7 +387,7 @@ table a, #comments a{background-color:inherit;}
 	#pageintro .introtxt{max-width:none; float:none;}
 	#pageintro .introtxt .heading{font-size:36px;}
 
-	#footer{padding-bottom:50px;}
+	#footer{padding-bottom:20px;}
 }
 
 @media screen and (max-width:450px){}
