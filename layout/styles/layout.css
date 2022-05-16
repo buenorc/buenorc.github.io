@@ -432,9 +432,9 @@ box-info {
 
 /*images - frame */
 .frame {
-  width: 300px;
+  width: 296px;
   height: 220px;
-  border: 10px solid #6e89bc;
+  border: 5px solid #6e89bc;
   background: white;
   margin: auto;
   padding: 10px 10px;
@@ -452,10 +452,11 @@ box-info {
 /*images - figure caption*/
 
 figcaption {
-    background-color: #FFFFFF;
-    color: #888888;
+    background-color: #6e89bc;
+    color: #DCDCDC;
     padding: 10px;
     text-align: left;
+		opacity: 0.7;
 }
 figure {
     border: thin #FFFFFF;
