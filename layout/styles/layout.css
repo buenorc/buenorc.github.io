@@ -452,11 +452,10 @@ box-info {
 /*images - figure caption*/
 
 figcaption {
-    background-color: #6e89bc;
-    color: #DCDCDC;
+    background-color: #FFFFFF;
+    color: #888888;
     padding: 10px;
     text-align: left;
-		opacity: 0.7;
 }
 figure {
     border: thin #FFFFFF;
