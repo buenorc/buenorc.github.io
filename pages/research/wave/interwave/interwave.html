@@ -129,7 +129,7 @@ Licence URI: http://www.os-templates.com/template-terms
       <div class="group btmspace-50 demo">
 
         <div class="one_half first">
-          <p>The Interwave Analyzer is designed to be a powerful, easily accessible, and universal software to analyze the thermally stratified system from the instrumented buoy and numerical models, reviling specific details about the internal wave field and the lake mixing regime. </p>
+          <p>The Interwave Analyzer is designed to be a powerful, easily accessible, and universal software to analyze the thermally stratified system from the instrumented buoy and numerical models, reviling specific details about the internal wave field and the lake mixing regime (<a href="https://doi.org/10.1016/j.envsoft.2020.104950"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Model. Softw.</a>). </p>
           <p>The software has an intuitive GUI (Fig 1), where users may specify some parameters to the analysis of lake hydrodynamic. The software provides some important analysis related to internal motion, which includes:</p>
           <ol>
             <li>A detailed and unique characterization of wind events;</li>
@@ -159,7 +159,7 @@ Licence URI: http://www.os-templates.com/template-terms
           </figure>
         </div>
         <div class="one_half"> </div>
-        <p>The wind characterization accounts for wind events that may favor the formation of internal seiche. The system computes through windowed segments the contribution of the wind direction on the internal seiche formation. The software computes consecutive wind events and the mean effective Wedderburn number for each averaged segment.  When the Wedderburn number is in the range for internal wave formation, the software adds the period as a consecutive wind event. The longer the wind event, the higher the probability of internal seiche generation (Fig. 2). The segment size is based on the internal seiche period (t=1/8 T<sub>V1H1</sub>). <p>
+        <p>The wind characterization accounts for wind events that may favor the formation of internal seiche. The system computes through windowed segments the contribution of the wind direction on the internal seiche formation. The software computes consecutive wind events and the mean effective Wedderburn number for each averaged segment. When the Wedderburn number is in the range for internal wave formation (<a href="https://doi.org/10.1175/1520-0485(1980)010<1104:TCOMLD>2.0.CO;2"  target="_blank">Spigel and Imberger, 1980; J. Phys. Oceanogr.</a>), the software adds the period as a consecutive wind event. The longer the wind event, the higher the probability of internal seiche generation (Fig. 2). The segment size is based on the internal seiche period (t=1/8 T<sub>V1H1</sub>). <p>
         <p>Spectral analyses are performed by Welch's method (Fourier transform) and Wavelet transform. The software also provides the confidence level for power spectral density of isotherms, revealing significant peaks that may be attributed to internal waves activities. Coupled with spectral analysis, the software also provides the theoretical period of internal seiche for different vertical modes (Fig. 3). </p>
         <p>For higher vertical modes, the interwave analyzer also provides a phase shift analysis between isotherms. To identify internal wave resonance with wind forcing, the software provides also coherence analysis with the power spectral density of wind speed. </p>
 
@@ -173,10 +173,10 @@ Licence URI: http://www.os-templates.com/template-terms
           </figure>
         </div>
         <div class="one_half">        </div>
-        <p>Combined with all these observations, the software provides some theoretical results to describe the internal seiche field, including lake mixing characterization and internal seiche formation and degeneration.<p>
-        <p>The first version has been published at Environmental modelling and Software in 2021 under the title Interwave analyzer for thermally stratified lakes [6], but we are working on further improvements. </p>
+        <p>Combined with all these observations, the software provides some theoretical results to describe the internal seiche field, including lake mixing characterization (<a href="https://doi.org/10.1175/1520-0485(1980)010<1104:TCOMLD>2.0.CO;2"  target="_blank">Spigel and Imberger, 1980; J. Phys. Oceanogr.</a>) and internal seiche formation (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>) and degeneration (<a href="https://doi.org/10.1017/S0022112001003536"  target="_blank">Horn et al., 2001; J. Fluid Mech.</a>).<p>
+        <p>The first version has been published at Environmental modelling and Software in 2021 under the title Interwave analyzer for thermally stratified lakes (<a href="https://doi.org/10.1016/j.envsoft.2020.104950"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Model. Softw.</a>), but we are working on further improvements. </p>
         <p>In version 2.0, the first version released after publication, we added a decomposition model, including an internal wave solution for continous stratification system. The new functionality provides the theoretical wave period of the first five vertical modes, as well as, a detailed description of the mode shapes. </p>
-
+        <p>Results obtained with Interwave Analyzer v.2.0 can be used together with horizontal velocity data and applied into the <a href="https://github.com/buenorc/decomp-interwave"  target="_blank">horizontal velocity decomposer</a> to decompose the horizontal velocity into the first five internal seiche vertical modes.</p>
       </div>
 
 
