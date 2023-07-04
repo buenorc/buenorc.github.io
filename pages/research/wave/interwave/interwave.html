@@ -130,7 +130,8 @@ Licence URI: http://www.os-templates.com/template-terms
 
         <div class="one_half first">
           <p>The Interwave Analyzer is designed to be a powerful, easily accessible, and universal software to analyze the thermally stratified system from the instrumented buoy and numerical models, reviling specific details about the internal wave field and the lake mixing regime (<a href="https://doi.org/10.1016/j.envsoft.2020.104950"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Model. Softw.</a>). </p>
-          <p>The software has an intuitive GUI (Fig 1), where users may specify some parameters to the analysis of lake hydrodynamic. The software provides some important analysis related to internal motion, which includes:</p>
+          <p>TThe software offers an intuitive graphical user interface (Fig 1) that allows users to easily specify parameters for the analysis of lake hydrodynamics. It provides several essential analyses related to internal motion, including:</p>
+
           <ol>
             <li>A detailed and unique characterization of wind events;</li>
             <li>An effective Wedderburn number filtered by the wind characterization;</li>
@@ -159,9 +160,11 @@ Licence URI: http://www.os-templates.com/template-terms
           </figure>
         </div>
         <div class="one_half"> </div>
-        <p>The wind characterization accounts for wind events that may favor the formation of internal seiche. The system computes through windowed segments the contribution of the wind direction on the internal seiche formation. The software computes consecutive wind events and the mean effective Wedderburn number for each averaged segment. When the Wedderburn number is in the range for internal wave formation (<a href="https://doi.org/10.1175/1520-0485(1980)010<1104:TCOMLD>2.0.CO;2"  target="_blank">Spigel and Imberger, 1980; J. Phys. Oceanogr.</a>), the software adds the period as a consecutive wind event. The longer the wind event, the higher the probability of internal seiche generation (Fig. 2). The segment size is based on the internal seiche period (t=1/8 T<sub>V1H1</sub>). <p>
-        <p>Spectral analyses are performed by Welch's method (Fourier transform) and Wavelet transform. The software also provides the confidence level for power spectral density of isotherms, revealing significant peaks that may be attributed to internal waves activities. Coupled with spectral analysis, the software also provides the theoretical period of internal seiche for different vertical modes (Fig. 3). </p>
-        <p>For higher vertical modes, the interwave analyzer also provides a phase shift analysis between isotherms. To identify internal wave resonance with wind forcing, the software provides also coherence analysis with the power spectral density of wind speed. </p>
+        <p>The software includes a wind characterization feature that takes into account wind events that may contribute to the formation of internal seiches. By analyzing segmented windows, the system calculates the influence of wind direction on the generation of internal seiches. For each averaged segment, the software computes consecutive wind events and determines the mean effective Wedderburn number. When the Wedderburn number falls within the range associated with internal wave formation (<a href="https://doi.org/10.1175/1520-0485(1980)010<1104:TCOMLD>2.0.CO;2"  target="_blank">Spigel and Imberger, 1980; J. Phys. Oceanogr.</a>), the software considers it as a consecutive wind event. It is worth noting that the longer the duration of the wind event, the greater the likelihood of generating internal seiches (Fig. 2). The size of each segment is determined based on the theoretical period of the internal seiche (t=1/8 T<sub>V1H1</sub>). <p>
+        <p>Spectral analyses are performed by Welch's method (Fourier transform) and Wavelet transform. The software also provides the confidence level for power spectral density of isotherms, revealing significant peaks that may be attributed to internal waves activities. Coupled with spectral analysis, the software also provides the theoretical period of internal seiche for different modes (Fig. 3). </p>
+        <br>
+        <p>The software offers a phase shift analysis between isotherms to identify internal waves with higher vertical modes. Additionally, the software includes a coherence analysis that examines the relationship between the power spectral density of wind speed and internal waves, which enables the identification of potential resonance effect between internal waves and wind forcing.</p>
+        <p>In addition to the aforementioned capabilities, the software offers theoretical results to describe the internal seiche field, including lake mixing characterization (<a href="https://doi.org/10.1175/1520-0485(1980)010<1104:TCOMLD>2.0.CO;2"  target="_blank">Spigel and Imberger, 1980; J. Phys. Oceanogr.</a>) and internal seiche amplitude (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>) and how the internal seiche could be degenerated (<a href="https://doi.org/10.1017/S0022112001003536"  target="_blank">Horn et al., 2001; J. Fluid Mech.</a>).<p>
 
       </div>
 
@@ -169,17 +172,32 @@ Licence URI: http://www.os-templates.com/template-terms
         <div class="one_half first">
           <figure>
             <img class="imgr borderedbox inspace-5" src="img/spectra-windows.jpg" alt="">
-            <figcaption><b>Fig 3.</b> Power spectral densities for different isotherms varying three user-defined parameters: window, window size, and wind direction contribution (angle). a) Flattop window with a window size of 3 days b) Hamming window with a window size of 3 days, and c) Hamming window with a window size of 1 day.</figcaption>
+            <figcaption><b>Fig 3.</b> Power spectral densities for different isotherms varying three user-defined parameters: window, window size, and wind direction contribution (angle).</figcaption>
           </figure>
         </div>
         <div class="one_half">        </div>
-        <p>Combined with all these observations, the software provides some theoretical results to describe the internal seiche field, including lake mixing characterization (<a href="https://doi.org/10.1175/1520-0485(1980)010<1104:TCOMLD>2.0.CO;2"  target="_blank">Spigel and Imberger, 1980; J. Phys. Oceanogr.</a>) and internal seiche formation (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>) and degeneration (<a href="https://doi.org/10.1017/S0022112001003536"  target="_blank">Horn et al., 2001; J. Fluid Mech.</a>).<p>
-        <p>The first version has been published at Environmental modelling and Software in 2021 under the title Interwave analyzer for thermally stratified lakes (<a href="https://doi.org/10.1016/j.envsoft.2020.104950"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Model. Softw.</a>), but we are working on further improvements. </p>
-        <p>In version 2.0, the first version released after publication, we added a decomposition model, including an internal wave solution for continous stratification system. The new functionality provides the theoretical wave period of the first five vertical modes, as well as, a detailed description of the mode shapes. </p>
-        <p>Results obtained with Interwave Analyzer v.2.0 can be used together with horizontal velocity data and applied into the <a href="https://github.com/buenorc/decomp-interwave"  target="_blank">horizontal velocity decomposer</a> to decompose the horizontal velocity into the first five internal seiche vertical modes.</p>
+        <p>The first version has been published at Environmental modelling and Software in 2021 under the title "Interwave analyzer for thermally stratified lakes" (<a href="https://doi.org/10.1016/j.envsoft.2020.104950"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Model. Softw.</a>). However, we are continuously working on further improvements and enhancements.</p>
+        <p>With the release of version 2.0, we introduced a decomposition model that incorporates an internal wave solution for continuous stratification. This new functionality provides the theoretical wave period for the first five vertical modes, along with a detailed description of their mode shapes.</p>
+        <p>The results obtained using Interwave Analyzer V2.0 can be combined with horizontal velocity data and utilized in conjunction with the horizontal velocity decomposer <a href="https://github.com/buenorc/decomp-interwave"  target="_blank">horizontal velocity decomposer</a>. This allows to decompose the horizontal velocity into the first five vertical modes of internal seiches, further enhancing the analysis capabilities of the software.</p>
       </div>
-
-
+      <hr>
+      <h1>Time-series of Horiozntal velocity and Lake Number</h1>
+      <header>
+        <figure class="avatar"><img src="../../colab/general.png" alt=""></figure>
+        <address>
+          Are you an undergraduate student with a passion for environmental research and programming? This project offers a opportunity to gain hands-on experience in environmental data analysis and software development. You will have the chance to deepen your understanding of physical limnology while enhancing your programming skills in Python.
+        </address>
+        <time></time>
+      </header>
+      <br>
+      <p>Main tasks include:</p>
+      <ol>
+        <li>Developing Python scripts to incorporate new input options for horizontal velocity and bathymetry data;</li>
+        <li>Implementing algorithms to use velocity data on the deocmposition model to obtain velocity associated to different modes;</li>
+        <li>Implementing algorithms to calculate the lake number based on the provided inputs;</li>
+        <li>Testing and debugging the software to ensure its accuracy and functionality;</li>
+        <li>Collaborating with the team to analyze and interpret the results obtained from the enhanced Interwave Analyzer;</li>
+      </ol>
     </div>
     <div class="clear"></div>
   </main>

@@ -142,6 +142,16 @@ File: Layout CSS
 --------------------------------------------------------------------------------------------------------------- */
 nav ul, nav ol{margin:0; padding:0; list-style:none;}
 
+ol {
+  display: block;
+  list-style-type: decimal;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 40px;
+}
+
 #mainav, #breadcrumb, .sidebar nav{line-height:normal;}
 #mainav .drop::after, #mainav li li .drop::after, #breadcrumb li a::after, .sidebar nav a::after{position:absolute; font-family:"FontAwesome"; font-size:10px; line-height:10px;}
 
@@ -455,7 +465,7 @@ figcaption {
     background-color: #FFFFFF;
     color: #888888;
     padding: 10px;
-    text-align: left;
+    text-align: justify;
 }
 figure {
     border: thin #FFFFFF;

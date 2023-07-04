@@ -131,14 +131,13 @@ Licence URI: http://www.os-templates.com/template-terms
       <div class="group btmspace-50 demo" style="text-align:justify">
 
         <div class="one_half first">
-          <p>We have analyzed the internal seiche amplitude from temperature profiles obtained from field monitoring (from Vossoroca reservoir and Harp Lake) and compared with theoretical amplitude (<a href="https://doi.org/10.1007/BF02523176"  target="_blank">Stevens and Lawrence. 1996; Aquatic Sciences</a>).  </p>
-          <p>We have detected internal seiches in Vossoroca Reservoir and Harp Lake with different vertical modes (For more information <a href="../detection/detection.html">click here</a>). We have observed that most of the wave is formed during the winter season in Vossoroca Reservoir and in Autumn in Harp Lake, suggesting that higher amplitude internal seiches are excited during periods of low stability (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>), which corroborates with previous theoretical results (Fig. 1).</p>
-
+          <p>We investigated the internal seiche amplitude by examining temperature profiles obtained from field monitoring at Vossoroca Reservoir and Harp Lake. The results were then compared with theoretical amplitudes reported in the literature (<a href="https://doi.org/10.1007/BF02523176"  target="_blank">Stevens and Lawrence. 1996; Aquatic Sciences</a>).  </p>
+          <p>Our study revealed the presence of internal seiches with higher vertical modes in both Vossoroca Reservoir and Harp Lake. The majority of interna waves in Vossoroca Reservoir occured during the winter season, while in Harp Lake, they were more prevalent during autumn. These findings indicate that periods of weaker stratification coincide with period of higher internal seiche amplitudes (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>), which aligns with previous theoretical outcomes (see Fig 1).</p>
         </div>
         <div class="one_half">
-          <p> The system stability can be described by the Wedderburn number (W): </p>
-          <p><span class="math display">\[W=\frac{g&#39;~h_e^2}{L~u^2}\]</span></p>
-          <p>in which g' is the reduced gravity, he is the upper mixed layer, L is the basin length, and u* is the velocity friction of the wind.<p>
+          <p>Internal waves are often predicted by the Wedderburn number (W), which describes the ratio between the gradient of pressure stablished by stratification and wind friction </p>
+          <p><span class="math display">\[W=\frac{g&#39;~h_e^2}{L~u^2},\]</span></p>
+          <p>in which g' is the reduced gravity, h<sub>e</sub> is the upper mixed layer, L is the basin length, and u is the wind friction velocity.<p>
           <p>Although the internal seiche pattern is well described by previous theories (<a href="https://doi.org/10.1007/BF02523176"  target="_blank">Stevens and Lawrence. 1996; Aquatic Sciences</a>), the estimation fails to predict the internal seiche amplitude when the stratification deviates from the idealized two-layer system (Fig 1).</p>
         </div>
       </div>
@@ -156,16 +155,18 @@ Licence URI: http://www.os-templates.com/template-terms
         </div>
         <div class="one_half">        </div>
 
-        <p>We observed a  much smaller amplitude for a really small W (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>). To understand why the internal seiche was limited in some thermal conditions, in this study, we ran 32 simulations to analyze the lake response to a wind event (varying W from 10 to 0.1).</p>
-        <p>Numerical observations have suggested that the amplitude of internal seiches is not just correlated to the W, but is affected by other variables, such as the ratio of the depth of the thermocline and the total water depth  (h<sub>e</sub>/H), the resonance effect with the wind, and the turbulence production near the wave crest (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>). We observed that the measured results (which include also observation from the wide literature) are not well described by previously established theories. </p>
-        <p> The wave amplitude is directly associated with the daily Wedderburn number of the analyzed period at the thermocline depth for fundamental internal seiche mode. The overall result, more clear for V1H1 internal seiche mode observed in Vossoroca reservoir, shows an inversely proportional relationship between internal wave amplitude and the Wedderburn number, with higher variation for different h<sub>e</sub>/H.</p>
-        <p> We observed that for a low Wedderburn number (W<"1"), the instabilities due to boundary interactions reduce the basin-scale internal wave amplitude, and the increase of the wave does not follow the previous mathematical formulation anymore. This observation was also evidenced through three-dimensional numerical simulations. </p>
+        <p>We observed a  much smaller amplitude for small Wedderburn number (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>). To understand why the internal seiche was attenuated in some thermally stratified basins, we ran 32 simulations to analyze the lake response to a wind event (varying the Wedderburn number from 0.1 to 10).</p>
+        <p>Numerical observations have indicated that the amplitude of internal seiche is influenced by various factors beyond the Wedderburn number. These factors include the additional contribution of the h<sub>e</sub>/H ratio (ratio between the epilimnion theckness and total water depth), wind-wave resonance effects, and turbulence production near the wave crest (<a href="https://link.springer.com/article/10.1007/s10652-020-09767-1"  target="_blank">de Carvalho Bueno et al., 2021; Environ. Fluid Mech.</a>). We observed from measured results (which include also observation from the wide literature) that previously established theories sometimes fail to predict internal seiche amplitude.</p>
+
+        <p> The internal seiche amplitude is directly associated with the daily Wedderburn number of the analyzed period. The overall result, more clear for V1H1 internal seiche mode observed in Vossoroca reservoir, shows an inversely proportional relationship between internal wave amplitude and the Wedderburn number, with higher variation for different h<sub>e</sub>/H.</p>
+        <p> We observed that for a low Wedderburn number (W<1), instabilities due to shear interactions reduce the internal wave amplitude, and the wave amplitude does not follow the previous mathematical formulation. This observation was also evidenced through three-dimensional numerical simulations. </p>
+        <p> For a shallow upper layer, the three-dimensional model also indicated that the increase of pressure at the upper layer, leads to a higher internal seiche compared with previous theories (Fig. 2). </p>
 
 
       </div>
       <hr>
       <div class="group btmspace-50 demo" style="text-align:justify">
-
+        <h1>Parameterization of Internal seiche amplitude</h1>
         <div class="one_half first">
           <figure>
             <img class="imgl borderedbox inspace-5" src="img/model.png" alt="">
@@ -173,13 +174,16 @@ Licence URI: http://www.os-templates.com/template-terms
           </figure>
         </div>
         <div class="one_half">  </div>
-        <p>For a shallow upper layer, the three-dimensional model also indicated that the increase of pressure at the upper layer, leads to a higher internal seiche compared with previous theories (Fig. 2). Based on numerical data, and supported by field observations, we proposed a new parameterization to better describe the excitation of basin-scale internal waves in thermal-stratified basins [6]:</p>
+        <p>Based on numerical data, and supported by field observations, we proposed a new parameterization to better describe the excitation of basin-scale internal waves in thermally stratified lakes and reservoirs:</p>
         <p><span class="math display">\[\frac{\zeta_o}{h_e} = A\exp\Bigg(\frac{-(W-k)^2}{2~f^2}\Bigg)\]</span></p>
         <p>where W is the Wedderburn number, k = 6 and  A = 0.1 are universal constants, and f is a function of he/H, which determines an higher order influence of h<sub>e</sub>/H:</p>
         <p><span class="math display">\[f(h_e/H) = g(h_e/H)\exp\Bigg(\frac{(h_e/H)^2}{B}\Bigg)\]</span></p>
         <p>where B = 0.125 is a universal constant (found empirically) and the function g is a function of he/H that was found empirically from the numerical simulations and is defined as:</p>
         <p><span class="math display">\[g(h_e/H) = 12.156\Bigg(\frac{h_e}{H}\Bigg)^3- 15.714\Bigg(\frac{h_e}{H}\Bigg)^2 + 2.843 \frac{h_e}{H} + 2.085\]</span></p>
+        <br>
+        <p>The vertical displacement of upweeling events described by the above equations does not provide a definitive method for calculating the wave amplitude. However, it serves as a valuable tool for comprehending the physical processes that impact the development of internal seiches in thermally stratified lakes, which are not accounted in simplified model schemes.</p>
       </div>
+      <hr>
 
     </div>
     <div class="clear"></div>
