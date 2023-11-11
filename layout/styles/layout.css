@@ -263,7 +263,7 @@ hr, .borderedbox{border-color:#ffffff; opacity=0.4}
 label span{color:#FF0000; background-color:inherit;}
 input:focus, textarea:focus, *:required:focus{border-color:#6785b8;}
 .overlay{color:#FFFFFF; background-color:inherit;}
-.overlay::after{color:inherit; background-color:rgba(0,0,0,.55);}
+.overlay::after{color:inherit; background-color:rgba(0,0,0,.1);}
 
 .btn, .btn.inverse:hover{border-radius: 25px; color:#FFFFFF; background-color:#6785b8; border-color:#6785b8;}
 .btn:hover, .btn.inverse{color:inherit; background-color:transparent; border-color:inherit;}
@@ -432,12 +432,11 @@ transform: translate(-50%, -20%);
 /* box around information - mask background color */
 box-info {
     display: inline-block;
-		margin-top: 15%;
-    width: 100%;
+		margin-top: 0%;
+    width: 95%;
 		background-color: #000000;
-		padding: 15px ;
     text-align:justify;
-		opacity:0.7;
+    font-size: 14px;
 }
 
 /*images - frame */
