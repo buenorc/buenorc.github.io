@@ -1,5 +1,8 @@
 /****************************** MAIN STYLES - backgorund,deviders ******************************/
 
+@import url("fontawesome-4.5.0.min.css");
+@import url("framework.css");
+
 /* Main Container */
 img, embed, object, video {
 	max-width: 100%
