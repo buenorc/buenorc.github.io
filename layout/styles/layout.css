@@ -31,10 +31,10 @@ File: Layout CSS
 
 /* Header
 --------------------------------------------------------------------------------------------------------------- */
-#header{padding:30px 0 0 0;}
+#header{padding:10px 0 0 0;}
 
 #header #logo{margin-top:;}
-#header #logo h1{margin:0; padding:0; font-size:22px; text-transform:uppercase;}
+#header #logo h1{margin:0; padding:0; font-size:30px;}
 
 
 /* Page Intro
@@ -106,7 +106,7 @@ File: Layout CSS
 --------------------------------------------------------------------------------------------------------------- */
 #footer{padding:80px 0;}
 
-#footer .title{margin:0 0 50px 0; padding:0; font-size:1.2rem; text-transform:uppercase;}
+#footer .title{margin:0 0 50px 0; padding:0; font-size:1.2rem; font-family: 'Freestyle Script', sans-serif; font-size: 50px;}
 
 #footer .linklist li{display:block; margin-bottom:15px; padding:0 0 15px 0; border-bottom:1px solid;}
 #footer .linklist li:last-child{margin:0; padding:0; border:none;}
@@ -158,11 +158,11 @@ ol {
 /* Top Navigation */
 #mainav{}
 #mainav ul.clear{margin-top:3px;}
-#mainav ul{text-transform:uppercase;}
+#mainav ul{}
 #mainav ul ul{z-index:9999; position:absolute; width:180px; text-transform:none;}
 #mainav ul ul ul{left:180px; top:0;}
-#mainav li{display:inline-block; position:relative; margin:0 15px 0 0; padding:0;}
-#mainav li:last-child{margin-right:0;}
+#mainav li{display:inline-block; position:relative; margin:0 15px 0 0; padding:0;font-family: 'Freestyle Script', sans-serif;font-size: 25px;}
+#mainav li:last-child{margin-right:0}
 #mainav li li{width:100%; margin:0;}
 #mainav li a{display:block; padding:0 0 32px 0;}
 #mainav li li a{border:solid; border-width:0 0 1px 0;}
@@ -180,7 +180,7 @@ ol {
 #mainav form select option{margin:5px; padding:0; border:none;}
 
 /* Breadcrumb */
-#breadcrumb{padding:15px 0; text-transform:uppercase;}
+#breadcrumb{padding:15px 0;}
 #breadcrumb ul{margin:0; padding:0; list-style:none;}
 #breadcrumb li{display:inline-block; margin:0 6px 0 0; padding:0;}
 #breadcrumb li a{display:block; position:relative; margin:0; padding:0 12px 0 0; font-size:12px;}
@@ -304,7 +304,7 @@ article:hover .icon::before, article:hover .icon::after{}
 
 
 /* Footer */
-#footer .title{color:#888888;}
+#footer .title{color:#888888; font-size: 50px;}
 #footer .linklist li{border-color:#141414;}
 
 /* Navigation */
@@ -350,7 +350,7 @@ table a, #comments a{background-color:inherit;}
 /* Max Wrapper Width - Laptop, Desktop etc.
 --------------------------------------------------------------------------------------------------------------- */
 @media screen and (min-width:978px){
-	.hoc{max-width:978px;}
+	.hoc{max-width:978px; padding-bottom:-20px}
 }
 
 
@@ -361,7 +361,7 @@ table a, #comments a{background-color:inherit;}
 
 	#topbar{}
 
-	#header{padding-bottom:30px;}
+	#header{padding-bottom:50px;}
 
 	#mainav{}
 	#mainav ul{display:none;}
@@ -392,7 +392,7 @@ table a, #comments a{background-color:inherit;}
 	#topbar .fl_right ul li:last-child{margin-right:0;}
 
 	#header{text-align:center;}
-	#header #logo{margin-bottom:15px;}
+	#header #logo{}
 
 	#pageintro .introtxt{max-width:none; float:none;}
 	#pageintro .introtxt .heading{font-size:36px;}
@@ -410,7 +410,7 @@ table a, #comments a{background-color:inherit;}
 	.scrollable table{margin:0; padding:0; white-space:nowrap;}
 
 	.inline li{display:block; margin-bottom:10px;}
-	.pushright li{margin-right:0;}
+	.pushright li{margin-right:0; }
 
 	.font-x2{font-size:1.4rem;}
 	.font-x3{font-size:1.6rem;}

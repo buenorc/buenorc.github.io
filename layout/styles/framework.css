@@ -16,7 +16,7 @@ html, body{margin:0; padding:0; font-size:14px; line-height:1.6em;}
 .bold{font-weight:bold;}
 .center{text-align:center;}
 .right{text-align:right;}
-.uppercase{text-transform:uppercase;}
+.uppercase{font-family: 'Freestyle Script', sans-serif;font-size: 1px;}
 .capitalise{text-transform:capitalize;}
 .hidden{display:none;}
 .nospace{margin:0; padding:0; list-style:none;}
@@ -31,7 +31,7 @@ html, body{margin:0; padding:0; font-size:14px; line-height:1.6em;}
 .bgded{background-position:top center; background-repeat:no-repeat; background-size:cover;}
 .circle{border-radius:50%; background-clip:padding-box;}
 
-.btn{display:inline-block; padding:15px 25px 17px; text-transform:uppercase; border:1px solid;}
+.btn{display:inline-block; padding:15px 25px 17px; font-family: border:1px solid;}
 .btn.medium{padding:10px 20px 12px;}
 .btn.small{padding:8px 18px 10px; text-transform:none;}
 
@@ -70,7 +70,7 @@ label{margin-bottom:5px;}
 
 /* Generalise
 --------------------------------------------------------------------------------------------------------------- */
-h1, h2, h3, h4, h5, h6, .heading{margin:0 0 20px 0; font-size:22px; line-height:normal; font-weight:normal; text-transform:capitalize;}
+h1, h2, h3, h4, h5, h6, .heading{margin:0 0 20px 0; font-size:50px; line-height:normal; font-weight:normal; font-family: 'Freestyle Script'}
 
 .underlined{display:inline-block; position:relative; padding-bottom:15px; z-index:1;}
 .underlined::before, .underlined::after{display:block; position:absolute; bottom:0; width:100%; height:1px; content:"";}
@@ -82,9 +82,9 @@ hr{display:block; width:100%; height:1px; border:solid; border-width:1px 0 0 0;}
 .font-xs{font-size:.8rem;}
 .font-x1{font-size:1.2rem;}
 .font-x2{font-size:1.8rem;}
-.font-x3{font-size:2.8rem;}
+.font-x3{font-size:3.5rem;}
 
-.wrapper{display:block; width:100%; margin:0; padding:0; text-align:left; word-wrap:break-word;}
+.wrapper{display:block; width:100%; margin:0; padding-bottom:10px; text-align:left; word-wrap:break-word;}
 /*
 The "hoc" class is a generic class used to centre a containing element horizontally
 It should be used in conjunction with a second class or ID
@@ -94,7 +94,7 @@ It should be used in conjunction with a second class or ID
 
 /* HTML 5 Overrides
 --------------------------------------------------------------------------------------------------------------- */
-address, article, aside, figcaption, figure, footer, header, main, nav, section{display:block; margin:0; padding:0;}
+address, article, aside, figcaption, figure, footer, header, main, nav, section{display:block; margin:0; padding:0; font-size:12px; text-align:left;}
 
 
 /* Grid
