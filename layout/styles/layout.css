@@ -33,8 +33,8 @@ File: Layout CSS
 --------------------------------------------------------------------------------------------------------------- */
 #header{padding:10px 0 0 0;}
 
-#header #logo{margin-top:;}
-#header #logo h1{margin:0; padding:0; font-size:30px;}
+#header #logo{margin-top:10px;}
+#header #logo h1{margin:0; padding:0; font-size:45px;}
 
 
 /* Page Intro
@@ -157,11 +157,11 @@ ol {
 
 /* Top Navigation */
 #mainav{}
-#mainav ul.clear{margin-top:3px;}
+#mainav ul.clear{margin-top:22px;}
 #mainav ul{}
 #mainav ul ul{z-index:9999; position:absolute; width:180px; text-transform:none;}
 #mainav ul ul ul{left:180px; top:0;}
-#mainav li{display:inline-block; position:relative; margin:0 15px 0 0; padding:0;font-family: 'Freestyle Script', sans-serif;font-size: 25px;}
+#mainav li{display:inline-block; position:relative; margin:0 20px 0 0; padding:0;font-family: 'FontAwesome', sans-serif;font-size: 15px;}
 #mainav li:last-child{margin-right:0}
 #mainav li li{width:100%; margin:0;}
 #mainav li a{display:block; padding:0 0 32px 0;}
@@ -279,7 +279,7 @@ article:hover .icon::before, article:hover .icon::after{}
 
 /* Rows */
 .row0{color:#888888; background-color:#FFFFFF;}
-.row1{color:#FFFFFF; background-color:#000000;}
+.row1{color:#FFFFFF; background-color:#000000; height: 81px}
 .row2{color:#888888; background-color:#F4F4F4;}
 .row3{color:#888888; background-color:#FFFFFF;}
 .row4{color:#FFFFFF; background-color:#292929;}
@@ -841,6 +841,7 @@ textarea.input {
 
 .active, .dot:hover {
   background-color: #717171;
+
 }
 
 /* Fading animation */
