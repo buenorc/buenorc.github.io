@@ -106,7 +106,7 @@ File: Layout CSS
 --------------------------------------------------------------------------------------------------------------- */
 #footer{padding:80px 0;}
 
-#footer .title{margin:0 0 50px 0; padding:0; font-size:1.2rem; font-family: 'Freestyle Script', sans-serif; font-size: 50px;}
+#footer .title{margin:0 0 50px 0; padding:0; font-size:1.2rem; font-family: 'Freestyle Script', 'Freestyle Script'; font-size: 50px;}
 
 #footer .linklist li{display:block; margin-bottom:15px; padding:0 0 15px 0; border-bottom:1px solid;}
 #footer .linklist li:last-child{margin:0; padding:0; border:none;}
