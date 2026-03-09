@@ -394,6 +394,11 @@ table a, #comments a{background-color:inherit;}
 	#header{text-align:center;}
 	#header #logo{}
 
+    #logo h1{
+      font-size:24px;
+      font-weight:500;
+  }
+
 	#pageintro .introtxt{max-width:none; float:none;}
 	#pageintro .introtxt .heading{font-size:36px;}
 
@@ -402,6 +407,17 @@ table a, #comments a{background-color:inherit;}
 
 @media screen and (max-width:450px){}
 
+  @media screen and (max-width:750px){
+
+  .mobile-hide{
+      display:none;
+  }
+
+  .one_half{
+      width:100% !important;
+  }
+
+  }
 
 /* Other
 --------------------------------------------------------------------------------------------------------------- */
