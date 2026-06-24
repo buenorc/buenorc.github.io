@@ -6,36 +6,449 @@ Licence URI: http://www.os-templates.com/template-terms
 <html>
 <head>
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VSXC5R13ZJ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VSXC5R13ZJ');
-  </script>
-
-
-<title> de Carvalho Bueno</title>
+<title>Physical Limnology: Monitoring &amp; Methods — de Carvalho Bueno</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="../../../layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
 <link href="https://fonts.cdnfonts.com/css/freestyle-script" rel="stylesheet">
-</head>
+<!-- Tabler icons (for journal content & EMS only) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<!-- Google Fonts for journal content area -->
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<body id="top">
+<style>
+/* ── CSS VARIABLES (journal content & EMS only) ───── */
+:root {
+  --navy:    #2B3E6B;
+  --navy-dk: #1A2744;
+  --navy-lt: #3D5490;
+  --blue:    #6785B8;
+  --blue-lt: #A8BEDD;
+  --blue-xlt:#EAF0F8;
+  --gold:    #C09A3A;
+  --gold-lt: #F0E4B8;
+  --text:    #1E2A3A;
+  --text-2:  #4A5568;
+  --text-3:  #718096;
+  --border:  #D0DAEB;
+  --bg:      #F7F9FC;
+  --white:   #FFFFFF;
+  --serif:   'Merriweather', Georgia, serif;
+  --sans:    'Source Sans 3', system-ui, sans-serif;
+}
+html { scroll-behavior: smooth; }
+
+/* ── PAGE LAYOUT ──────────────────────────────────── */
+.page-wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+
+/* ── JOURNAL HERO ─────────────────────────────────── */
+.journal-hero {
+  background: linear-gradient(135deg, var(--navy-dk) 0%, var(--navy-lt) 100%);
+  border-radius: 10px;
+  padding: 48px 56px;
+  color: var(--white);
+  margin-bottom: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.journal-hero::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: rgba(103,133,184,.18);
+}
+.journal-hero::after {
+  content: '';
+  position: absolute; bottom: -60px; right: 80px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(192,154,58,.12);
+}
+.journal-eyebrow {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.journal-title {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: 300; line-height: 1.25;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.journal-title em { font-style: italic; color: var(--blue-lt); }
+.journal-abbr {
+  font-size: 13px; color: var(--blue-lt);
+  margin-bottom: 22px; letter-spacing: .04em;
+}
+.journal-lead {
+  font-size: 15px; color: rgba(255,255,255,.82);
+  max-width: 620px; line-height: 1.7; margin-bottom: 32px;
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; position: relative; z-index: 1; }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 22px; border-radius: 5px;
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .18s; text-decoration: none;
+  border: none;
+}
+.btn-primary { background: var(--gold); color: #1A1200; }
+.btn-primary:hover { background: #D4AA3F; color: #1A1200; text-decoration: none; }
+.btn-outline { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,.45); }
+.btn-outline:hover { background: rgba(255,255,255,.1); text-decoration: none; color: var(--white); }
+
+/* ── SECTION TITLES ───────────────────────────────── */
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--serif); font-size: 22px; font-weight: 400;
+  color: var(--navy-dk); margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--blue-xlt);
+}
+.section-title::after {
+  content: ''; display: block; width: 48px; height: 2px;
+  background: var(--gold); margin-top: 10px;
+}
+
+/* ── TWO-COLUMN LAYOUT ────────────────────────────── */
+.two-col { display: grid; grid-template-columns: 1fr 320px; gap: 48px; margin-bottom: 56px; }
+.main-col {}
+.side-col {}
+
+/* ── AIMS & SCOPE ─────────────────────────────────── */
+.aims-text p { font-size: 15px; color: var(--text-2); line-height: 1.8; margin-bottom: 14px; }
+
+.scope-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.scope-tag {
+  background: var(--blue-xlt); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 14px;
+  font-size: 13px; color: var(--navy);
+}
+
+/* ── SIDEBAR BOXES ────────────────────────────────── */
+.info-box {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px 22px; margin-bottom: 20px;
+}
+.info-box-title {
+  font-family: var(--serif); font-size: 14px; font-weight: 700;
+  color: var(--navy-dk); margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.info-list { list-style: none; }
+.info-list li {
+  font-size: 13px; color: var(--text-2);
+  padding: 5px 0; border-bottom: 1px solid var(--blue-xlt);
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.info-list li:last-child { border-bottom: none; }
+.info-list li i { color: var(--blue); margin-top: 3px; flex-shrink: 0; }
+
+.editorial-board { }
+.board-member {
+  padding: 8px 0; border-bottom: 1px solid var(--blue-xlt);
+  font-size: 13px;
+}
+.board-member:last-child { border-bottom: none; }
+.board-member-name { font-weight: 500; color: var(--navy-dk); }
+.board-member-role { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: .06em; }
+.board-member-inst { color: var(--text-3); font-size: 12px; }
+
+/* ── AUTHOR INSTRUCTIONS ──────────────────────────── */
+.instruction-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  margin-bottom: 32px;
+}
+.instruction-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
+  border-top: 3px solid var(--blue);
+}
+.instruction-card h4 {
+  font-family: var(--serif); font-size: 14px; font-weight: 700;
+  color: var(--navy-dk); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.instruction-card h4 i { color: var(--blue); font-size: 16px; }
+.instruction-card p, .instruction-card li {
+  font-size: 13px; color: var(--text-2); line-height: 1.6;
+}
+.instruction-card ul { list-style: none; padding: 0; }
+.instruction-card ul li { padding: 3px 0; padding-left: 14px; position: relative; }
+.instruction-card ul li::before { content: '–'; position: absolute; left: 0; color: var(--blue-lt); }
+
+/* ── MANUSCRIPT TYPES ─────────────────────────────── */
+.ms-types { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.ms-type-row {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 10px 14px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px;
+}
+.ms-type-name { font-weight: 600; color: var(--navy); min-width: 180px; }
+.ms-type-detail { color: var(--text-3); }
+.ms-type-limit { margin-left: auto; color: var(--blue); font-size: 12px; white-space: nowrap; }
+
+/* ── ARTICLES IN PRESS ────────────────────────────── */
+.articles-section { margin-bottom: 56px; }
+.article-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px 22px; margin-bottom: 12px;
+  border-left: 4px solid var(--blue);
+  transition: box-shadow .15s;
+}
+.article-card:hover { box-shadow: 0 2px 12px rgba(43,62,107,.1); }
+.article-meta { font-size: 12px; color: var(--text-3); margin-bottom: 5px; font-family: var(--sans); }
+.article-title {
+  font-family: var(--serif); font-size: 15px; color: var(--navy-dk);
+  font-weight: 400; margin-bottom: 6px; line-height: 1.4;
+}
+.article-authors { font-size: 13px; color: var(--text-2); font-style: italic; margin-bottom: 10px; }
+.article-links { display: flex; gap: 10px; }
+.article-link {
+  font-size: 12px; font-weight: 500; color: var(--blue);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 3px 10px; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.article-link:hover { background: var(--blue-xlt); text-decoration: none; }
+.badge-press {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em;
+  background: var(--gold-lt); color: var(--gold);
+  border-radius: 3px; padding: 2px 7px; margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ── SUBMIT BANNER ────────────────────────────────── */
+.submit-banner {
+  background: var(--navy-dk);
+  border-radius: 10px; padding: 36px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 32px; margin-bottom: 56px; flex-wrap: wrap;
+}
+.submit-banner-text h3 {
+  font-family: var(--serif); font-size: 20px; font-weight: 300;
+  color: var(--white); margin-bottom: 6px;
+}
+.submit-banner-text p { font-size: 14px; color: var(--blue-lt); max-width: 480px; }
+.btn-submit-large {
+  background: var(--gold); color: #1A1200;
+  padding: 13px 28px; font-size: 15px; font-weight: 600;
+  border-radius: 6px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 9px;
+  transition: background .18s; cursor: pointer; border: none;
+}
+.btn-submit-large:hover { background: #D4AA3F; text-decoration: none; color: #1A1200; }
+
+/* ── DIVIDER ──────────────────────────────────────── */
+hr.section-divider {
+  border: none; border-top: 1px solid var(--border);
+  margin: 48px 0;
+}
+
+/* ── FOOTER ───────────────────────────────────────── */
+.site-footer {
+  background: var(--navy-dk); color: rgba(255,255,255,.5);
+  padding: 18px 0; font-size: 13px;
+}
+.footer-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ── MODAL OVERLAY ────────────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(10,20,40,.65); z-index: 1000;
+  align-items: flex-start; justify-content: center;
+  padding: 32px 16px; overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg); border-radius: 10px;
+  width: 100%; max-width: 980px;
+  min-height: 560px;
+  box-shadow: 0 20px 60px rgba(10,20,40,.35);
+  overflow: hidden; position: relative;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 16px;
+  background: rgba(0,0,0,.15); border: none; border-radius: 50%;
+  width: 30px; height: 30px; cursor: pointer; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--white); font-size: 18px;
+}
+.modal-close:hover { background: rgba(0,0,0,.35); }
+
+/* ── EDITORIAL SYSTEM (inside modal) ─────────────── */
+#ems-app { min-height: 560px; background: #F7F9FC; font-family: 'Source Sans 3', system-ui, sans-serif; }
+.ems-hdr {
+  background: #1A2744; padding: 13px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ems-hdr-logo { font-family: 'Merriweather', Georgia, serif; font-size: 13px; color: #E8F0F8; font-weight: 300; }
+.ems-hdr-abbr { font-size: 10px; color: #8BACD4; margin-top: 1px; letter-spacing: .06em; }
+.ems-hdr-right { display: flex; align-items: center; gap: 10px; }
+.ems-hdr-user { font-size: 12px; color: #A8BEDD; }
+.ems-hdr-role { font-size: 10px; padding: 2px 8px; border-radius: 3px; background: #0D1B35; color: #6785B8; text-transform: uppercase; letter-spacing: .05em; }
+.ems-btn-logout { font-size: 12px; color: #8BACD4; cursor: pointer; border: .5px solid #4A6FA5; border-radius: 4px; padding: 4px 10px; background: transparent; }
+.ems-btn-logout:hover { background: #0D1B35; }
+
+/* auth */
+.ems-auth-wrap { min-height: 480px; display: flex; align-items: center; justify-content: center; padding: 28px 16px; }
+.ems-auth-card { background: #fff; border: 1px solid #D0DAEB; border-radius: 8px; padding: 28px 30px; width: 100%; max-width: 400px; }
+.ems-auth-title { font-family: 'Merriweather', Georgia, serif; font-size: 17px; color: #1E2A3A; margin-bottom: 3px; font-weight: 400; }
+.ems-auth-sub { font-size: 13px; color: #718096; margin-bottom: 18px; }
+.ems-hint { background: #EAF0F8; border: 1px solid #D0DAEB; border-radius: 6px; padding: 9px 12px; font-size: 12px; color: #4A5568; margin-bottom: 14px; line-height: 1.6; }
+.ems-hint strong { color: #2B3E6B; }
+.ef { display: flex; flex-direction: column; margin-bottom: 12px; }
+.el { font-size: 11px; font-weight: 600; color: #4A5568; margin-bottom: 4px; letter-spacing: .04em; }
+.ei, .es, .eta { border: 1px solid #CBD5E0; border-radius: 5px; padding: 7px 10px; font-size: 13px; background: #fff; color: #1E2A3A; width: 100%; font-family: inherit; }
+.ei:focus, .es:focus, .eta:focus { outline: none; border-color: #6785B8; box-shadow: 0 0 0 2px rgba(103,133,184,.18); }
+.eta { min-height: 80px; resize: vertical; line-height: 1.6; }
+.ems-btn-p { width: 100%; background: #2B3E6B; color: #fff; border: none; border-radius: 5px; padding: 9px; font-size: 13px; font-weight: 500; cursor: pointer; margin-top: 6px; font-family: inherit; }
+.ems-btn-p:hover { background: #1A2744; }
+.ems-sw { text-align: center; margin-top: 12px; font-size: 13px; color: #718096; }
+.ems-sw span { color: #6785B8; cursor: pointer; }
+.ems-sw span:hover { text-decoration: underline; }
+.ems-err { background: #FEF2F2; color: #9B1C1C; border: 1px solid #FCA5A5; border-radius: 5px; padding: 7px 11px; font-size: 13px; margin-bottom: 10px; }
+.ems-ok { background: #F0FDF4; color: #14532D; border: 1px solid #86EFAC; border-radius: 5px; padding: 7px 11px; font-size: 13px; margin-bottom: 10px; }
+
+/* dashboard */
+.ems-dash { display: grid; grid-template-columns: 200px 1fr; min-height: 520px; }
+.ems-sb { background: #fff; border-right: 1px solid #D0DAEB; padding: 14px 0; }
+.ems-sb-sec { font-size: 10px; font-weight: 600; letter-spacing: .09em; color: #A0AEC0; padding: 0 14px; margin: 14px 0 5px; text-transform: uppercase; }
+.ems-sb-it { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 13px; color: #4A5568; cursor: pointer; border-left: 3px solid transparent; transition: all .12s; }
+.ems-sb-it:hover { background: #EAF0F8; color: #2B3E6B; }
+.ems-sb-it.active { background: #EAF0F8; color: #2B3E6B; border-left-color: #6785B8; font-weight: 500; }
+.ems-sb-it i { font-size: 15px; }
+.ems-bdc { font-size: 10px; min-width: 18px; height: 18px; border-radius: 9px; background: #2B3E6B; color: #fff; display: flex; align-items: center; justify-content: center; margin-left: auto; padding: 0 5px; }
+
+.ems-main { padding: 20px; overflow-y: auto; }
+.ems-pt { font-size: 16px; font-weight: 500; color: #1E2A3A; font-family: 'Merriweather', Georgia, serif; }
+.ems-pd { font-size: 12px; color: #718096; margin-top: 2px; }
+.ems-ph { margin-bottom: 14px; }
+
+.ems-stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-bottom: 14px; }
+.ems-stat-card { background: #EAF0F8; border-radius: 6px; padding: 11px 13px; }
+.ems-stat-lbl { font-size: 11px; color: #4A5568; margin-bottom: 3px; }
+.ems-stat-val { font-size: 21px; font-weight: 500; color: #1E2A3A; }
+
+/* tags */
+.etag { font-size: 11px; font-weight: 500; border-radius: 3px; padding: 2px 8px; white-space: nowrap; }
+.etag-draft { background: #E2E8F0; color: #4A5568; }
+.etag-sub { background: #DBEAFE; color: #1E40AF; }
+.etag-rev { background: #FEF3C7; color: #92400E; }
+.etag-reqrev { background: #FEE2E2; color: #991B1B; }
+.etag-acc { background: #D1FAE5; color: #065F46; }
+.etag-rej { background: #FEE2E2; color: #7F1D1D; }
+
+/* buttons */
+.ems-btn-sm { font-size: 12px; padding: 4px 11px; border-radius: 4px; cursor: pointer; border: 1px solid #D0DAEB; background: #fff; color: #1E2A3A; font-family: inherit; transition: background .12s; }
+.ems-btn-sm:hover { background: #EAF0F8; }
+.ems-btn-sm.blue { background: #2B3E6B; color: #fff; border-color: #2B3E6B; }
+.ems-btn-sm.blue:hover { background: #1A2744; }
+.ems-btn-sm.amber { background: #FEF3C7; color: #92400E; border-color: #FCD34D; }
+.ems-btn-new { background: #2B3E6B; color: #fff; border: none; border-radius: 5px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-family: inherit; }
+.ems-btn-new:hover { background: #1A2744; }
+.ems-btn-back { font-size: 13px; color: #4A5568; cursor: pointer; border: 1px solid #D0DAEB; background: transparent; border-radius: 5px; padding: 7px 14px; font-family: inherit; }
+.ems-btn-back:hover { background: #EAF0F8; }
+
+/* cards */
+.ems-ms-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.ems-ms-card { background: #fff; border: 1px solid #D0DAEB; border-radius: 7px; padding: 12px 16px; cursor: pointer; }
+.ems-ms-card:hover { border-color: #A8BEDD; }
+.ems-ms-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.ems-ms-title { font-size: 13px; font-weight: 500; color: #1E2A3A; flex: 1; }
+.ems-ms-meta { font-size: 11px; color: #A0AEC0; margin-top: 4px; }
+.ems-ms-acts { display: flex; gap: 7px; margin-top: 8px; }
+
+/* form */
+.ems-fw { background: #fff; border: 1px solid #D0DAEB; border-radius: 8px; padding: 20px; }
+.ems-fst { font-size: 13px; font-weight: 600; color: #1E2A3A; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #EAF0F8; }
+.ems-fg1 { display: grid; grid-template-columns: 1fr; gap: 11px; }
+.ems-fg { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+.ems-ff { display: flex; flex-direction: column; }
+
+.ems-stepper { display: flex; margin-bottom: 22px; }
+.ems-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.ems-step:not(:last-child)::after { content: ''; position: absolute; top: 12px; left: 50%; width: 100%; height: 1px; background: #D0DAEB; z-index: 0; }
+.ems-st-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; z-index: 1; border: 2px solid #D0DAEB; background: #fff; color: #A0AEC0; }
+.ems-step.done .ems-st-dot { background: #2B3E6B; color: #fff; border-color: #2B3E6B; }
+.ems-step.active .ems-st-dot { background: #EAF0F8; color: #2B3E6B; border-color: #6785B8; }
+.ems-st-lbl { font-size: 10px; color: #A0AEC0; margin-top: 4px; text-align: center; }
+.ems-step.active .ems-st-lbl { color: #2B3E6B; font-weight: 600; }
+.ems-step.done .ems-st-lbl { color: #4A5568; }
+
+.ems-form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #EAF0F8; }
+
+.ems-arow { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 7px; align-items: end; margin-bottom: 7px; }
+.ems-btn-icon { width: 30px; height: 30px; border-radius: 4px; border: 1px solid #D0DAEB; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #718096; font-size: 14px; flex-shrink: 0; font-family: inherit; }
+.ems-btn-icon:hover { background: #FEF2F2; color: #9B1C1C; }
+.ems-btn-icon.add { color: #2B3E6B; }
+.ems-btn-icon.add:hover { background: #EAF0F8; color: #2B3E6B; }
+.ems-btn-icon.star-on { color: #C09A3A; }
+.ems-btn-icon.star-on:hover { background: #FFFBEB; color: #C09A3A; }
+
+.ems-file-drop { border: 1.5px dashed #CBD5E0; border-radius: 7px; padding: 20px; text-align: center; cursor: pointer; margin-top: 7px; color: #718096; background: #F7FAFC; }
+.ems-file-drop:hover { border-color: #6785B8; background: #EAF0F8; }
+.ems-file-drop i { font-size: 24px; display: block; margin-bottom: 6px; color: #6785B8; }
+.ems-file-drop p { font-size: 13px; }
+.ems-file-drop small { font-size: 11px; color: #A0AEC0; }
+.ems-flist { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+.ems-fi { display: flex; align-items: center; gap: 9px; background: #EAF0F8; border: 1px solid #D0DAEB; border-radius: 5px; padding: 7px 11px; }
+.ems-fi .fn { font-size: 12px; flex: 1; color: #1E2A3A; }
+.ems-fi .fc { font-size: 10px; padding: 2px 7px; border-radius: 3px; background: #DBEAFE; color: #1E40AF; }
+.ems-fi .fs { font-size: 10px; color: #A0AEC0; }
+
+.ems-rev-alert { background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 7px; padding: 13px 17px; margin-bottom: 14px; border-left: 4px solid #D97706; }
+.ems-rev-alert-t { font-size: 13px; font-weight: 600; color: #92400E; margin-bottom: 3px; display: flex; align-items: center; gap: 7px; }
+.ems-rev-alert-b { font-size: 12px; color: #78350F; line-height: 1.5; }
+
+.ems-rc { background: #F7FAFC; border: 1px solid #D0DAEB; border-radius: 6px; padding: 12px; margin-bottom: 9px; }
+.ems-rc-lbl { font-size: 10px; font-weight: 600; color: #A0AEC0; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+.ems-rc-text { font-size: 13px; color: #1E2A3A; line-height: 1.6; }
+
+.ems-tl { display: flex; flex-direction: column; margin-top: 10px; }
+.ems-tl-item { display: flex; gap: 10px; padding-bottom: 13px; position: relative; }
+.ems-tl-item:not(:last-child)::after { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 1px; background: #D0DAEB; }
+.ems-tl-dot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; z-index: 1; }
+.ems-tl-dot.done { background: #2B3E6B; color: #fff; }
+.ems-tl-dot.active { background: #D97706; color: #fff; }
+.ems-tl-dot.pend { background: #EAF0F8; color: #A0AEC0; border: 1px solid #D0DAEB; }
+.ems-tl-ev { font-size: 12px; font-weight: 500; color: #1E2A3A; padding-top: 2px; }
+.ems-tl-dt { font-size: 10px; color: #A0AEC0; margin-top: 1px; }
+
+.ems-cl-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4A5568; padding: 3px 0; cursor: pointer; }
+.ems-cl-item input[type=checkbox] { accent-color: #2B3E6B; width: 13px; height: 13px; }
+
+.ems-db-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ems-db-table th { text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #D0DAEB; background: #EAF0F8; }
+.ems-db-table td { padding: 9px 10px; border-bottom: 1px solid #EAF0F8; color: #1E2A3A; vertical-align: top; }
+.ems-db-table tr:last-child td { border-bottom: none; }
+.ems-db-table tr:hover td { background: #F7FAFC; }
+.ems-empty { text-align: center; padding: 48px 20px; color: #718096; }
+.ems-empty i { font-size: 34px; display: block; margin-bottom: 10px; color: #D0DAEB; }
+
+.ems-filter-row { display: flex; gap: 7px; margin-bottom: 12px; flex-wrap: wrap; }
+.ems-fbtn { font-size: 12px; padding: 4px 12px; border-radius: 20px; cursor: pointer; border: 1px solid #D0DAEB; background: #fff; color: #718096; font-family: inherit; }
+.ems-fbtn.active { background: #2B3E6B; color: #fff; border-color: #2B3E6B; }
+
+.ems-loading { text-align: center; padding: 60px; font-size: 13px; color: #A0AEC0; }
+</style>
+</head>
+<body>
 
 <!-- Top Header -->
 <div class="wrapper row0">
   <div id="topbar" class="hoc clear">
     <div class="fl_left">
       <ul class="faico clear">
-        <!-- no used icons
-        <li><a class="faicon-facebook" href="#"><i class="fa fa-facebook"></i></a></li>-->
-        <!--<li><a class="faicon-pinterest" href="#"><i class="fa fa-pinterest"></i></a></li>-->
-        <!--<li><a class="faicon-twitter" href="#"><i class="fa fa-twitter"></i></a></li>-->
-        <!--<li><a class="faicon-dribble" href="#"><i class="fa fa-dribbble"></i></a></li>
-        <li><a class="faicon-rss" href="#"><i class="fa fa-rss"></i></a></li>
-        -->
         <li><a class="faicon-linkedin" href="#"><i class="fa fa-linkedin"></i></a></li>
         <li><a class="faicon-google-plus" href="#"><i class="fa fa-google-plus"></i></a></li>
       </ul>
@@ -47,7 +460,6 @@ Licence URI: http://www.os-templates.com/template-terms
     </div>
   </div>
 </div>
-
 
 <!-- Main header -->
 <div class="wrapper row1">
@@ -102,10 +514,8 @@ Licence URI: http://www.os-templates.com/template-terms
 
       </ul>
     </nav>
-
   </header>
-</div> <!-- end of the main header -->
-
+</div>
 
 <!-- GPS site -->
 <div class="wrapper row2">
@@ -118,72 +528,258 @@ Licence URI: http://www.os-templates.com/template-terms
   </div>
 </div>
 
-
 <!-- Text Body -->
 <div class="wrapper row3">
   <main class="hoc container clear">
-    <!-- main body -->
-    <!-- ################################################################################################ -->
-    <div class="content">
-      <h2>JOURNAL OF HYDRODYNAMICS OF AQUATIC ECOSYSTEMS</h2>
-      <div class="group btmspace-50 demo">
-        <div class="one_half first" style="text-align:justify">
-          <p>The "Journal of Hydrodynamics of Aquatic Ecosystems" is a fictional scientific journal utilized in educational modules. The journal is carefully designed to immerse students in a simulated scientific environment, providing a platform where aspiring scientists can comprehend the essential components of scientific communication. It facilitates exploration into the processes of manuscript submission and peer-review.</p>
-          <br>
-          <p>Within the confines of these imaginative pages, students embark on a journey to explore the dynamics of lakes, reservoirs, estuaries, rivers, and streams. They delve into the nuances of physical limnology through various means, including numerical simulations, field measurements, and laboratory experiments. This immersive experience serves as a hands-on preparation for students, equipping them with the skills required to navigate the intricacies of scientific inquiry and publication. </p>
+<div class="page-wrap" style="max-width:none;padding:32px 0 60px;">
 
+  <!-- HERO -->
+  <div class="journal-hero">
+    <div class="journal-eyebrow">Fictional Educational Journal</div>
+    <div class="journal-title">Physical Limnology:<br><em>Monitoring &amp; Methods</em></div>
+    <div class="journal-abbr">Phys. Limnol. Monit. Methods &nbsp;·&nbsp; ISSN 0000-0000 (online) &nbsp;·&nbsp; Est. 2023</div>
+    <div class="journal-lead">
+      A simulated scientific journal for educational modules in physical limnology and aquatic hydrodynamics. Students experience the full lifecycle of scientific publication — from manuscript preparation to peer review — in a realistic editorial environment.
+    </div>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="openEMS()">
+        <i class="ti ti-send"></i> Submit a manuscript
+      </button>
+      <a href="#aims" class="btn btn-outline">
+        <i class="ti ti-book"></i> Aims &amp; scope
+      </a>
+      <a href="#instructions" class="btn btn-outline">
+        <i class="ti ti-file-text"></i> Author instructions
+      </a>
+    </div>
+  </div>
+
+  <!-- SUBMIT BANNER -->
+  <div class="submit-banner" id="submit-banner">
+    <div class="submit-banner-text">
+      <h3>Ready to submit your manuscript?</h3>
+      <p>Register or sign in to the editorial system to submit a new manuscript, track the status of existing submissions, and respond to reviewer comments.</p>
+    </div>
+    <button class="btn-submit-large" onclick="openEMS()">
+      <i class="ti ti-arrow-right"></i> Open submission portal
+    </button>
+  </div>
+
+  <!-- AIMS & SCOPE + SIDEBAR -->
+  <div class="two-col" id="aims">
+
+    <div class="main-col">
+
+      <!-- Aims & Scope -->
+      <div class="section-label">About the journal</div>
+      <div class="section-title">Aims &amp; scope</div>
+      <div class="aims-text">
+        <p><em>Physical Limnology: Monitoring &amp; Methods</em> is a fictional peer-reviewed journal created for use in educational modules on physical limnology, aquatic hydrodynamics, and environmental sensing. The journal provides students with a realistic publication environment in which to develop scientific writing and critical review skills.</p>
+
+        <p>The journal publishes original research, methodological papers, and technical notes addressing the physical dynamics of lakes, reservoirs, estuaries, rivers, and streams. Contributions may employ numerical simulations, field measurement campaigns, laboratory experiments, or novel instrumentation.</p>
+
+        <p>Coverage spans all scales of aquatic physical processes, from near-bed turbulence and bottom boundary layers to basin-scale circulation and interbasin exchange. Special emphasis is placed on contributions that advance monitoring technologies, open-source data acquisition tools, and reproducible field or laboratory methods.</p>
+      </div>
+
+      <div class="scope-tags">
+        <span class="scope-tag">Internal waves</span>
+        <span class="scope-tag">Gravity currents</span>
+        <span class="scope-tag">Turbulence &amp; mixing</span>
+        <span class="scope-tag">Thermocline dynamics</span>
+        <span class="scope-tag">Sensor development</span>
+        <span class="scope-tag">Field campaigns</span>
+        <span class="scope-tag">Numerical modelling</span>
+        <span class="scope-tag">Laboratory experiments</span>
+        <span class="scope-tag">Water quality physics</span>
+        <span class="scope-tag">Stratification</span>
+        <span class="scope-tag">Seiching</span>
+        <span class="scope-tag">Near-surface dynamics</span>
+      </div>
+
+      <hr class="section-divider">
+
+      <!-- Author instructions -->
+      <div class="section-label">Before you submit</div>
+      <div class="section-title" id="instructions">Instructions to authors</div>
+
+      <div class="instruction-grid">
+        <div class="instruction-card">
+          <h4><i class="ti ti-file-description"></i> Manuscript preparation</h4>
+          <ul>
+            <li>Use the official Word or LaTeX template</li>
+            <li>Maximum 8,000 words for original articles (excluding references)</li>
+            <li>Figures must be submitted at ≥ 300 dpi, TIFF or EPS</li>
+            <li>Equations numbered consecutively in parentheses</li>
+            <li>SI units throughout; exceptions must be justified</li>
+          </ul>
         </div>
-        <div class="one_half">
-          <img class="imgr borderedbox inspace-5" src="pic1.jpg" alt="">
+        <div class="instruction-card">
+          <h4><i class="ti ti-users"></i> Authorship &amp; ethics</h4>
+          <ul>
+            <li>All authors must meet the ICMJE authorship criteria</li>
+            <li>Corresponding author is responsible for all correspondence</li>
+            <li>Conflicts of interest must be declared at submission</li>
+            <li>Data availability statement is mandatory</li>
+            <li>Field studies require applicable ethics approvals</li>
+          </ul>
+        </div>
+        <div class="instruction-card">
+          <h4><i class="ti ti-quote"></i> References</h4>
+          <ul>
+            <li>Author–year format (e.g. Fischer et al., 1979)</li>
+            <li>Reference list in alphabetical order</li>
+            <li>DOIs required where available</li>
+            <li>Personal communications in text only, not in reference list</li>
+            <li>Maximum 60 references for original articles</li>
+          </ul>
+        </div>
+        <div class="instruction-card">
+          <h4><i class="ti ti-upload"></i> Submission checklist</h4>
+          <ul>
+            <li>Main manuscript (PDF or DOCX)</li>
+            <li>Supplementary material (if applicable)</li>
+            <li>Cover letter addressed to the editor</li>
+            <li>High-resolution figures as separate files</li>
+            <li>Suggest 2–4 potential reviewers</li>
+          </ul>
         </div>
       </div>
-      <br>
-      <footer>
-        <ul class="nospace inline pushright">
-        <li><a class="btn" href="instructions/instructions.pdf"  target="_blank" style="width:100%; text-align:center">Instructions to authors</a></li>
+
+      <!-- Manuscript types -->
+      <div class="section-label" style="margin-top:32px">Submission categories</div>
+      <div class="section-title">Manuscript types</div>
+
+      <div class="ms-types">
+        <div class="ms-type-row">
+          <span class="ms-type-name">Original article</span>
+          <span class="ms-type-detail">Full research papers presenting novel experimental, field, or computational findings</span>
+          <span class="ms-type-limit">≤ 8,000 words · 10 figures</span>
+        </div>
+        <div class="ms-type-row">
+          <span class="ms-type-name">Review article</span>
+          <span class="ms-type-detail">Critical synthesis of existing literature on a focused topic; by invitation or proposal</span>
+          <span class="ms-type-limit">≤ 12,000 words</span>
+        </div>
+        <div class="ms-type-row">
+          <span class="ms-type-name">Short communication</span>
+          <span class="ms-type-detail">Rapid reports of significant preliminary results warranting timely dissemination</span>
+          <span class="ms-type-limit">≤ 3,000 words · 4 figures</span>
+        </div>
+        <div class="ms-type-row">
+          <span class="ms-type-name">Technical note</span>
+          <span class="ms-type-detail">Descriptions of new instruments, data acquisition systems, or analytical techniques</span>
+          <span class="ms-type-limit">≤ 4,000 words · 6 figures</span>
+        </div>
+        <div class="ms-type-row">
+          <span class="ms-type-name">Letter to the editor</span>
+          <span class="ms-type-detail">Brief scientific comments on papers published in this journal</span>
+          <span class="ms-type-limit">≤ 1,000 words</span>
+        </div>
+      </div>
+
+    </div><!-- end main-col -->
+
+    <!-- SIDEBAR -->
+    <div class="side-col">
+
+      <div class="info-box">
+        <div class="info-box-title"><i class="ti ti-info-circle"></i> Journal information</div>
+        <ul class="info-list">
+          <li><i class="ti ti-calendar"></i> <span><strong>Founded:</strong> 2023</span></li>
+          <li><i class="ti ti-file-check"></i> <span><strong>Peer review:</strong> Double-blind</span></li>
+          <li><i class="ti ti-clock"></i> <span><strong>Review time:</strong> 4–6 weeks (simulated)</span></li>
+          <li><i class="ti ti-world"></i> <span><strong>Language:</strong> English</span></li>
+          <li><i class="ti ti-lock-open"></i> <span><strong>Access:</strong> Open access (fictional)</span></li>
+          <li><i class="ti ti-cash"></i> <span><strong>Article fee:</strong> No charge (educational)</span></li>
         </ul>
-      </footer>
-        <br>
-        <footer>
-          <ul class="nospace inline pushright">
-          <li><a class="btn" href="template/Word/template-JHAE.docx"  target="_blank" style="width:100%; text-align:center">template Word</a></li>
-          </ul>
-        </footer>
-        <br>
-          <footer>
-            <ul class="nospace inline pushright">
-            <li><a class="btn" href="mailto:decarvalhobueno@gmail.com?subject=Journal of Hydrodynamics of Aquatic Ecosystems Submission"  style="width:100%; text-align:center">Submit Manuscript</a></li>
-            </ul>
-          </footer>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-title"><i class="ti ti-users"></i> Editorial board</div>
+        <div class="editorial-board">
+          <div class="board-member">
+            <div class="board-member-role">Editor-in-Chief</div>
+            <div class="board-member-name">Prof. Rafael de Carvalho Bueno</div>
+            <div class="board-member-inst">Federal University of Paraná, Brazil</div>
+          </div>
+          <div class="board-member">
+            <div class="board-member-role">Associate Editor</div>
+            <div class="board-member-name">Dr. (TBD)</div>
+            <div class="board-member-inst">Physical Limnology</div>
+          </div>
+          <div class="board-member">
+            <div class="board-member-role">Associate Editor</div>
+            <div class="board-member-name">Dr. (TBD)</div>
+            <div class="board-member-inst">Sensor Development</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-title"><i class="ti ti-download"></i> Templates &amp; guidelines</div>
+        <ul class="info-list">
+          <li><i class="ti ti-file-word"></i>
+            <a href="template/Word/template-JHAE.docx" target="_blank">Word template (.docx)</a>
+          </li>
+          <li><i class="ti ti-file"></i>
+            <a href="instructions/instructions.pdf" target="_blank">Instructions to authors (PDF)</a>
+          </li>
+          <li><i class="ti ti-mail"></i>
+            <a href="mailto:decarvalhobueno@gmail.com?subject=PLMM Submission">Contact the editor</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="info-box" style="background:#1A2744;border-color:#2B3E6B">
+        <div class="info-box-title" style="color:#E8F0F8;border-color:#2B3E6B">
+          <i class="ti ti-send" style="color:#C09A3A"></i> Submit your work
+        </div>
+        <p style="font-size:13px;color:#A8BEDD;margin-bottom:14px;line-height:1.6">
+          Use the editorial management system to submit manuscripts, track decisions, and upload revisions.
+        </p>
+        <button class="btn-submit-large" onclick="openEMS()" style="width:100%;justify-content:center;font-size:13px;padding:10px">
+          <i class="ti ti-arrow-right"></i> Open submission portal
+        </button>
+      </div>
+
+    </div><!-- end side-col -->
+  </div><!-- end two-col -->
+
+  <!-- ARTICLES IN PRESS -->
+  <hr class="section-divider">
+  <div class="articles-section" id="articles">
+    <div class="section-label">Latest</div>
+    <div class="section-title">Articles in press</div>
+
+    <div class="article-card">
+      <div class="article-meta">
+        Physical Limnology: Monitoring &amp; Methods &nbsp;·&nbsp; 2023
+        <span class="badge-press">In press</span>
+      </div>
+      <div class="article-title">
+        Effects of bottom obstacles on the front velocity of gravity currents: a case study
+      </div>
+      <div class="article-authors">
+        Felipe Baglioli, Diego A. Casas, Karollyn L. de Quadros, Grenda I. M. da Silva
+      </div>
+      <div class="article-links">
+        <a class="article-link" href="issue/reviewed_article-0001M1.pdf" target="_blank">
+          <i class="ti ti-file-text"></i> Article
+        </a>
+        <a class="article-link" href="issue/reviewed_article-0001S1.pdf" target="_blank">
+          <i class="ti ti-file-plus"></i> Supplementary information
+        </a>
+      </div>
     </div>
 
-    <hr>
-    <h2>Articles in press</h2>
-    <br>
-      Hydrodynamics of EnvironmentalAquatic Systems, 2023
-      <br>
-      <b>Effects of bottom obstacles on the front velocity of gravity currents: a case study</b>
-      <br>
-      <i>Felipe Baglioli, Diego A. Casas, Karollyn L. de Quadros, Grenda I. M. da Silva</i>
-      <br>
-      <a href="issue/reviewed_article-0001M1.pdf"  target="_blank">Article</a> and <a href="issue/reviewed_article-0001S1.pdf"  target="_blank">Supplementary Information</a>
-    <br>
+  </div>
 
-
-    <div class="clear"></div>
+</div><!-- end page-wrap -->
   </main>
-</div>
+</div><!-- end wrapper row3 -->
 
 
-
-
-
-<!-- end of text body -->
-
-
-
-<!-- Page Footer (no extended footer)-->
-</div>
+<!-- ── FOOTER ──────────────────────────────────────── -->
 <div class="wrapper row5">
   <div id="copyright" class="hoc clear">
     <p class="fl_left">Copyright &copy; 2022 - All Rights Reserved - <a href="#">de Carvalho Bueno</a></p>
@@ -191,11 +787,470 @@ Licence URI: http://www.os-templates.com/template-terms
 </div>
 <a id="backtotop" href="#top"><i class="fa fa-chevron-up"></i></a>
 <!-- JAVASCRIPTS -->
-<script src="layout/scripts/jquery.min.js"></script>
-<script src="layout/scripts/jquery.backtotop.js"></script>
-<script src="layout/scripts/jquery.mobilemenu.js"></script>
+<script src="../../../layout/scripts/jquery.min.js"></script>
+<script src="../../../layout/scripts/jquery.backtotop.js"></script>
+<script src="../../../layout/scripts/jquery.mobilemenu.js"></script>
 <!-- IE9 Placeholder Support -->
-<script src="layout/scripts/jquery.placeholder.min.js"></script>
+<script src="../../../layout/scripts/jquery.placeholder.min.js"></script>
 <!-- / IE9 Placeholder Support -->
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: EDITORIAL MANAGEMENT SYSTEM
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="emsModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEMS()" title="Close"><i class="ti ti-x"></i></button>
+    <div id="ems-app">
+      <!-- header -->
+      <div class="ems-hdr">
+        <div>
+          <div class="ems-hdr-logo">Physical Limnology: Monitoring &amp; Methods</div>
+          <div class="ems-hdr-abbr">Editorial Management System</div>
+        </div>
+        <div class="ems-hdr-right" id="emsHdrRight" style="display:none">
+          <span class="ems-hdr-user" id="emsHdrUser"></span>
+          <span class="ems-hdr-role" id="emsHdrRole"></span>
+          <button class="ems-btn-logout" onclick="emsLogout()"><i class="ti ti-logout"></i> Sign out</button>
+        </div>
+      </div>
+      <div id="emsVC"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     EDITORIAL SYSTEM SCRIPT
+══════════════════════════════════════════════════ -->
+<script>
+/* ── MODAL ─────────────────────────────────────────── */
+function openEMS(){ document.getElementById('emsModal').classList.add('open'); if(!EMS.ready) emsLoad(); }
+function closeEMS(){ document.getElementById('emsModal').classList.remove('open'); }
+document.getElementById('emsModal').addEventListener('click', function(e){ if(e.target===this) closeEMS(); });
+
+/* ── STATE ─────────────────────────────────────────── */
+const EDITOR = { email:'editor@plmm.org', pass:'plmm2024', name:'Prof. de Carvalho Bueno', inst:'Federal University of Paraná', role:'editor' };
+const MS_TYPES = ['Original article','Review article','Short communication','Technical note','Letter to the editor','Revision'];
+const SL = {draft:'Draft',submitted:'Submitted',under_review:'Under review',revision_required:'Revision required',accepted:'Accepted',rejected:'Rejected'};
+const SC = {draft:'etag-draft',submitted:'etag-sub',under_review:'etag-rev',revision_required:'etag-reqrev',accepted:'etag-acc',rejected:'etag-rej'};
+
+const EMS = {
+  view:'login', authMode:'login', authErr:null, authOk:null,
+  currentUser:null, currentRole:null,
+  activeTab:'manuscripts', formStep:0, editingId:null, viewingId:null,
+  draftMs:null, filterStatus:'all',
+  users:{}, manuscripts:{}, ready:false
+};
+
+function uid(){ return 'ms_'+Math.random().toString(36).slice(2)+Date.now(); }
+function dateStr(){ return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+async function emsLoad(){
+  emsRender();
+  try {
+    const uR = await window.storage.get('plmm:users', true);
+    if(uR) EMS.users = JSON.parse(uR.value);
+    const mR = await window.storage.get('plmm:manuscripts', true);
+    if(mR) EMS.manuscripts = JSON.parse(mR.value);
+  } catch(e){ EMS.users={}; EMS.manuscripts={}; }
+  EMS.ready = true;
+  emsRender();
+}
+
+async function emsPersist(){
+  try {
+    await window.storage.set('plmm:users', JSON.stringify(EMS.users), true);
+    await window.storage.set('plmm:manuscripts', JSON.stringify(EMS.manuscripts), true);
+  } catch(e){}
+}
+
+function isEd(email){ return email === EDITOR.email; }
+
+function emsRender(){
+  const vc = document.getElementById('emsVC');
+  const hr = document.getElementById('emsHdrRight');
+  if(!vc) return;
+  if(EMS.currentUser){
+    hr.style.display='flex';
+    document.getElementById('emsHdrUser').textContent = isEd(EMS.currentUser)?EDITOR.name:(EMS.users[EMS.currentUser]?.name||EMS.currentUser);
+    document.getElementById('emsHdrRole').textContent = isEd(EMS.currentUser)?'editor':'author';
+  } else { hr.style.display='none'; }
+  if(!EMS.ready){ vc.innerHTML='<div class="ems-loading"><i class="ti ti-loader" style="font-size:28px;display:block;margin-bottom:10px"></i>Connecting to database…</div>'; return; }
+  if(EMS.view==='login')    vc.innerHTML=emsRenderAuth();
+  else if(EMS.view==='dash')   vc.innerHTML=emsRenderDash();
+  else if(EMS.view==='form')   vc.innerHTML=emsRenderForm();
+  else if(EMS.view==='detail') vc.innerHTML=emsRenderDetail();
+  else if(EMS.view==='review') vc.innerHTML=emsRenderReview();
+  else if(EMS.view==='admin')  vc.innerHTML=emsRenderAdmin();
+}
+
+/* ── AUTH ──────────────────────────────────────────── */
+function emsRenderAuth(){
+  const r=EMS.authMode==='register';
+  return `<div class="ems-auth-wrap"><div class="ems-auth-card">
+    <div class="ems-auth-title">${r?'Create account':'Sign in'}</div>
+    <div class="ems-auth-sub">${r?'Register to submit to PLMM':'Access the editorial system'}</div>
+    ${EMS.authErr?`<div class="ems-err">${EMS.authErr}</div>`:''}
+    ${EMS.authOk?`<div class="ems-ok">${EMS.authOk}</div>`:''}
+    ${!r?`<div class="ems-hint"><strong>Editor login:</strong> editor@plmm.org &nbsp;·&nbsp; password: plmm2024</div>`:''}
+    ${r?`<div class="ef"><label class="el">Full name</label><input class="ei" id="eaN" placeholder="Your full name"/></div>`:''}
+    <div class="ef"><label class="el">Email</label><input class="ei" id="eaE" type="email" placeholder="you@university.edu"/></div>
+    <div class="ef"><label class="el">Password</label><input class="ei" id="eaP" type="password" placeholder="Password"/></div>
+    ${r?`<div class="ef"><label class="el">Institution</label><input class="ei" id="eaI" placeholder="University or research center"/></div>`:''}
+    <button class="ems-btn-p" onclick="emsDoAuth()">${r?'Create account':'Sign in'}</button>
+    <div class="ems-sw">${r?'Already have an account? <span onclick="emsSwAuth(\'login\')">Sign in</span>':"No account? <span onclick=\"emsSwAuth('register')\">Register</span>"}</div>
+  </div></div>`;
+}
+
+function emsSwAuth(m){ EMS.authMode=m; EMS.authErr=null; EMS.authOk=null; emsRender(); }
+
+async function emsDoAuth(){
+  const email=(document.getElementById('eaE')?.value||'').trim().toLowerCase();
+  const pass=document.getElementById('eaP')?.value||'';
+  if(!email||!pass){ EMS.authErr='Please fill in all fields.'; emsRender(); return; }
+  if(EMS.authMode==='login'){
+    if(email===EDITOR.email){
+      if(pass!==EDITOR.pass){ EMS.authErr='Incorrect editor password.'; emsRender(); return; }
+      EMS.currentUser=EDITOR.email; EMS.currentRole='editor'; EMS.view='admin'; EMS.authErr=null; emsRender(); return;
+    }
+    if(!EMS.users[email]||EMS.users[email].pass!==pass){ EMS.authErr='Incorrect email or password.'; emsRender(); return; }
+    EMS.currentUser=email; EMS.currentRole='author'; EMS.view='dash'; EMS.activeTab='manuscripts'; EMS.authErr=null; emsRender(); return;
+  }
+  const name=(document.getElementById('eaN')?.value||'').trim();
+  const inst=(document.getElementById('eaI')?.value||'').trim();
+  if(!name){ EMS.authErr='Please enter your name.'; emsRender(); return; }
+  if(email===EDITOR.email){ EMS.authErr='This email is reserved.'; emsRender(); return; }
+  if(EMS.users[email]){ EMS.authErr='An account with this email already exists.'; emsRender(); return; }
+  EMS.users[email]={name,pass,inst,email,role:'author'};
+  await emsPersist();
+  EMS.authOk='Account created! You can now sign in.'; EMS.authMode='login'; EMS.authErr=null; emsRender();
+}
+
+function emsLogout(){ EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; emsRender(); }
+
+/* ── DASHBOARD ─────────────────────────────────────── */
+function emsMyMss(){ return Object.values(EMS.manuscripts).filter(m=>m.owner===EMS.currentUser); }
+function emsAllMss(){ return Object.values(EMS.manuscripts); }
+
+function emsRenderDash(){
+  const mss=emsMyMss();
+  const pend=mss.filter(m=>m.status==='revision_required').length;
+  const t=EMS.activeTab;
+  return `<div class="ems-dash">
+  <nav class="ems-sb">
+    <div class="ems-sb-sec">Submissions</div>
+    <div class="ems-sb-it ${t==='manuscripts'?'active':''}" onclick="emsSetTab('manuscripts')"><i class="ti ti-file-text"></i> My manuscripts ${pend?`<span class="ems-bdc">${pend}</span>`:''}</div>
+    <div class="ems-sb-it" onclick="emsStartNew()"><i class="ti ti-plus"></i> New submission</div>
+    <div class="ems-sb-sec">Account</div>
+    <div class="ems-sb-it ${t==='profile'?'active':''}" onclick="emsSetTab('profile')"><i class="ti ti-user"></i> Profile</div>
+  </nav>
+  <div class="ems-main">${t==='manuscripts'?emsRenderMyMss(mss):emsRenderProfile()}</div>
+  </div>`;
+}
+
+function emsRenderMyMss(mss){
+  if(!mss.length) return `<div class="ems-ph"><div class="ems-pt">My manuscripts</div></div><div class="ems-empty"><i class="ti ti-file-off"></i><p>No submissions yet.</p><button class="ems-btn-new" onclick="emsStartNew()"><i class="ti ti-plus"></i> New submission</button></div>`;
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="ems-ph" style="margin:0"><div class="ems-pt">My manuscripts</div><div class="ems-pd">Track your submissions</div></div><button class="ems-btn-new" onclick="emsStartNew()"><i class="ti ti-plus"></i> New submission</button></div>
+  <div class="ems-ms-list">${mss.map(m=>`<div class="ems-ms-card"><div class="ems-ms-head"><div class="ems-ms-title">${m.title||'(Untitled)'}</div><span class="etag ${SC[m.status]||'etag-draft'}">${SL[m.status]||m.status}</span></div>
+  <div class="ems-ms-meta">${m.type||'—'} · Updated ${m.updated||'—'} · ${(m.files||[]).length} file(s)</div>
+  <div class="ems-ms-acts">
+    <button class="ems-btn-sm" onclick="emsOpenDetail('${m.id}')"><i class="ti ti-eye"></i> View</button>
+    ${m.status==='draft'?`<button class="ems-btn-sm blue" onclick="emsEditMs('${m.id}')"><i class="ti ti-edit"></i> Continue</button>`:''}
+    ${m.status==='revision_required'?`<button class="ems-btn-sm amber" onclick="emsEditMs('${m.id}')"><i class="ti ti-upload"></i> Submit revision</button>`:''}
+  </div></div>`).join('')}</div>`;
+}
+
+function emsRenderProfile(){
+  const u=EMS.users[EMS.currentUser];
+  return `<div class="ems-ph"><div class="ems-pt">Profile</div></div>
+  <div class="ems-fw" style="max-width:460px">
+    <div class="ef"><label class="el">Full name</label><input class="ei" id="epN" value="${u?.name||''}"/></div>
+    <div class="ef"><label class="el">Email</label><input class="ei" value="${u?.email||''}" disabled/></div>
+    <div class="ef"><label class="el">Institution</label><input class="ei" id="epI" value="${u?.inst||''}"/></div>
+    <button class="ems-btn-new" onclick="emsSaveProfile()" style="margin-top:6px"><i class="ti ti-device-floppy"></i> Save</button>
+  </div>`;
+}
+
+async function emsSaveProfile(){
+  const u=EMS.users[EMS.currentUser];
+  u.name=document.getElementById('epN')?.value||u.name;
+  u.inst=document.getElementById('epI')?.value||u.inst;
+  await emsPersist(); alert('Profile saved!');
+}
+
+function emsSetTab(t){ EMS.activeTab=t; emsRender(); }
+function emsStartNew(){ EMS.editingId=null; EMS.formStep=0; EMS.draftMs=emsInitDraft(); EMS.view='form'; emsRender(); }
+function emsEditMs(id){ EMS.editingId=id; EMS.draftMs=JSON.parse(JSON.stringify(EMS.manuscripts[id])); EMS.formStep=0; EMS.view='form'; emsRender(); }
+function emsOpenDetail(id){ EMS.viewingId=id; EMS.view='detail'; emsRender(); }
+function emsOpenReview(id){ EMS.viewingId=id; EMS.view='review'; emsRender(); }
+
+function emsInitDraft(){
+  const u=EMS.users[EMS.currentUser]||{};
+  return {id:uid(),title:'',type:'',abstract:'',keywords:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
+}
+
+/* ── FORM ──────────────────────────────────────────── */
+const STEPS=['Type','Authors','Abstract','Files','Submit'];
+
+function emsRenderForm(){
+  const ms=EMS.draftMs;
+  const isRev=ms.status==='revision_required';
+  let c='';
+  if(EMS.formStep===0) c=emsStep0(ms);
+  else if(EMS.formStep===1) c=emsStep1(ms);
+  else if(EMS.formStep===2) c=emsStep2(ms);
+  else if(EMS.formStep===3) c=emsStep3(ms);
+  else if(EMS.formStep===4) c=emsStep4(ms);
+  const stp=STEPS.map((s,i)=>{const cl=i<EMS.formStep?'done':i===EMS.formStep?'active':'';const d=i<EMS.formStep?'<i class="ti ti-check"></i>':i+1;return `<div class="ems-step ${cl}"><div class="ems-st-dot">${d}</div><div class="ems-st-lbl">${s}</div></div>`;}).join('');
+  const back=EMS.formStep>0?`<button class="ems-btn-back" onclick="emsPrevStep()"><i class="ti ti-arrow-left"></i> Back</button>`:`<button class="ems-btn-back" onclick="emsBackDash()"><i class="ti ti-arrow-left"></i> Dashboard</button>`;
+  const nxt=EMS.formStep===4?(isRev?'Submit revision':'Submit manuscript'):'Continue';
+  return `<div class="ems-main">
+  ${isRev?`<div class="ems-rev-alert"><div class="ems-rev-alert-t"><i class="ti ti-alert-circle"></i> Revision requested</div><div class="ems-rev-alert-b">Address all reviewer comments and upload a revised manuscript.</div></div>`:''}
+  <div class="ems-ph"><div class="ems-pt">${isRev?'Submit revision':EMS.editingId?'Continue submission':'New submission'}</div><div class="ems-pd">Progress is saved at each step</div></div>
+  <div class="ems-fw"><div class="ems-stepper">${stp}</div>${c}
+  <div class="ems-form-nav">${back}<span style="font-size:11px;color:#A0AEC0"><i class="ti ti-device-floppy"></i> Auto-saved</span>
+  <button class="ems-btn-new" onclick="emsNextStep()">${nxt} <i class="ti ti-arrow-right"></i></button>
+  </div></div></div>`;
+}
+
+function emsStep0(ms){
+  const opts=MS_TYPES.map(t=>`<option ${ms.type===t?'selected':''}>${t}</option>`).join('');
+  return `<div class="ems-fst">Manuscript type &amp; details</div><div class="ems-fg1">
+    <div class="ems-ff"><label class="el">Type *</label><select class="es" id="f_type"><option value="">Select…</option>${opts}</select></div>
+    <div class="ems-ff"><label class="el">Full title *</label><input class="ei" id="f_title" placeholder="Full manuscript title" value="${ms.title||''}"/></div>
+    <div class="ems-ff"><label class="el">Running head (max 60 chars)</label><input class="ei" id="f_short" placeholder="Short title" value="${ms.shortTitle||''}"/></div>
+    <div class="ems-ff"><label class="el">Keywords (comma-separated)</label><input class="ei" id="f_kw" placeholder="e.g. internal waves, thermocline, turbulence" value="${ms.keywords||''}"/></div>
+  </div>`;
+}
+function emsStep1(ms){
+  const A=ms.authors||[{name:'',email:'',inst:'',corresponding:true}];
+  const rows=A.map((a,i)=>`<div class="ems-arow">
+    <div class="ems-ff"><label class="el">Full name</label><input class="ei" id="a_n_${i}" value="${a.name||''}"/></div>
+    <div class="ems-ff"><label class="el">Email</label><input class="ei" id="a_e_${i}" value="${a.email||''}"/></div>
+    <div class="ems-ff"><label class="el">Institution</label><input class="ei" id="a_i_${i}" value="${a.inst||''}"/></div>
+    <div><label class="el" style="visibility:hidden;font-size:10px">X</label><div style="display:flex;gap:4px">
+      <button class="ems-btn-icon ${a.corresponding?'star-on':''}" title="Corresponding" onclick="emsSetCorr(${i})"><i class="ti ti-star"></i></button>
+      ${A.length>1?`<button class="ems-btn-icon" onclick="emsRemAuth(${i})"><i class="ti ti-trash"></i></button>`:''}
+    </div></div>
+  </div>`).join('');
+  return `<div class="ems-fst">Authors</div>${rows}<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><button class="ems-btn-icon add" onclick="emsAddAuth()"><i class="ti ti-plus"></i></button><span style="font-size:12px;color:#718096">Add author</span></div>`;
+}
+function emsStep2(ms){
+  return `<div class="ems-fst">Abstract &amp; details</div><div class="ems-fg1">
+    <div class="ems-ff"><label class="el">Abstract * (150–300 words)</label><textarea class="eta" id="f_abs" style="min-height:120px">${ms.abstract||''}</textarea></div>
+    <div class="ems-ff"><label class="el">Highlights (optional, 3–5 bullet points)</label><textarea class="eta" id="f_hl" placeholder="• Finding 1&#10;• Finding 2">${ms.highlights||''}</textarea></div>
+    <div class="ems-ff"><label class="el">Suggested reviewers (name, email, institution — one per line)</label><textarea class="eta" id="f_sr" placeholder="Suggested reviewer info…" style="min-height:60px">${ms.sugReviewers||''}</textarea></div>
+  </div>`;
+}
+function emsStep3(ms){
+  const F=ms.files||[];
+  const fl=F.length?`<div class="ems-flist">${F.map((f,i)=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i><span class="fn">${f.name}</span><span class="fc">${f.category}</span><span class="fs">${f.size}</span><button class="ems-btn-icon" onclick="emsRemFile(${i})" style="flex-shrink:0"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:'';
+  return `<div class="ems-fst">Upload files</div>
+  <div class="ems-fg" style="margin-bottom:10px"><div class="ems-ff"><label class="el">File category</label><select class="es" id="f_fc"><option>Manuscript (main)</option><option>Cover letter</option><option>Supplementary material</option><option>Figures (high-res)</option><option>Revised manuscript</option><option>Response to reviewers</option><option>Data file</option><option>Other</option></select></div><div></div></div>
+  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, ZIP, XLSX, PNG — max 50 MB per file</small></div>
+  <input type="file" id="efi" multiple style="display:none" onchange="emsHandleFiles(this.files)"/>
+  ${fl}`;
+}
+function emsStep4(ms){
+  const au=(ms.authors||[]).map(a=>`${a.name}${a.corresponding?' (corresponding)':''}`).join('; ');
+  const isRev=ms.status==='revision_required';
+  const rc=ms.reviewerComments||[];
+  let rSec='';
+  if(isRev&&rc.length) rSec=`<div style="margin-bottom:14px"><div class="ems-fst">Reviewer comments to address</div>${rc.map((c,i)=>`<div class="ems-rc"><div class="ems-rc-lbl">Reviewer ${i+1}</div><div class="ems-rc-text">${c}</div></div>`).join('')}</div>`;
+  return `${rSec}<div class="ems-fst">Review &amp; ${isRev?'submit revision':'submit'}</div>
+  <div class="ems-rc" style="margin-bottom:12px"><div class="ems-rc-lbl">Summary</div>
+    <table style="font-size:12px;width:100%">
+      <tr><td style="color:#718096;padding:3px 0;width:110px">Type</td><td>${ms.type||'—'}</td></tr>
+      <tr><td style="color:#718096;padding:3px 0">Title</td><td>${ms.title||'—'}</td></tr>
+      <tr><td style="color:#718096;padding:3px 0">Authors</td><td>${au||'—'}</td></tr>
+      <tr><td style="color:#718096;padding:3px 0">Files attached</td><td>${(ms.files||[]).length}</td></tr>
+    </table>
+  </div>
+  <div class="ems-rc"><div class="ems-rc-lbl">Submission checklist</div>
+    ${['Manuscript follows PLMM author guidelines','All authors have approved this submission','Work is original and not under review elsewhere','Conflicts of interest declared','Data availability statement included'].map(it=>`<label class="ems-cl-item"><input type="checkbox"> ${it}</label>`).join('')}
+  </div>`;
+}
+
+function emsCollect(step){
+  const ms=EMS.draftMs;
+  if(step===0){ms.type=document.getElementById('f_type')?.value||ms.type;ms.title=document.getElementById('f_title')?.value||ms.title;ms.shortTitle=document.getElementById('f_short')?.value||ms.shortTitle;ms.keywords=document.getElementById('f_kw')?.value||ms.keywords;}
+  else if(step===1){const na=[];let i=0;while(document.getElementById(`a_n_${i}`)){na.push({name:document.getElementById(`a_n_${i}`).value,email:document.getElementById(`a_e_${i}`).value,inst:document.getElementById(`a_i_${i}`).value,corresponding:ms.authors[i]?.corresponding||false});i++;}ms.authors=na;}
+  else if(step===2){ms.abstract=document.getElementById('f_abs')?.value||ms.abstract;ms.highlights=document.getElementById('f_hl')?.value||ms.highlights;ms.sugReviewers=document.getElementById('f_sr')?.value||ms.sugReviewers;}
+  ms.updated=dateStr(); EMS.manuscripts[ms.id]=ms; emsPersist();
+}
+function emsNextStep(){ emsCollect(EMS.formStep); if(EMS.formStep===4){emsSubmitMs();return;} EMS.formStep++; emsRender(); }
+function emsPrevStep(){ emsCollect(EMS.formStep); EMS.formStep--; emsRender(); }
+function emsBackDash(){ emsCollect(EMS.formStep); EMS.view='dash'; EMS.activeTab='manuscripts'; emsRender(); }
+async function emsSubmitMs(){
+  const ms=EMS.draftMs;
+  if(!ms.title){ alert('Please add a title.'); return; }
+  const isRev=ms.status==='revision_required';
+  ms.status='submitted'; ms.updated=dateStr();
+  if(!ms.timeline) ms.timeline=[];
+  ms.timeline.push({event:isRev?'Revision submitted':'Manuscript submitted',date:dateStr(),done:true});
+  EMS.manuscripts[ms.id]=ms; await emsPersist();
+  EMS.view='detail'; EMS.viewingId=ms.id; emsRender();
+}
+function emsAddAuth(){ emsCollect(1); EMS.draftMs.authors.push({name:'',email:'',inst:'',corresponding:false}); emsRender(); }
+function emsRemAuth(i){ emsCollect(1); EMS.draftMs.authors.splice(i,1); emsRender(); }
+function emsSetCorr(i){ emsCollect(1); EMS.draftMs.authors.forEach((a,j)=>a.corresponding=j===i); emsRender(); }
+function emsHandleFiles(fl){
+  const cat=document.getElementById('f_fc')?.value||'Manuscript (main)';
+  Array.from(fl).forEach(f=>{const sz=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';EMS.draftMs.files.push({name:f.name,category:cat,size:sz});});
+  EMS.manuscripts[EMS.draftMs.id]=EMS.draftMs; emsPersist(); emsRender();
+}
+function emsRemFile(i){ EMS.draftMs.files.splice(i,1); emsRender(); }
+
+/* ── DETAIL VIEW ───────────────────────────────────── */
+function emsRenderDetail(){
+  const ms=EMS.manuscripts[EMS.viewingId];
+  if(!ms){EMS.view=isEd(EMS.currentUser)?'admin':'dash';emsRender();return'';}
+  const isRev=ms.status==='revision_required';
+  const rc=ms.reviewerComments||[];
+  const ised=isEd(EMS.currentUser);
+  const back=ised?`<button class="ems-btn-back" onclick="EMS.view='admin';emsRender()"><i class="ti ti-arrow-left"></i> All manuscripts</button>`:`<button class="ems-btn-back" onclick="EMS.view='dash';EMS.activeTab='manuscripts';emsRender()"><i class="ti ti-arrow-left"></i> My manuscripts</button>`;
+  const tlE=[{event:'Created',done:true,date:ms.created},{event:'Submitted',done:ms.status!=='draft',date:ms.status!=='draft'?ms.updated:null},{event:'Under review',done:['under_review','revision_required','accepted','rejected'].includes(ms.status),active:ms.status==='under_review'},{event:'Decision',done:['revision_required','accepted','rejected'].includes(ms.status)},{event:'Final decision',done:ms.status==='accepted'||ms.status==='rejected'}];
+  return `<div class="ems-main">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">${back}<div class="ems-pt">${ms.title||'(Untitled)'}</div><span class="etag ${SC[ms.status]||'etag-draft'}">${SL[ms.status]||ms.status}</span></div>
+  ${isRev?`<div class="ems-rev-alert"><div class="ems-rev-alert-t"><i class="ti ti-alert-circle"></i> Revision required</div><div class="ems-rev-alert-b">Please address reviewer comments and upload a revised manuscript.</div></div>`:''}
+  <div style="display:grid;grid-template-columns:1fr 220px;gap:14px">
+    <div>
+      <div class="ems-fw" style="margin-bottom:12px">
+        <div class="ems-fst">Manuscript details</div>
+        <table style="font-size:12px;width:100%;border-collapse:collapse">
+          <tr><td style="color:#718096;padding:4px 0;width:120px;vertical-align:top">Type</td><td>${ms.type||'—'}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Authors</td><td>${(ms.authors||[]).map(a=>`${a.name}${a.corresponding?' <span style="font-size:10px;color:#2B3E6B">(corr.)</span>':''}`).join('<br/>')}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Keywords</td><td>${ms.keywords||'—'}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Abstract</td><td style="line-height:1.5">${ms.abstract||'—'}</td></tr>
+          ${ms.highlights?`<tr><td style="color:#718096;padding:4px 0;vertical-align:top">Highlights</td><td style="white-space:pre-line">${ms.highlights}</td></tr>`:''}
+          <tr><td style="color:#718096;padding:4px 0">Submitted by</td><td>${ms.ownerName||ms.owner}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0">Updated</td><td>${ms.updated||'—'}</td></tr>
+        </table>
+      </div>
+      ${(ms.files||[]).length?`<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i><span class="fn">${f.name}</span><span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div></div>`:''}
+      ${rc.length?`<div class="ems-fw"><div class="ems-fst">Reviewer comments</div>${rc.map((c,i)=>`<div class="ems-rc"><div class="ems-rc-lbl">Reviewer ${i+1}</div><div class="ems-rc-text">${c}</div></div>`).join('')}${isRev&&!ised?`<div style="margin-top:12px"><button class="ems-btn-new" onclick="emsEditMs('${ms.id}')"><i class="ti ti-upload"></i> Upload revision</button></div>`:''}</div>`:''}
+      ${ised&&(ms.status==='submitted'||ms.status==='under_review')?`<div class="ems-fw" style="margin-top:12px"><div class="ems-fst">Editor actions</div><button class="ems-btn-sm blue" onclick="emsOpenReview('${ms.id}')"><i class="ti ti-clipboard-check"></i> Write review &amp; decision</button></div>`:''}
+    </div>
+    <div class="ems-fw"><div class="ems-fst">Editorial timeline</div>
+      <div class="ems-tl">${tlE.map(e=>`<div class="ems-tl-item"><div class="ems-tl-dot ${e.done?'done':(e.active?'active':'pend')}">${e.done?'<i class="ti ti-check"></i>':(e.active?'<i class="ti ti-clock"></i>':'')}</div><div><div class="ems-tl-ev">${e.event}</div>${e.done&&e.date?`<div class="ems-tl-dt">${e.date}</div>`:''}</div></div>`).join('')}</div>
+    </div>
+  </div></div>`;
+}
+
+/* ── REVIEW VIEW ───────────────────────────────────── */
+function emsRenderReview(){
+  const ms=EMS.manuscripts[EMS.viewingId];
+  if(!ms){EMS.view='admin';emsRender();return'';}
+  if(ms.status==='submitted'){ms.status='under_review';ms.updated=dateStr();if(!ms.timeline)ms.timeline=[];ms.timeline.push({event:'Review started',date:dateStr(),done:true});EMS.manuscripts[ms.id]=ms;emsPersist();}
+  return `<div class="ems-main">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button class="ems-btn-back" onclick="EMS.view='admin';emsRender()"><i class="ti ti-arrow-left"></i> All manuscripts</button><div class="ems-pt">Reviewing: ${ms.title||'(Untitled)'}</div></div>
+  <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
+    <div class="ems-fw">
+      <div class="ems-fst">Manuscript overview</div>
+      <table style="font-size:12px;width:100%;margin-bottom:16px">
+        <tr><td style="color:#718096;padding:3px 0;width:100px">Type</td><td>${ms.type||'—'}</td></tr>
+        <tr><td style="color:#718096;padding:3px 0">Authors</td><td>${(ms.authors||[]).map(a=>a.name).join(', ')||'—'}</td></tr>
+        <tr><td style="color:#718096;padding:3px 0;vertical-align:top">Abstract</td><td style="line-height:1.5">${ms.abstract||'—'}</td></tr>
+      </table>
+      <div class="ems-fst">Evaluation criteria</div>
+      ${[['Scientific quality','Rigor, methodology, and validity of results'],['Novelty','Originality and contribution to the field'],['Clarity','Writing quality, figures, and logical structure'],['Completeness','Methods, data, references, and data availability']].map(([l,d])=>`<div style="margin-bottom:14px"><label class="el">${l}</label><div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">${d}</div><div style="display:flex;gap:14px">${['Poor','Fair','Good','Excellent'].map((r,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;color:#4A5568"><input type="radio" name="r_${l.replace(/\s/g,'_')}" value="${i+1}" style="accent-color:#2B3E6B"> ${r}</label>`).join('')}</div></div>`).join('')}
+      <div class="ems-ff" style="margin-bottom:12px"><label class="el">Comments to authors (will be shared)</label><textarea class="eta" id="r_c" placeholder="Provide detailed, constructive feedback…" style="min-height:100px"></textarea></div>
+      <div class="ems-ff" style="margin-bottom:14px"><label class="el">Confidential notes to editor (not shared)</label><textarea class="eta" id="r_p" placeholder="Private notes for the editor only…" style="min-height:60px"></textarea></div>
+      <div class="ems-ff" style="margin-bottom:14px"><label class="el">Recommendation *</label>
+        <select class="es" id="r_d"><option value="">Select a recommendation…</option><option>Accept as is</option><option>Minor revisions required</option><option>Major revisions required</option><option>Reject with invitation to resubmit</option><option>Reject</option></select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="ems-btn-new" onclick="emsSubmitReview()"><i class="ti ti-send"></i> Submit decision</button>
+        <button class="ems-btn-sm" onclick="EMS.view='admin';emsRender()">Save &amp; finish later</button>
+      </div>
+    </div>
+    <div class="ems-fw"><div class="ems-fst">Review checklist</div>
+      ${['Within scope of PLMM','Methods are reproducible','Results clearly presented','Conclusions supported by data','References current and appropriate','Statistical analysis is correct','Data availability addressed'].map(it=>`<label class="ems-cl-item"><input type="checkbox"> ${it}</label>`).join('')}
+    </div>
+  </div></div>`;
+}
+
+async function emsSubmitReview(){
+  const ms=EMS.manuscripts[EMS.viewingId];
+  const dec=document.getElementById('r_d')?.value;
+  const comm=document.getElementById('r_c')?.value||'';
+  if(!dec){alert('Please select a recommendation.');return;}
+  const dm={'Accept as is':'accepted','Minor revisions required':'revision_required','Major revisions required':'revision_required','Reject with invitation to resubmit':'rejected','Reject':'rejected'};
+  ms.status=dm[dec]||'under_review'; ms.updated=dateStr();
+  if(comm.trim()){if(!ms.reviewerComments)ms.reviewerComments=[];ms.reviewerComments.push(comm.trim());}
+  if(!ms.timeline)ms.timeline=[];
+  ms.timeline.push({event:`Decision: ${dec}`,date:dateStr(),done:true});
+  EMS.manuscripts[ms.id]=ms; await emsPersist();
+  alert(`Decision submitted: "${dec}". The author has been notified.`);
+  EMS.view='admin'; emsRender();
+}
+
+/* ── ADMIN VIEW ────────────────────────────────────── */
+function emsRenderAdmin(){
+  const all=emsAllMss();
+  const filt=EMS.filterStatus==='all'?all:all.filter(m=>m.status===EMS.filterStatus);
+  const cnt={all:all.length,submitted:all.filter(m=>m.status==='submitted').length,under_review:all.filter(m=>m.status==='under_review').length,revision_required:all.filter(m=>m.status==='revision_required').length,accepted:all.filter(m=>m.status==='accepted').length,rejected:all.filter(m=>m.status==='rejected').length};
+  const t=EMS.activeTab||'db';
+  return `<div class="ems-dash">
+  <nav class="ems-sb">
+    <div class="ems-sb-sec">Editorial</div>
+    <div class="ems-sb-it ${t==='db'?'active':''}" onclick="EMS.activeTab='db';emsRender()"><i class="ti ti-database"></i> All manuscripts <span class="ems-bdc">${cnt.all}</span></div>
+    <div class="ems-sb-it ${t==='users'?'active':''}" onclick="EMS.activeTab='users';emsRender()"><i class="ti ti-users"></i> Registered authors</div>
+    <div class="ems-sb-sec">Filter by status</div>
+    ${[['submitted','Submitted',cnt.submitted],['under_review','Under review',cnt.under_review],['revision_required','Revision due',cnt.revision_required],['accepted','Accepted',cnt.accepted],['rejected','Rejected',cnt.rejected]].map(([k,l,n])=>`<div class="ems-sb-it ${EMS.filterStatus===k&&t==='db'?'active':''}" onclick="EMS.activeTab='db';EMS.filterStatus='${k}';emsRender()"><i class="ti ti-filter"></i> ${l} ${n>0?`<span class="ems-bdc">${n}</span>`:''}</div>`).join('')}
+  </nav>
+  <div class="ems-main">${t==='db'?emsRenderAdminDb(filt,cnt):emsRenderAdminUsers()}</div>
+  </div>`;
+}
+
+function emsRenderAdminDb(filt,cnt){
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="ems-ph" style="margin:0"><div class="ems-pt">Manuscript database</div><div class="ems-pd">${filt.length} record(s) shown</div></div>
+    <button class="ems-btn-sm" onclick="EMS.filterStatus='all';emsRender()"><i class="ti ti-refresh"></i> Show all</button>
+  </div>
+  <div class="ems-stat-row">
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Total</div><div class="ems-stat-val">${cnt.all}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Awaiting review</div><div class="ems-stat-val">${cnt.submitted+cnt.under_review}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Accepted</div><div class="ems-stat-val" style="color:#065F46">${cnt.accepted}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Rejected</div><div class="ems-stat-val" style="color:#7F1D1D">${cnt.rejected}</div></div>
+  </div>
+  <div class="ems-filter-row">${[['all','All'],['submitted','Submitted'],['under_review','Under review'],['revision_required','Revision req.'],['accepted','Accepted'],['rejected','Rejected'],['draft','Draft']].map(([k,l])=>`<button class="ems-fbtn ${EMS.filterStatus===k?'active':''}" onclick="EMS.filterStatus='${k}';emsRender()">${l}</button>`).join('')}</div>
+  ${filt.length===0?`<div class="ems-empty"><i class="ti ti-inbox"></i><p>No manuscripts in this category.</p></div>`:
+  `<div class="ems-fw" style="padding:0;overflow:hidden"><table class="ems-db-table" style="table-layout:fixed">
+    <colgroup><col style="width:30%"><col style="width:14%"><col style="width:14%"><col style="width:13%"><col style="width:13%"><col style="width:16%"></colgroup>
+    <thead><tr><th>Title</th><th>Type</th><th>Author</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+    <tbody>${filt.sort((a,b)=>(b.updated||'').localeCompare(a.updated||'')).map(m=>`<tr>
+      <td style="font-weight:500">${m.title||'(Untitled)'}</td>
+      <td style="color:#4A5568">${(m.type||'—').split(' ').slice(0,2).join(' ')}</td>
+      <td style="color:#4A5568">${m.ownerName||m.owner||'—'}</td>
+      <td><span class="etag ${SC[m.status]||'etag-draft'}">${SL[m.status]||m.status}</span></td>
+      <td style="color:#A0AEC0">${m.updated||'—'}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="ems-btn-sm" onclick="emsOpenDetail('${m.id}')"><i class="ti ti-eye"></i></button>
+        ${m.status==='submitted'||m.status==='under_review'?`<button class="ems-btn-sm blue" onclick="emsOpenReview('${m.id}')"><i class="ti ti-clipboard-check"></i></button>`:''}
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`}`;
+}
+
+function emsRenderAdminUsers(){
+  const users=Object.values(EMS.users);
+  const msByUser={};
+  Object.values(EMS.manuscripts).forEach(m=>{if(!msByUser[m.owner])msByUser[m.owner]=[];msByUser[m.owner].push(m);});
+  return `<div class="ems-ph"><div class="ems-pt">Registered authors</div><div class="ems-pd">${users.length} user(s)</div></div>
+  ${users.length===0?`<div class="ems-empty"><i class="ti ti-users"></i><p>No registered authors yet.</p></div>`:
+  `<div class="ems-fw" style="padding:0;overflow:hidden"><table class="ems-db-table" style="table-layout:fixed">
+    <colgroup><col style="width:22%"><col style="width:28%"><col style="width:26%"><col style="width:12%"><col style="width:12%"></colgroup>
+    <thead><tr><th>Name</th><th>Email</th><th>Institution</th><th>Role</th><th>Manuscripts</th></tr></thead>
+    <tbody>${users.map(u=>`<tr>
+      <td style="font-weight:500">${u.name||'—'}</td>
+      <td style="color:#4A5568">${u.email}</td>
+      <td style="color:#4A5568">${u.inst||'—'}</td>
+      <td><span class="etag etag-sub">${u.role||'author'}</span></td>
+      <td style="color:#718096">${(msByUser[u.email]||[]).length}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`}`;
+}
+</script>
+
 </body>
 </html>

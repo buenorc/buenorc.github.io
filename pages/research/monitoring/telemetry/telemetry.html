@@ -178,8 +178,175 @@ Licence URI: http://www.os-templates.com/template-terms
 
       <hr>
 
+      <header>
+        <figure class="avatar"><img src="../../colab/maria-eduarda-timos.png" alt=""></figure>
+        <address>
+        Research performed with the assistance of <a href="#">Maria Eduarda Timos</a>
+        </address>
+      </header>
 
-    </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+
+        <div class="one_half first">
+
+          <p>
+          Continuous environmental monitoring in remote areas is frequently constrained by the high cost,
+          power requirements, and maintenance demands of commercial telemetry systems. This project
+          developed and evaluated a low-cost autonomous monitoring platform based on LoRa communication,
+          designed for environmental applications where conventional infrastructure is unavailable or
+          economically unfeasible.
+          </p>
+
+          <p>
+          The proposed system integrates a Heltec WiFi LoRa 32 V3 board, based on an ESP32-S3
+          microcontroller and the Semtech SX1262 transceiver, combined with environmental sensors and
+          a battery-powered energy system. The platform was designed to perform autonomous data
+          acquisition, wireless transmission, and remote data delivery through a gateway architecture,
+          enabling real-time monitoring with low operational costs. Differently from the previous test,
+          which relied on separated communication modules connected to a microcontroller, this approach
+          evaluates an integrated LoRa-based platform, reducing hardware complexity and improving
+          energy management through native low-power functionalities.
+          </p>
+
+        </div>
+
+        <div class="one_half">
+
+          <figure>
+            <img class="imgr borderedbox inspace-5" src="img/2.1sistem.png" alt="">
+            <figcaption>
+            <b>Fig 4.</b> Architecture of the low-cost LoRa environmental monitoring system.
+            </figcaption>
+          </figure>
+
+        </div>
+
+      </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+
+        <div class="one_half first">
+          <figure>
+            <img class="imgl borderedbox inspace-5" src="img/2.2dist.png" alt="">
+            <figcaption>
+            <b>Fig 5.</b> LoRa communication range assessment under different propagation conditions using a higher-gain fiberglass antenna on receiver and a compact stub antenna on transmitir.
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="one_half">
+
+          <p>
+          The performance of the communication system was evaluated through field experiments under
+          line-of-sight (LoS) conditions (Figure 5a) and non-line-of-sight (NLoS) conditions (Figure 5b).
+          Two antenna configurations were tested: a compact stub antenna (Figure 4, item 3) and a
+          higher-gain fiberglass antenna. During the experiments, the transmitter was progressively
+          displaced away from the receiver, while the received signal strength indicator (RSSI) was
+          continuously recorded. This approach allowed the relationship between communication quality,
+          propagation distance, antenna gain, and environmental obstructions to be characterized.
+          </p>
+
+          <p>
+          Under NLoS conditions, where vegetation and terrain irregularities introduced significant signal
+          attenuation, the fiberglass antenna substantially improved communication performance, increasing
+          the average communication range from approximately 9 m to 98 m (Figure 5b). This result
+          highlights the limitations of small embedded antennas in complex environments and demonstrates
+          that higher-gain external antennas can compensate for propagation losses in remote monitoring
+          applications.
+          </p>
+
+          <p>
+          Under open-field conditions, with reduced obstruction and improved signal propagation, the same
+          antenna configuration achieved communication distances exceeding 300 m (Figure 5a). Although
+          LoRa technology can reach longer distances under ideal conditions, these results represent realistic
+          field conditions for environmental monitoring deployments, where sensors are commonly installed
+          near vegetation, uneven terrain, and other sources of signal degradation. Therefore, antenna
+          optimization represents a key factor for improving the reliability and scalability of low-cost
+          telemetry networks.
+          </p>
+          <p>
+          For practical environmental monitoring applications, the results indicate that the deployment strategy
+          should consider both antenna configuration and network architecture. The use of higher-gain antennas,
+          elevated receiver positions, and intermediate relay nodes can further expand the monitoring coverage,
+          especially in areas with complex topography or dense vegetation.
+          </p>
+
+        </div>
+
+      </div>
+
+      <p>
+      The energy autonomy of the telemetry system was evaluated through controlled battery discharge
+      experiments using a custom Li-Ion power pack composed of two 3.7 V cells connected in parallel,
+      providing a total capacity of 17,600 mAh. The battery system was integrated with an external
+      battery management circuit (BMS) to improve protection against overcharge and deep discharge.
+      The voltage of the battery pack was continuously monitored by the ESP32-S3 microcontroller,
+      allowing the evolution of the discharge curve to be characterized under different operating
+      conditions (Figure 6).
+      </p>
+
+      <p>
+      Three operational scenarios were evaluated to quantify the effect of communication frequency and
+      energy-saving strategies: continuous transmission, periodic measurements, and operation using
+      Deep Sleep mode. The tests compared high-frequency acquisition (1 second), nominal acquisition
+      intervals, and hourly measurements with the microcontroller and LoRa module entering a low-power
+      state between measurements.
+      </p>
+
+      <p>
+      The battery discharge analysis revealed two distinct operational phases (Figure 6a), with a stable voltage
+      reduction followed by a faster decay after reaching the critical threshold of approximately 4.11 V.
+      The implementation of Deep Sleep operation reduced the energy consumption by approximately
+      41 times compared with active operation, enabling a projected autonomy of approximately 57 days
+      under hourly monitoring conditions (Figure 6b).
+      </p>
+
+      <p>
+      The system was also validated during continuous outdoor operation, maintaining environmental
+      measurements for more than three weeks without interruptions or communication failures. These
+      results demonstrate that integrated LoRa platforms combined with appropriate power management
+      strategies can provide reliable, low-maintenance solutions for long-term environmental monitoring
+      in remote locations.
+      </p>
+
+      <figure>
+        <img class="imgr borderedbox inspace-5" src="img/2.3bat.png" alt="">
+        <figcaption>
+        <b>Fig 6.</b> Battery discharge behavior and autonomy estimation.
+        </figcaption>
+      </figure>
+
+      <hr>
+
+      <header>
+        <figure class="avatar"><img src="../../colab/maria-eduarda-timos.png" alt=""></figure>
+        <address>
+        Research performed with the assistance of <a href="#">Maria Eduarda Timos</a>
+        </address>
+      </header>
+
+      <p>
+      The next phase of this project focuses on expanding the telemetry platform into a unified communication
+      framework capable of integrating the different environmental monitoring systems developed within the
+      laboratory. A standardized communication protocol is currently being evaluated to allow the Heltec
+      LoRa platform to interface with multiple sensor packages, enabling coordinated data acquisition,
+      wireless transmission, and remote monitoring across different environmental applications. This
+      integration aims to create a modular monitoring ecosystem, where different sensors can be deployed
+      and managed through a common telemetry infrastructure.
+      </p>
+
+      <p>
+      Additionally, the energy autonomy of the system is being further investigated through the integration
+      of a solar energy harvesting module. The new configuration combines the Heltec LoRa platform and
+      the sensors with solar charging capabilities, allowing the evaluation of
+      continuous operation under field conditions. Performance will be compared with the current battery-only
+      configuration, based on four 3.7 V Li-Ion cells connected in parallel, considering energy balance,
+      battery recharge dynamics, and long-term operational stability. These developments aim to advance the
+      platform toward fully autonomous environmental monitoring stations capable of operating continuously
+      with minimal maintenance.
+      </p>
+
     <div class="clear"></div>
   </main>
 </div>
