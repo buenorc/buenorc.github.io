@@ -539,7 +539,7 @@ hr.section-divider {
     <div class="journal-title">Physical Limnology:<br><em>Monitoring &amp; Methods</em></div>
     <div class="journal-abbr">Phys. Limnol. Monit. Methods &nbsp;·&nbsp; ISSN 0000-0000 (online) &nbsp;·&nbsp; Est. 2023</div>
     <div class="journal-lead">
-      A simulated scientific journal for educational modules in physical limnology and aquatic hydrodynamics. Students experience the full lifecycle of scientific publication — from manuscript preparation to peer review — in a realistic editorial environment.
+      A scientific journal dedicated to advancing knowledge and discussion in physical limnology and aquatic hydrodynamics. The journal provides a platform for research communication, encouraging the exchange of ideas, methodologies, and innovative approaches in the study of aquatic systems.
     </div>
     <div class="hero-actions">
       <button class="btn btn-primary" onclick="openEMS()">
@@ -607,8 +607,8 @@ hr.section-divider {
           <h4><i class="ti ti-file-description"></i> Manuscript preparation</h4>
           <ul>
             <li>Use the official Word or LaTeX template</li>
-            <li>Maximum 8,000 words for original articles (excluding references)</li>
-            <li>Figures must be submitted at ≥ 300 dpi, TIFF or EPS</li>
+            <li>Maximum 8 pages for original articles (including references)</li>
+            <li>Figures must be submitted at ≥ 300 dpi</li>
             <li>Equations numbered consecutively in parentheses</li>
             <li>SI units throughout; exceptions must be justified</li>
           </ul>
@@ -616,11 +616,9 @@ hr.section-divider {
         <div class="instruction-card">
           <h4><i class="ti ti-users"></i> Authorship &amp; ethics</h4>
           <ul>
-            <li>All authors must meet the ICMJE authorship criteria</li>
+            <li>All authors are expected to have made a significant contribution to the research and manuscript preparation. A detailed "Author Contributions" statement must be included in the manuscript</li>
             <li>Corresponding author is responsible for all correspondence</li>
-            <li>Conflicts of interest must be declared at submission</li>
-            <li>Data availability statement is mandatory</li>
-            <li>Field studies require applicable ethics approvals</li>
+            <li>Use of artificial intelligence tools is permitted when appropriately disclosed and justified. Authors must include an "Artificial Intelligence Statement" section in the manuscript describing the tools used and their role</li>
           </ul>
         </div>
         <div class="instruction-card">
@@ -688,9 +686,9 @@ hr.section-divider {
           <li><i class="ti ti-calendar"></i> <span><strong>Founded:</strong> 2023</span></li>
           <li><i class="ti ti-file-check"></i> <span><strong>Peer review:</strong> Double-blind</span></li>
           <li><i class="ti ti-clock"></i> <span><strong>Review time:</strong> 4–6 weeks (simulated)</span></li>
-          <li><i class="ti ti-world"></i> <span><strong>Language:</strong> English</span></li>
-          <li><i class="ti ti-lock-open"></i> <span><strong>Access:</strong> Open access (fictional)</span></li>
-          <li><i class="ti ti-cash"></i> <span><strong>Article fee:</strong> No charge (educational)</span></li>
+          <li><i class="ti ti-world"></i> <span><strong>Language:</strong> English/Portuguese</span></li>
+          <li><i class="ti ti-lock-open"></i> <span><strong>Access:</strong> Open access</span></li>
+          <li><i class="ti ti-cash"></i> <span><strong>Article fee:</strong> No charge</span></li>
         </ul>
       </div>
 
@@ -699,7 +697,7 @@ hr.section-divider {
         <div class="editorial-board">
           <div class="board-member">
             <div class="board-member-role">Editor-in-Chief</div>
-            <div class="board-member-name">Prof. Rafael de Carvalho Bueno</div>
+            <div class="board-member-name">Dr. Rafael de Carvalho Bueno</div>
             <div class="board-member-inst">Federal University of Paraná, Brazil</div>
           </div>
           <div class="board-member">
@@ -720,6 +718,9 @@ hr.section-divider {
         <ul class="info-list">
           <li><i class="ti ti-file-word"></i>
             <a href="template/Word/template-JHAE.docx" target="_blank">Word template (.docx)</a>
+          </li>
+          <li><i class="ti ti-file-word"></i>
+            <a href="template/LATEX/template-JHAE.docx" target="_blank">LaTeX template (.zip)</a>
           </li>
           <li><i class="ti ti-file"></i>
             <a href="instructions/instructions.pdf" target="_blank">Instructions to authors (PDF)</a>
@@ -891,7 +892,7 @@ function emsRenderAuth(){
     <div class="ems-auth-sub">${r?'Register to submit to PLMM':'Access the editorial system'}</div>
     ${EMS.authErr?`<div class="ems-err">${EMS.authErr}</div>`:''}
     ${EMS.authOk?`<div class="ems-ok">${EMS.authOk}</div>`:''}
-    ${!r?`<div class="ems-hint"><strong>Editor login:</strong> editor@plmm.org &nbsp;·&nbsp; password: plmm2024</div>`:''}
+    ${!r?`<div class="ems-hint"><strong>Editor login:</strong> xxxxxxxx &nbsp;·&nbsp; password: xxxxxxxx</div>`:''}
     ${r?`<div class="ef"><label class="el">Full name</label><input class="ei" id="eaN" placeholder="Your full name"/></div>`:''}
     <div class="ef"><label class="el">Email</label><input class="ei" id="eaE" type="email" placeholder="you@university.edu"/></div>
     <div class="ef"><label class="el">Password</label><input class="ei" id="eaP" type="password" placeholder="Password"/></div>
