@@ -606,11 +606,13 @@ hr.section-divider {
         <div class="instruction-card">
           <h4><i class="ti ti-file-description"></i> Manuscript preparation</h4>
           <ul>
-            <li>Use the official Word or LaTeX template</li>
+            <li>Use the official LaTeX template</li>
+            <li>Portuguse language is only allowed for undergraduate students</li>
             <li>Maximum 8 pages for original articles (including references)</li>
+            <li>For first submission a single PDF file should be submitted (<\2 MB)</li>
+            <li>After first round of revision, editor can ask to send images and LaTex files</li>
             <li>Figures must be submitted at ≥ 300 dpi</li>
-            <li>Equations numbered consecutively in parentheses</li>
-            <li>SI units throughout; exceptions must be justified</li>
+            <li>The detailed instruction is provided on Instructions to authors (PDF)</li>
           </ul>
         </div>
         <div class="instruction-card">
@@ -626,7 +628,6 @@ hr.section-divider {
           <ul>
             <li>Author–year format (e.g. Fischer et al., 1979)</li>
             <li>Reference list in alphabetical order</li>
-            <li>DOIs required where available</li>
             <li>Personal communications in text only, not in reference list</li>
             <li>Maximum 60 references for original articles</li>
           </ul>
@@ -634,11 +635,10 @@ hr.section-divider {
         <div class="instruction-card">
           <h4><i class="ti ti-upload"></i> Submission checklist</h4>
           <ul>
-            <li>Main manuscript (PDF or DOCX)</li>
-            <li>Supplementary material (if applicable)</li>
+            <li>Main manuscript (PDF)</li>
+            <li>Supplementary material (if applicable in PDF)</li>
             <li>Cover letter addressed to the editor</li>
             <li>High-resolution figures as separate files</li>
-            <li>Suggest 2–4 potential reviewers</li>
           </ul>
         </div>
       </div>
@@ -651,27 +651,17 @@ hr.section-divider {
         <div class="ms-type-row">
           <span class="ms-type-name">Original article</span>
           <span class="ms-type-detail">Full research papers presenting novel experimental, field, or computational findings</span>
-          <span class="ms-type-limit">≤ 8,000 words · 10 figures</span>
+          <span class="ms-type-limit">≤ 8 pages · 5 figures</span>
         </div>
         <div class="ms-type-row">
           <span class="ms-type-name">Review article</span>
           <span class="ms-type-detail">Critical synthesis of existing literature on a focused topic; by invitation or proposal</span>
-          <span class="ms-type-limit">≤ 12,000 words</span>
+          <span class="ms-type-limit">≤ 8 pages</span>
         </div>
         <div class="ms-type-row">
           <span class="ms-type-name">Short communication</span>
           <span class="ms-type-detail">Rapid reports of significant preliminary results warranting timely dissemination</span>
-          <span class="ms-type-limit">≤ 3,000 words · 4 figures</span>
-        </div>
-        <div class="ms-type-row">
-          <span class="ms-type-name">Technical note</span>
-          <span class="ms-type-detail">Descriptions of new instruments, data acquisition systems, or analytical techniques</span>
-          <span class="ms-type-limit">≤ 4,000 words · 6 figures</span>
-        </div>
-        <div class="ms-type-row">
-          <span class="ms-type-name">Letter to the editor</span>
-          <span class="ms-type-detail">Brief scientific comments on papers published in this journal</span>
-          <span class="ms-type-limit">≤ 1,000 words</span>
+          <span class="ms-type-limit">≤ 4 pages words · 2 figures</span>
         </div>
       </div>
 
@@ -683,8 +673,8 @@ hr.section-divider {
       <div class="info-box">
         <div class="info-box-title"><i class="ti ti-info-circle"></i> Journal information</div>
         <ul class="info-list">
-          <li><i class="ti ti-calendar"></i> <span><strong>Founded:</strong> 2023</span></li>
-          <li><i class="ti ti-file-check"></i> <span><strong>Peer review:</strong> Double-blind</span></li>
+          <li><i class="ti ti-calendar"></i> <span><strong>Founded:</strong> 2026</span></li>
+          <li><i class="ti ti-file-check"></i> <span><strong>Peer review:</strong> Single-blind</span></li>
           <li><i class="ti ti-clock"></i> <span><strong>Review time:</strong> 4–6 weeks (simulated)</span></li>
           <li><i class="ti ti-world"></i> <span><strong>Language:</strong> English/Portuguese</span></li>
           <li><i class="ti ti-lock-open"></i> <span><strong>Access:</strong> Open access</span></li>
@@ -717,10 +707,7 @@ hr.section-divider {
         <div class="info-box-title"><i class="ti ti-download"></i> Templates &amp; guidelines</div>
         <ul class="info-list">
           <li><i class="ti ti-file-word"></i>
-            <a href="template/Word/template-JHAE.docx" target="_blank">Word template (.docx)</a>
-          </li>
-          <li><i class="ti ti-file-word"></i>
-            <a href="template/LATEX/template-JHAE.docx" target="_blank">LaTeX template (.zip)</a>
+            <a href="template/Latex/phylim_template.zip" target="_blank">LaTeX template (.zip)</a>
           </li>
           <li><i class="ti ti-file"></i>
             <a href="instructions/instructions.pdf" target="_blank">Instructions to authors (PDF)</a>
@@ -795,6 +782,10 @@ hr.section-divider {
 <script src="../../../layout/scripts/jquery.placeholder.min.js"></script>
 <!-- / IE9 Placeholder Support -->
 
+<!-- Supabase (Editorial Management System backend) — loaded dynamically below with
+     explicit error handling, since a static <script src> can silently fail to run
+     (ad-blockers, CSP headers, or scripts stripped by a CMS) and leave `supabase` undefined. -->
+
 <!-- ══════════════════════════════════════════════════
      MODAL: EDITORIAL MANAGEMENT SYSTEM
 ══════════════════════════════════════════════════ -->
@@ -828,6 +819,56 @@ function openEMS(){ document.getElementById('emsModal').classList.add('open'); i
 function closeEMS(){ document.getElementById('emsModal').classList.remove('open'); }
 document.getElementById('emsModal').addEventListener('click', function(e){ if(e.target===this) closeEMS(); });
 
+/* ══════════════════════════════════════════════════
+   SUPABASE CONFIGURATION
+   Paste your project's URL and PUBLISHABLE (anon) key below.
+   Get them from: Supabase Dashboard → Project Settings → API.
+   NEVER put your secret/service_role key here — this file runs
+   in the visitor's browser and anyone can view-source it. Only
+   the publishable/anon key is safe to expose client-side.
+══════════════════════════════════════════════════ */
+const SUPABASE_URL = "https://xgptgyogczjsfnpdvwqe.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_kJPrXJhA3HpFjCjFaKVd0A_4Xg0yGB4";
+const SUPABASE_FILES_BUCKET = "phylim-files";
+
+/* ── DYNAMIC SUPABASE LOADER ───────────────────────────
+   Loads the supabase-js SDK from CDN with explicit error handling,
+   since a static <script src> can silently fail (ad-blockers, CSP
+   headers, a CMS stripping tags) and leave things undefined with a
+   confusing crash. */
+let sb = null;
+let emsDbErr = null;
+
+function emsLoadScript(src){
+  return new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = false;
+    s.onload = ()=>resolve();
+    s.onerror = ()=>reject(new Error('Failed to load script: '+src));
+    document.head.appendChild(s);
+  });
+}
+
+async function emsInitDb(){
+  try {
+    if(typeof window.supabase === 'undefined'){
+      await emsLoadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+    }
+    if(typeof window.supabase === 'undefined'){
+      throw new Error('Supabase script loaded but the "supabase" global is still undefined.');
+    }
+    if(SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY'){
+      throw new Error('Supabase config has not been filled in yet (still contains placeholder values).');
+    }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    emsDbErr = null;
+  } catch(e){
+    console.error('Supabase failed to initialize:', e);
+    emsDbErr = e.message || String(e);
+  }
+}
+
 /* ── STATE ─────────────────────────────────────────── */
 const EDITOR = { email:'editor@plmm.org', pass:'plmm2024', name:'Prof. de Carvalho Bueno', inst:'Federal University of Paraná', role:'editor' };
 const MS_TYPES = ['Original article','Review article','Short communication','Technical note','Letter to the editor','Revision'];
@@ -842,26 +883,79 @@ const EMS = {
   users:{}, manuscripts:{}, ready:false
 };
 
+let emsChannel = null;
+
 function uid(){ return 'ms_'+Math.random().toString(36).slice(2)+Date.now(); }
 function dateStr(){ return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
 
-async function emsLoad(){
-  emsRender();
-  try {
-    const uR = await window.storage.get('plmm:users', true);
-    if(uR) EMS.users = JSON.parse(uR.value);
-    const mR = await window.storage.get('plmm:manuscripts', true);
-    if(mR) EMS.manuscripts = JSON.parse(mR.value);
-  } catch(e){ EMS.users={}; EMS.manuscripts={}; }
-  EMS.ready = true;
-  emsRender();
+/* ── SUPABASE SYNC ─────────────────────────────────────
+   Fetches everyone's users/manuscripts from Postgres tables, then
+   subscribes to realtime changes so EMS.users / EMS.manuscripts stay
+   in sync across everyone who opens the page (editor + all authors),
+   and survive reloads. Expects two tables:
+     plmm_users        (email text primary key, data jsonb)
+     plmm_manuscripts  (id text primary key, data jsonb) */
+function emsDescribeErr(err, tableLabel){
+  const parts = [];
+  if(err?.message) parts.push(err.message);
+  if(err?.details) parts.push(err.details);
+  if(err?.hint) parts.push(`Hint: ${err.hint}`);
+  if(err?.code) parts.push(`(code ${err.code})`);
+  const msg = parts.length ? parts.join(' — ') : JSON.stringify(err);
+  return `Error reading "${tableLabel}": ${msg}`;
 }
 
-async function emsPersist(){
+async function emsFetchAll(){
+  const { data: uRows, error: uErr } = await sb.from('plmm_users').select('*');
+  if(uErr){ const msg = emsDescribeErr(uErr, 'plmm_users'); console.error(msg, uErr); throw new Error(msg); }
+  const u={}; (uRows||[]).forEach(row=>{ u[row.email]=row.data; }); EMS.users=u;
+
+  const { data: mRows, error: mErr } = await sb.from('plmm_manuscripts').select('*');
+  if(mErr){ const msg = emsDescribeErr(mErr, 'plmm_manuscripts'); console.error(msg, mErr); throw new Error(msg); }
+  const m={}; (mRows||[]).forEach(row=>{ m[row.id]=row.data; }); EMS.manuscripts=m;
+}
+
+async function emsLoad(){
+  emsRender(); // shows "connecting..." until data arrives
+  if(emsChannel) return; // already connected
+
+  if(!sb){
+    await emsInitDb();
+    if(emsDbErr){ EMS.ready = true; emsRender(); return; }
+  }
+
   try {
-    await window.storage.set('plmm:users', JSON.stringify(EMS.users), true);
-    await window.storage.set('plmm:manuscripts', JSON.stringify(EMS.manuscripts), true);
-  } catch(e){}
+    await emsFetchAll();
+    emsDbErr = null;
+  } catch(e){
+    emsDbErr = e.message || String(e);
+    EMS.ready = true; emsRender(); return;
+  }
+  EMS.ready = true;
+  emsRender();
+
+  emsChannel = sb.channel('plmm-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'plmm_users'}, async ()=>{
+      try{ await emsFetchAll(); if(EMS.view!=='form') emsRender(); }catch(e){ console.error(e); }
+    })
+    .on('postgres_changes', {event:'*', schema:'public', table:'plmm_manuscripts'}, async ()=>{
+      try{ await emsFetchAll(); if(EMS.view!=='form') emsRender(); }catch(e){ console.error(e); }
+    })
+    .subscribe();
+}
+
+async function emsSaveUser(email){
+  try {
+    const { error } = await sb.from('plmm_users').upsert({ email, data: EMS.users[email] });
+    if(error) throw error;
+  } catch(e){ console.error('Failed to save user:', e); alert('Could not save to the database. Check your connection and Supabase configuration.'); }
+}
+
+async function emsSaveMs(ms){
+  try {
+    const { error } = await sb.from('plmm_manuscripts').upsert({ id: ms.id, data: ms });
+    if(error) throw error;
+  } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Supabase configuration.'); }
 }
 
 function isEd(email){ return email === EDITOR.email; }
@@ -875,6 +969,15 @@ function emsRender(){
     document.getElementById('emsHdrUser').textContent = isEd(EMS.currentUser)?EDITOR.name:(EMS.users[EMS.currentUser]?.name||EMS.currentUser);
     document.getElementById('emsHdrRole').textContent = isEd(EMS.currentUser)?'editor':'author';
   } else { hr.style.display='none'; }
+  if(emsDbErr){
+    vc.innerHTML=`<div class="ems-loading" style="text-align:left;max-width:520px;margin:40px auto;padding:20px 24px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;color:#9B1C1C">
+      <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><i class="ti ti-alert-circle"></i> Couldn't connect to the database</div>
+      <div style="font-size:13px;line-height:1.6;margin-bottom:10px">${emsDbErr}</div>
+      <div style="font-size:12px;color:#7F1D1D;line-height:1.6">This usually means: (1) the Supabase config still has placeholder values, (2) the tables/policies described in the setup instructions haven't been created yet in your Supabase project, (3) an ad-blocker or browser privacy extension is blocking the CDN script, or (4) a Content-Security-Policy on this site is blocking external scripts. Check the browser console for more detail, then reload the page.</div>
+      <button class="ems-btn-sm" style="margin-top:12px" onclick="emsDbErr=null;sb=null;emsChannel=null;EMS.ready=false;emsLoad()"><i class="ti ti-refresh"></i> Try again</button>
+    </div>`;
+    return;
+  }
   if(!EMS.ready){ vc.innerHTML='<div class="ems-loading"><i class="ti ti-loader" style="font-size:28px;display:block;margin-bottom:10px"></i>Connecting to database…</div>'; return; }
   if(EMS.view==='login')    vc.innerHTML=emsRenderAuth();
   else if(EMS.view==='dash')   vc.innerHTML=emsRenderDash();
@@ -922,7 +1025,7 @@ async function emsDoAuth(){
   if(email===EDITOR.email){ EMS.authErr='This email is reserved.'; emsRender(); return; }
   if(EMS.users[email]){ EMS.authErr='An account with this email already exists.'; emsRender(); return; }
   EMS.users[email]={name,pass,inst,email,role:'author'};
-  await emsPersist();
+  await emsSaveUser(email);
   EMS.authOk='Account created! You can now sign in.'; EMS.authMode='login'; EMS.authErr=null; emsRender();
 }
 
@@ -975,7 +1078,7 @@ async function emsSaveProfile(){
   const u=EMS.users[EMS.currentUser];
   u.name=document.getElementById('epN')?.value||u.name;
   u.inst=document.getElementById('epI')?.value||u.inst;
-  await emsPersist(); alert('Profile saved!');
+  await emsSaveUser(EMS.currentUser); alert('Profile saved!');
 }
 
 function emsSetTab(t){ EMS.activeTab=t; emsRender(); }
@@ -1044,10 +1147,10 @@ function emsStep2(ms){
 }
 function emsStep3(ms){
   const F=ms.files||[];
-  const fl=F.length?`<div class="ems-flist">${F.map((f,i)=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i><span class="fn">${f.name}</span><span class="fc">${f.category}</span><span class="fs">${f.size}</span><button class="ems-btn-icon" onclick="emsRemFile(${i})" style="flex-shrink:0"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:'';
+  const fl=F.length?`<div class="ems-flist">${F.map((f,i)=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span><button class="ems-btn-icon" onclick="emsRemFile(${i})" style="flex-shrink:0"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:'';
   return `<div class="ems-fst">Upload files</div>
   <div class="ems-fg" style="margin-bottom:10px"><div class="ems-ff"><label class="el">File category</label><select class="es" id="f_fc"><option>Manuscript (main)</option><option>Cover letter</option><option>Supplementary material</option><option>Figures (high-res)</option><option>Revised manuscript</option><option>Response to reviewers</option><option>Data file</option><option>Other</option></select></div><div></div></div>
-  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, ZIP, XLSX, PNG — max 50 MB per file</small></div>
+  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, ZIP, XLSX, PNG — max 2 MB per file</small></div>
   <input type="file" id="efi" multiple style="display:none" onchange="emsHandleFiles(this.files)"/>
   ${fl}`;
 }
@@ -1071,12 +1174,21 @@ function emsStep4(ms){
   </div>`;
 }
 
+/* Renders a file name as a clickable download link once uploaded to Supabase Storage,
+   or a status label while uploading / if the upload failed. */
+function emsFileLink(f){
+  if(f.uploading) return `<span class="fn">${f.name} <em style="color:#A0AEC0;font-style:normal">(uploading…)</em></span>`;
+  if(f.error) return `<span class="fn">${f.name} <em style="color:#9B1C1C;font-style:normal">(upload failed${f.errorMsg?': '+f.errorMsg:''})</em></span>`;
+  if(f.url) return `<a class="fn" href="${f.url}" target="_blank" style="color:#2B3E6B;text-decoration:underline">${f.name}</a>`;
+  return `<span class="fn">${f.name}</span>`;
+}
+
 function emsCollect(step){
   const ms=EMS.draftMs;
   if(step===0){ms.type=document.getElementById('f_type')?.value||ms.type;ms.title=document.getElementById('f_title')?.value||ms.title;ms.shortTitle=document.getElementById('f_short')?.value||ms.shortTitle;ms.keywords=document.getElementById('f_kw')?.value||ms.keywords;}
   else if(step===1){const na=[];let i=0;while(document.getElementById(`a_n_${i}`)){na.push({name:document.getElementById(`a_n_${i}`).value,email:document.getElementById(`a_e_${i}`).value,inst:document.getElementById(`a_i_${i}`).value,corresponding:ms.authors[i]?.corresponding||false});i++;}ms.authors=na;}
   else if(step===2){ms.abstract=document.getElementById('f_abs')?.value||ms.abstract;ms.highlights=document.getElementById('f_hl')?.value||ms.highlights;ms.sugReviewers=document.getElementById('f_sr')?.value||ms.sugReviewers;}
-  ms.updated=dateStr(); EMS.manuscripts[ms.id]=ms; emsPersist();
+  ms.updated=dateStr(); EMS.manuscripts[ms.id]=ms; emsSaveMs(ms);
 }
 function emsNextStep(){ emsCollect(EMS.formStep); if(EMS.formStep===4){emsSubmitMs();return;} EMS.formStep++; emsRender(); }
 function emsPrevStep(){ emsCollect(EMS.formStep); EMS.formStep--; emsRender(); }
@@ -1088,18 +1200,56 @@ async function emsSubmitMs(){
   ms.status='submitted'; ms.updated=dateStr();
   if(!ms.timeline) ms.timeline=[];
   ms.timeline.push({event:isRev?'Revision submitted':'Manuscript submitted',date:dateStr(),done:true});
-  EMS.manuscripts[ms.id]=ms; await emsPersist();
+  EMS.manuscripts[ms.id]=ms; await emsSaveMs(ms);
   EMS.view='detail'; EMS.viewingId=ms.id; emsRender();
 }
 function emsAddAuth(){ emsCollect(1); EMS.draftMs.authors.push({name:'',email:'',inst:'',corresponding:false}); emsRender(); }
 function emsRemAuth(i){ emsCollect(1); EMS.draftMs.authors.splice(i,1); emsRender(); }
 function emsSetCorr(i){ emsCollect(1); EMS.draftMs.authors.forEach((a,j)=>a.corresponding=j===i); emsRender(); }
-function emsHandleFiles(fl){
+
+/* Uploads real files to Supabase Storage (bucket: phylim-files, path: <manuscriptId>/<filename>)
+   and stores a public download URL alongside each file's metadata, so the editor can open
+   the actual PDF/DOCX/etc. — not just its name. */
+const EMS_MAX_FILE_MB = 2;
+async function emsHandleFiles(fl){
   const cat=document.getElementById('f_fc')?.value||'Manuscript (main)';
-  Array.from(fl).forEach(f=>{const sz=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';EMS.draftMs.files.push({name:f.name,category:cat,size:sz});});
-  EMS.manuscripts[EMS.draftMs.id]=EMS.draftMs; emsPersist(); emsRender();
+  const ms=EMS.draftMs;
+  for(const f of Array.from(fl)){
+    if(f.size > EMS_MAX_FILE_MB*1024*1024){
+      alert(`"${f.name}" is larger than ${EMS_MAX_FILE_MB} MB and was skipped. Please compress it or contact the editor for large files.`);
+      continue;
+    }
+    const sz=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';
+    const path=`${ms.id}/${Date.now()}_${f.name}`;
+    const entry={name:f.name,category:cat,size:sz,path,uploading:true};
+    ms.files.push(entry);
+    emsRender();
+    try{
+      const { error: upErr } = await sb.storage.from(SUPABASE_FILES_BUCKET).upload(path, f, { upsert:true });
+      if(upErr) throw upErr;
+      const { data: urlData } = sb.storage.from(SUPABASE_FILES_BUCKET).getPublicUrl(path);
+      entry.url = urlData.publicUrl;
+      entry.uploading = false;
+    }catch(e){
+      const msg = e?.message || e?.error_description || JSON.stringify(e);
+      console.error('Upload failed for', f.name, ':', msg, e);
+      entry.uploading = false;
+      entry.error = true;
+      entry.errorMsg = msg;
+    }
+    emsRender();
+  }
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
 }
-function emsRemFile(i){ EMS.draftMs.files.splice(i,1); emsRender(); }
+async function emsRemFile(i){
+  const f=EMS.draftMs.files[i];
+  if(f && f.path){ try{ await sb.storage.from(SUPABASE_FILES_BUCKET).remove([f.path]); }catch(e){ console.warn('Could not delete file from storage:', e); } }
+  EMS.draftMs.files.splice(i,1);
+  emsRender();
+  EMS.manuscripts[EMS.draftMs.id]=EMS.draftMs;
+  await emsSaveMs(EMS.draftMs);
+}
 
 /* ── DETAIL VIEW ───────────────────────────────────── */
 function emsRenderDetail(){
@@ -1127,7 +1277,7 @@ function emsRenderDetail(){
           <tr><td style="color:#718096;padding:4px 0">Updated</td><td>${ms.updated||'—'}</td></tr>
         </table>
       </div>
-      ${(ms.files||[]).length?`<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i><span class="fn">${f.name}</span><span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div></div>`:''}
+      ${(ms.files||[]).length?`<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div></div>`:''}
       ${rc.length?`<div class="ems-fw"><div class="ems-fst">Reviewer comments</div>${rc.map((c,i)=>`<div class="ems-rc"><div class="ems-rc-lbl">Reviewer ${i+1}</div><div class="ems-rc-text">${c}</div></div>`).join('')}${isRev&&!ised?`<div style="margin-top:12px"><button class="ems-btn-new" onclick="emsEditMs('${ms.id}')"><i class="ti ti-upload"></i> Upload revision</button></div>`:''}</div>`:''}
       ${ised&&(ms.status==='submitted'||ms.status==='under_review')?`<div class="ems-fw" style="margin-top:12px"><div class="ems-fst">Editor actions</div><button class="ems-btn-sm blue" onclick="emsOpenReview('${ms.id}')"><i class="ti ti-clipboard-check"></i> Write review &amp; decision</button></div>`:''}
     </div>
@@ -1141,7 +1291,7 @@ function emsRenderDetail(){
 function emsRenderReview(){
   const ms=EMS.manuscripts[EMS.viewingId];
   if(!ms){EMS.view='admin';emsRender();return'';}
-  if(ms.status==='submitted'){ms.status='under_review';ms.updated=dateStr();if(!ms.timeline)ms.timeline=[];ms.timeline.push({event:'Review started',date:dateStr(),done:true});EMS.manuscripts[ms.id]=ms;emsPersist();}
+  if(ms.status==='submitted'){ms.status='under_review';ms.updated=dateStr();if(!ms.timeline)ms.timeline=[];ms.timeline.push({event:'Review started',date:dateStr(),done:true});EMS.manuscripts[ms.id]=ms;emsSaveMs(ms);}
   return `<div class="ems-main">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button class="ems-btn-back" onclick="EMS.view='admin';emsRender()"><i class="ti ti-arrow-left"></i> All manuscripts</button><div class="ems-pt">Reviewing: ${ms.title||'(Untitled)'}</div></div>
   <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
@@ -1152,6 +1302,7 @@ function emsRenderReview(){
         <tr><td style="color:#718096;padding:3px 0">Authors</td><td>${(ms.authors||[]).map(a=>a.name).join(', ')||'—'}</td></tr>
         <tr><td style="color:#718096;padding:3px 0;vertical-align:top">Abstract</td><td style="line-height:1.5">${ms.abstract||'—'}</td></tr>
       </table>
+      ${(ms.files||[]).length?`<div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist" style="margin-bottom:16px">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div>`:''}
       <div class="ems-fst">Evaluation criteria</div>
       ${[['Scientific quality','Rigor, methodology, and validity of results'],['Novelty','Originality and contribution to the field'],['Clarity','Writing quality, figures, and logical structure'],['Completeness','Methods, data, references, and data availability']].map(([l,d])=>`<div style="margin-bottom:14px"><label class="el">${l}</label><div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">${d}</div><div style="display:flex;gap:14px">${['Poor','Fair','Good','Excellent'].map((r,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;color:#4A5568"><input type="radio" name="r_${l.replace(/\s/g,'_')}" value="${i+1}" style="accent-color:#2B3E6B"> ${r}</label>`).join('')}</div></div>`).join('')}
       <div class="ems-ff" style="margin-bottom:12px"><label class="el">Comments to authors (will be shared)</label><textarea class="eta" id="r_c" placeholder="Provide detailed, constructive feedback…" style="min-height:100px"></textarea></div>
@@ -1180,7 +1331,7 @@ async function emsSubmitReview(){
   if(comm.trim()){if(!ms.reviewerComments)ms.reviewerComments=[];ms.reviewerComments.push(comm.trim());}
   if(!ms.timeline)ms.timeline=[];
   ms.timeline.push({event:`Decision: ${dec}`,date:dateStr(),done:true});
-  EMS.manuscripts[ms.id]=ms; await emsPersist();
+  EMS.manuscripts[ms.id]=ms; await emsSaveMs(ms);
   alert(`Decision submitted: "${dec}". The author has been notified.`);
   EMS.view='admin'; emsRender();
 }
