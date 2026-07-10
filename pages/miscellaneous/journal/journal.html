@@ -387,7 +387,7 @@ hr.section-divider {
 
 .ems-form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #EAF0F8; }
 
-.ems-arow { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 7px; align-items: end; margin-bottom: 7px; }
+.ems-arow { display: grid; grid-template-columns: 100px 1fr 1fr 1fr auto; gap: 7px; align-items: end; margin-bottom: 7px; }
 .ems-btn-icon { width: 30px; height: 30px; border-radius: 4px; border: 1px solid #D0DAEB; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #718096; font-size: 14px; flex-shrink: 0; font-family: inherit; }
 .ems-btn-icon:hover { background: #FEF2F2; color: #9B1C1C; }
 .ems-btn-icon.add { color: #2B3E6B; }
@@ -489,7 +489,6 @@ hr.section-divider {
             <li><a href="../../../pages/research/wave/wave.html">Internal Waves</a></li>
             <li><a href="../../../pages/research/monitoring/monitoring.html">Sensors Development</a></li>
             <li><a href="../../../pages/research/current/current.html">Gravity Currents</a></li>
-            <li><a href="../../../pages/research/projects/projects.html">Research Projects</a></li>
           </ul>
         </li>
 
@@ -580,8 +579,6 @@ hr.section-divider {
         <p>The journal publishes original research, methodological papers, and technical notes addressing the physical dynamics of lakes, reservoirs, estuaries, rivers, and streams. Contributions may employ numerical simulations, field measurement campaigns, laboratory experiments, or novel instrumentation.</p>
 
         <p>Coverage spans all scales of aquatic physical processes, from near-bed turbulence and bottom boundary layers to basin-scale circulation and interbasin exchange. Special emphasis is placed on contributions that advance monitoring technologies, open-source data acquisition tools, and reproducible field or laboratory methods.</p>
-
-        <p>While groundbreaking advances are not expected, every manuscript should present an original idea, methodological improvement, dataset, analysis, or technical contribution. The objective is to cultivate rigorous scientific thinking and communication by simulating the complete peer-review and publication process.</p>
       </div>
 
       <div class="scope-tags">
@@ -606,44 +603,48 @@ hr.section-divider {
       <div class="section-title" id="instructions">Instructions to authors</div>
 
       <div class="instruction-grid">
+
         <div class="instruction-card">
           <h4><i class="ti ti-file-description"></i> Manuscript preparation</h4>
           <ul>
-            <li>Manuscripts must be prepared using the official LaTeX template.</li>
-            <li>Manuscripts should be written in English. Submissions in Portuguese are accepted only for undergraduate student papers.</li>
-            <li>Original Research Articles should not exceed 8 pages, including figures, tables, and references.</li>
-            <li>For the initial submission, upload a single PDF file (maximum file size: 2 MB).</li>
-            <li>After the first round of peer review, authors may be requested to submit the source LaTeX files and high-resolution figures.</li>
-            <li>Figures must have a minimum resolution of 300 dpi and be of publication quality.</li>
-            <li>Detailed formatting and submission requirements are available in the <strong>Instructions for Authors (PDF)</strong>.</li>
+            <li>Use the official LaTeX template only.</li>
+            <li>Manuscript must be written in English (Portuguese only for undergraduate papers).</li>
+            <li>Original Articles: maximum 8 pages (excluding supplementary material).</li>
+            <li>Include all mandatory sections (Abstract, Keywords, Methods, Results, Discussion, Conclusion, etc.).</li>
+            <li>Provide 3–5 Highlights (≤85 characters each) and at least 3 Keywords.</li>
+            <li>Keep <code>\linenumbers</code> enabled for the initial submission.</li>
           </ul>
         </div>
+
         <div class="instruction-card">
-          <h4><i class="ti ti-users"></i> Authorship &amp; ethics</h4>
+          <h4><i class="ti ti-users"></i> Authorship &amp; Ethics</h4>
           <ul>
-            <li>All authors are expected to have made a significant contribution to the research and manuscript preparation. A detailed "Author Contributions" statement must be included in the manuscript</li>
-            <li>Corresponding author is responsible for all correspondence</li>
-            <li>Use of artificial intelligence tools is permitted when appropriately disclosed and justified. Authors must include an "Artificial Intelligence Statement" section in the manuscript describing the tools used and their role</li>
+            <li>All group members must contribute substantially to the study.</li>
+            <li>One corresponding author is responsible for submission and revisions.</li>
+            <li>An <strong>Author Contributions</strong> section is mandatory.</li>
+            <li>If AI tools were used, include an <strong>Artificial Intelligence Statement</strong>.</li>
           </ul>
         </div>
+
         <div class="instruction-card">
-          <h4><i class="ti ti-quote"></i> References</h4>
+          <h4><i class="ti ti-quote"></i> Figures &amp; References</h4>
           <ul>
-            <li>Author–year format (e.g. Fischer et al., 1979)</li>
-            <li>Reference list in alphabetical order</li>
-            <li>Personal communications in text only, not in reference list</li>
-            <li>Maximum 60 references for original articles</li>
+            <li>Cite all figures, tables, and references in numerical/alphabetical order.</li>
+            <li>Use publication-quality figures (minimum 300 dpi).</li>
+            <li>Store figures in the <code>images</code> folder using sequential names (Fig1, Fig2...).</li>
+            <li>Follow the reference style provided in the LaTeX template.</li>
           </ul>
         </div>
+
         <div class="instruction-card">
           <h4><i class="ti ti-upload"></i> Submission checklist</h4>
           <ul>
-            <li>Main manuscript (PDF)</li>
-            <li>Supplementary material (if applicable in PDF)</li>
-            <li>Cover letter addressed to the editor</li>
-            <li>High-resolution figures as separate files</li>
+            <li><strong>Initial submission:</strong> compiled PDF only (optional Supplementary PDF).</li>
+            <li><strong>Revised submission:</strong> <code>main.tex</code>, clean PDF, marked-up PDF, <code>.bib</code>, figures, Response to Reviewers, and Supplementary Material (if applicable).</li>
+            <li>Submit only through the online system before the deadline.</li>
           </ul>
         </div>
+
       </div>
 
       <!-- Manuscript types -->
@@ -654,17 +655,27 @@ hr.section-divider {
         <div class="ms-type-row">
           <span class="ms-type-name">Original article</span>
           <span class="ms-type-detail">Full research papers presenting novel experimental, field, or computational findings</span>
-          <span class="ms-type-limit">≤ 8 pages · 5 figures</span>
+          <span class="ms-type-limit">≤ 8,000 words · 10 figures</span>
         </div>
         <div class="ms-type-row">
           <span class="ms-type-name">Review article</span>
           <span class="ms-type-detail">Critical synthesis of existing literature on a focused topic; by invitation or proposal</span>
-          <span class="ms-type-limit">≤ 8 pages</span>
+          <span class="ms-type-limit">≤ 12,000 words</span>
         </div>
         <div class="ms-type-row">
           <span class="ms-type-name">Short communication</span>
           <span class="ms-type-detail">Rapid reports of significant preliminary results warranting timely dissemination</span>
-          <span class="ms-type-limit">≤ 4 pages words · 2 figures</span>
+          <span class="ms-type-limit">≤ 3,000 words · 4 figures</span>
+        </div>
+        <div class="ms-type-row">
+          <span class="ms-type-name">Technical note</span>
+          <span class="ms-type-detail">Descriptions of new instruments, data acquisition systems, or analytical techniques</span>
+          <span class="ms-type-limit">≤ 4,000 words · 6 figures</span>
+        </div>
+        <div class="ms-type-row">
+          <span class="ms-type-name">Letter to the editor</span>
+          <span class="ms-type-detail">Brief scientific comments on papers published in this journal</span>
+          <span class="ms-type-limit">≤ 1,000 words</span>
         </div>
       </div>
 
@@ -676,8 +687,8 @@ hr.section-divider {
       <div class="info-box">
         <div class="info-box-title"><i class="ti ti-info-circle"></i> Journal information</div>
         <ul class="info-list">
-          <li><i class="ti ti-calendar"></i> <span><strong>Founded:</strong> 2026</span></li>
-          <li><i class="ti ti-file-check"></i> <span><strong>Peer review:</strong> Single-blind</span></li>
+          <li><i class="ti ti-calendar"></i> <span><strong>Founded:</strong> 2023</span></li>
+          <li><i class="ti ti-file-check"></i> <span><strong>Peer review:</strong> Double-blind</span></li>
           <li><i class="ti ti-clock"></i> <span><strong>Review time:</strong> 4–6 weeks (simulated)</span></li>
           <li><i class="ti ti-world"></i> <span><strong>Language:</strong> English/Portuguese</span></li>
           <li><i class="ti ti-lock-open"></i> <span><strong>Access:</strong> Open access</span></li>
@@ -710,7 +721,10 @@ hr.section-divider {
         <div class="info-box-title"><i class="ti ti-download"></i> Templates &amp; guidelines</div>
         <ul class="info-list">
           <li><i class="ti ti-file-word"></i>
-            <a href="template/Latex/phylim_template.zip" target="_blank">LaTeX template (.zip)</a>
+            <a href="template/Word/template-JHAE.docx" target="_blank">Word template (.docx)</a>
+          </li>
+          <li><i class="ti ti-file-word"></i>
+            <a href="template/LATEX/template-JHAE.docx" target="_blank">LaTeX template (.zip)</a>
           </li>
           <li><i class="ti ti-file"></i>
             <a href="instructions/instructions.pdf" target="_blank">Instructions to authors (PDF)</a>
@@ -877,6 +891,64 @@ const EDITOR = { email:'editor@plmm.org', pass:'plmm2024', name:'Prof. de Carval
 const MS_TYPES = ['Original article','Review article','Short communication','Technical note','Letter to the editor','Revision'];
 const SL = {draft:'Draft',submitted:'Submitted',under_review:'Under review',revision_required:'Revision required',accepted:'Accepted',rejected:'Rejected'};
 const SC = {draft:'etag-draft',submitted:'etag-sub',under_review:'etag-rev',revision_required:'etag-reqrev',accepted:'etag-acc',rejected:'etag-rej'};
+const TITLE_OPTIONS = ['', 'Dr.', 'Prof.', 'Mr.', 'Ms.', 'Mx.'];
+
+/* ── NAME / MANUSCRIPT-ID FORMATTING (for ScholarOne-style emails) ─────────
+   Journals conventionally address authors formally ("Dear Dr. Surname:")
+   and list authors as "Surname, Given Name; Surname, Given Name". These
+   helpers extract a surname from a free-text full name, handling common
+   multi-word surname particles (de, van, von, etc.) so names like
+   "Rafael de Carvalho Bueno" become surname "de Carvalho Bueno" rather
+   than just "Bueno". */
+const NAME_PARTICLES = ['de','da','do','dos','das','van','von','di','del','della','la','le','du','bin','al'];
+function emsSurname(fullName){
+  if(!fullName) return '';
+  const parts = fullName.trim().split(/\s+/);
+  if(parts.length<=1) return fullName.trim();
+  for(let i=1;i<parts.length;i++){
+    if(NAME_PARTICLES.includes(parts[i].toLowerCase())) return parts.slice(i).join(' ');
+  }
+  return parts[parts.length-1];
+}
+function emsGivenName(fullName){
+  const sur = emsSurname(fullName);
+  if(!sur || !fullName) return fullName||'';
+  const idx = fullName.indexOf(sur);
+  return idx>0 ? fullName.slice(0, idx).trim() : '';
+}
+function emsCitationName(fullName){
+  const sur = emsSurname(fullName), giv = emsGivenName(fullName);
+  return giv ? `${sur}, ${giv}` : sur;
+}
+function emsAuthorListStr(ms){
+  return (ms.authors||[]).map(a=>emsCitationName(a.name)).filter(Boolean).join('; ');
+}
+function emsGreetingLine(author){
+  if(!author || !author.name) return 'Dear Author,';
+  const sur = emsSurname(author.name);
+  return author.title ? `Dear ${author.title} ${sur}:` : `Dear ${author.name},`;
+}
+/* Assigns the next sequential manuscript number for the current year,
+   e.g. PLMM-26-0001. Only called once per manuscript, on first submission;
+   revisions reuse the same number with a .R1 / .R2 / ... suffix.
+   Note: derived from locally-synced data, so two submissions landing in
+   the exact same instant could in principle collide — an acceptable
+   limitation for a low-volume teaching journal, not something to rely on
+   for a high-traffic production system. */
+function emsNextMsNumber(){
+  const year = new Date().getFullYear().toString().slice(-2);
+  const prefix = `PLMM-${year}-`;
+  const nums = Object.values(EMS.manuscripts)
+    .map(m=>m.msNumber)
+    .filter(n=>n && n.startsWith(prefix))
+    .map(n=>parseInt(n.slice(prefix.length),10))
+    .filter(n=>!isNaN(n));
+  const next = (nums.length?Math.max(...nums):0)+1;
+  return prefix + String(next).padStart(4,'0');
+}
+function emsFullMsId(ms){
+  return (ms.msNumber||ms.id) + (ms.revisionRound>0?`.R${ms.revisionRound}`:'');
+}
 
 const EMS = {
   view:'login', authMode:'login', authErr:null, authOk:null,
@@ -959,6 +1031,78 @@ async function emsSaveMs(ms){
     const { error } = await sb.from('plmm_manuscripts').upsert({ id: ms.id, data: ms });
     if(error) throw error;
   } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Supabase configuration.'); }
+}
+
+/* ── DELETION (editor only) ───────────────────────────
+   Permanently removes data from Supabase — not a soft-delete. Storage files
+   are removed first (using the paths already tracked per file), then the
+   database row. Used both for single-manuscript deletion and, optionally,
+   when deleting a user account that owns manuscripts. */
+async function emsDeleteMsFiles(ms){
+  const paths=(ms.files||[]).map(f=>f.path).filter(Boolean);
+  if(!paths.length) return;
+  try{ await sb.storage.from(SUPABASE_FILES_BUCKET).remove(paths); }
+  catch(e){ console.error('Failed to delete some files from storage:', e); }
+}
+async function emsDeleteMsRecord(id){
+  try{
+    const { error } = await sb.from('plmm_manuscripts').delete().eq('id', id);
+    if(error) throw error;
+  }catch(e){ console.error('Failed to delete manuscript row:', e); alert('Could not delete the manuscript from the database. Check your connection.'); throw e; }
+  delete EMS.manuscripts[id];
+}
+async function emsDeleteMs(id){
+  const ms=EMS.manuscripts[id];
+  if(!ms) return;
+  const label=`"${ms.title||'(Untitled)'}"${ms.msNumber?` (${emsFullMsId(ms)})`:''}`;
+  if(!confirm(`Permanently delete manuscript ${label}?\n\nThis removes the manuscript record and all its uploaded files. This cannot be undone.`)) return;
+  await emsDeleteMsFiles(ms);
+  try{ await emsDeleteMsRecord(id); }catch(e){ return; }
+  EMS.view='admin'; EMS.activeTab='db'; emsRender();
+}
+async function emsDeleteUser(email){
+  const u=EMS.users[email];
+  if(!u) return;
+  const userMss=Object.values(EMS.manuscripts).filter(m=>m.owner===email);
+  if(!confirm(`Permanently delete the account for ${u.name||email} (${email})?\n\nThis cannot be undone.`)) return;
+
+  let alsoDeleteMss=false;
+  if(userMss.length){
+    alsoDeleteMss=confirm(`This author has ${userMss.length} manuscript(s).\n\nClick OK to also permanently delete those manuscripts and their files.\nClick Cancel to keep the manuscripts (they'll stay in the system, just no longer linked to a login).`);
+  }
+  if(alsoDeleteMss){
+    for(const ms of userMss){
+      await emsDeleteMsFiles(ms);
+      try{ await emsDeleteMsRecord(ms.id); }catch(e){ /* keep going with the rest */ }
+    }
+  }
+  try{
+    const { error } = await sb.from('plmm_users').delete().eq('email', email);
+    if(error) throw error;
+  }catch(e){ console.error('Failed to delete user:', e); alert('Could not delete the user from the database. Check your connection.'); return; }
+  delete EMS.users[email];
+  emsRender();
+}
+
+/* Sends an email via the "send-email" Supabase Edge Function (which relays to Resend).
+   Fire-and-forget from the UI's perspective — a failed email should never block a
+   submission or decision from being saved, so callers don't await this on the critical path. */
+async function emsSendEmail(to, subject, html){
+  const recipients = (Array.isArray(to) ? to : [to]).filter(Boolean);
+  if(!recipients.length) return;
+  try{
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: recipients, subject, html })
+    });
+    if(!resp.ok){
+      const errBody = await resp.text();
+      console.error('Email send failed:', resp.status, errBody);
+    }
+  }catch(e){
+    console.error('Email send error:', e);
+  }
 }
 
 function isEd(email){ return email === EDITOR.email; }
@@ -1058,7 +1202,7 @@ function emsRenderMyMss(mss){
   if(!mss.length) return `<div class="ems-ph"><div class="ems-pt">My manuscripts</div></div><div class="ems-empty"><i class="ti ti-file-off"></i><p>No submissions yet.</p><button class="ems-btn-new" onclick="emsStartNew()"><i class="ti ti-plus"></i> New submission</button></div>`;
   return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="ems-ph" style="margin:0"><div class="ems-pt">My manuscripts</div><div class="ems-pd">Track your submissions</div></div><button class="ems-btn-new" onclick="emsStartNew()"><i class="ti ti-plus"></i> New submission</button></div>
   <div class="ems-ms-list">${mss.map(m=>`<div class="ems-ms-card"><div class="ems-ms-head"><div class="ems-ms-title">${m.title||'(Untitled)'}</div><span class="etag ${SC[m.status]||'etag-draft'}">${SL[m.status]||m.status}</span></div>
-  <div class="ems-ms-meta">${m.type||'—'} · Updated ${m.updated||'—'} · ${(m.files||[]).length} file(s)</div>
+  <div class="ems-ms-meta">${m.msNumber?`ID: ${emsFullMsId(m)} · `:''}${m.type||'—'} · Updated ${m.updated||'—'} · ${(m.files||[]).length} file(s)</div>
   <div class="ems-ms-acts">
     <button class="ems-btn-sm" onclick="emsOpenDetail('${m.id}')"><i class="ti ti-eye"></i> View</button>
     ${m.status==='draft'?`<button class="ems-btn-sm blue" onclick="emsEditMs('${m.id}')"><i class="ti ti-edit"></i> Continue</button>`:''}
@@ -1092,7 +1236,7 @@ function emsOpenReview(id){ EMS.viewingId=id; EMS.view='review'; emsRender(); }
 
 function emsInitDraft(){
   const u=EMS.users[EMS.currentUser]||{};
-  return {id:uid(),title:'',type:'',abstract:'',keywords:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
+  return {id:uid(),title:'',type:'',abstract:'',keywords:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',title:'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
 }
 
 /* ── FORM ──────────────────────────────────────────── */
@@ -1129,8 +1273,9 @@ function emsStep0(ms){
   </div>`;
 }
 function emsStep1(ms){
-  const A=ms.authors||[{name:'',email:'',inst:'',corresponding:true}];
+  const A=ms.authors||[{name:'',email:'',inst:'',title:'',corresponding:true}];
   const rows=A.map((a,i)=>`<div class="ems-arow">
+    <div class="ems-ff"><label class="el">Title</label><select class="es" id="a_t_${i}">${TITLE_OPTIONS.map(t=>`<option value="${t}" ${((a.title||'')===t)?'selected':''}>${t||'—'}</option>`).join('')}</select></div>
     <div class="ems-ff"><label class="el">Full name</label><input class="ei" id="a_n_${i}" value="${a.name||''}"/></div>
     <div class="ems-ff"><label class="el">Email</label><input class="ei" id="a_e_${i}" value="${a.email||''}"/></div>
     <div class="ems-ff"><label class="el">Institution</label><input class="ei" id="a_i_${i}" value="${a.inst||''}"/></div>
@@ -1153,7 +1298,7 @@ function emsStep3(ms){
   const fl=F.length?`<div class="ems-flist">${F.map((f,i)=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span><button class="ems-btn-icon" onclick="emsRemFile(${i})" style="flex-shrink:0"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:'';
   return `<div class="ems-fst">Upload files</div>
   <div class="ems-fg" style="margin-bottom:10px"><div class="ems-ff"><label class="el">File category</label><select class="es" id="f_fc"><option>Manuscript (main)</option><option>Cover letter</option><option>Supplementary material</option><option>Figures (high-res)</option><option>Revised manuscript</option><option>Response to reviewers</option><option>Data file</option><option>Other</option></select></div><div></div></div>
-  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, ZIP, XLSX, PNG — max 2 MB per file</small></div>
+  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, ZIP, XLSX, PNG — max ${EMS_MAX_FILE_MB} MB per file</small></div>
   <input type="file" id="efi" multiple style="display:none" onchange="emsHandleFiles(this.files)"/>
   ${fl}`;
 }
@@ -1189,7 +1334,7 @@ function emsFileLink(f){
 function emsCollect(step){
   const ms=EMS.draftMs;
   if(step===0){ms.type=document.getElementById('f_type')?.value||ms.type;ms.title=document.getElementById('f_title')?.value||ms.title;ms.shortTitle=document.getElementById('f_short')?.value||ms.shortTitle;ms.keywords=document.getElementById('f_kw')?.value||ms.keywords;}
-  else if(step===1){const na=[];let i=0;while(document.getElementById(`a_n_${i}`)){na.push({name:document.getElementById(`a_n_${i}`).value,email:document.getElementById(`a_e_${i}`).value,inst:document.getElementById(`a_i_${i}`).value,corresponding:ms.authors[i]?.corresponding||false});i++;}ms.authors=na;}
+  else if(step===1){const na=[];let i=0;while(document.getElementById(`a_n_${i}`)){na.push({name:document.getElementById(`a_n_${i}`).value,email:document.getElementById(`a_e_${i}`).value,inst:document.getElementById(`a_i_${i}`).value,title:document.getElementById(`a_t_${i}`)?.value||'',corresponding:ms.authors[i]?.corresponding||false});i++;}ms.authors=na;}
   else if(step===2){ms.abstract=document.getElementById('f_abs')?.value||ms.abstract;ms.highlights=document.getElementById('f_hl')?.value||ms.highlights;ms.sugReviewers=document.getElementById('f_sr')?.value||ms.sugReviewers;}
   ms.updated=dateStr(); EMS.manuscripts[ms.id]=ms; emsSaveMs(ms);
 }
@@ -1200,20 +1345,46 @@ async function emsSubmitMs(){
   const ms=EMS.draftMs;
   if(!ms.title){ alert('Please add a title.'); return; }
   const isRev=ms.status==='revision_required';
+
+  if(!ms.msNumber){ ms.msNumber = emsNextMsNumber(); ms.revisionRound = 0; }
+  let prevFullId = null;
+  if(isRev){
+    prevFullId = emsFullMsId(ms);
+    ms.revisionRound = (ms.revisionRound||0)+1;
+  }
+  const fullId = emsFullMsId(ms);
+
   ms.status='submitted'; ms.updated=dateStr();
   if(!ms.timeline) ms.timeline=[];
   ms.timeline.push({event:isRev?'Revision submitted':'Manuscript submitted',date:dateStr(),done:true});
   EMS.manuscripts[ms.id]=ms; await emsSaveMs(ms);
+
+  const recipients=(ms.authors||[]).map(a=>a.email).filter(Boolean);
+  const corr=(ms.authors||[]).find(a=>a.corresponding)||(ms.authors||[])[0];
+  const authorList=emsAuthorListStr(ms);
+  const subject=`Manuscript ${fullId}: ${isRev?'Revision received':'Submission confirmation'}`;
+  const html=`
+    <p>${emsGreetingLine(corr)}</p>
+    <p>Your ${isRev?'revised manuscript':'manuscript'} entitled &quot;${ms.title}&quot;${authorList?` by ${authorList}`:''} has been successfully submitted online and is presently being given full consideration for publication in <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
+    <p>Co-authors: please contact the Editorial Office as soon as possible if you disagree with being listed as a co-author for this manuscript.</p>
+    <p>Your manuscript ID is <strong>${fullId}</strong>.</p>
+    ${prevFullId?`<p>For your reference, the manuscript number of the previous version is: <strong>${prevFullId}</strong>.</p>`:''}
+    <p>Please mention the above manuscript ID in all future correspondence regarding this submission.</p>
+    <p>You can view the status of your manuscript at any time by signing in to the editorial system.</p>
+    <p>Thank you for submitting your ${isRev?'revised manuscript':'manuscript'} to <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
+    <p>Sincerely,<br>PLMM Editorial Office</p>`;
+  emsSendEmail(recipients, subject, html);
+
   EMS.view='detail'; EMS.viewingId=ms.id; emsRender();
 }
-function emsAddAuth(){ emsCollect(1); EMS.draftMs.authors.push({name:'',email:'',inst:'',corresponding:false}); emsRender(); }
+function emsAddAuth(){ emsCollect(1); EMS.draftMs.authors.push({name:'',email:'',inst:'',title:'',corresponding:false}); emsRender(); }
 function emsRemAuth(i){ emsCollect(1); EMS.draftMs.authors.splice(i,1); emsRender(); }
 function emsSetCorr(i){ emsCollect(1); EMS.draftMs.authors.forEach((a,j)=>a.corresponding=j===i); emsRender(); }
 
 /* Uploads real files to Supabase Storage (bucket: phylim-files, path: <manuscriptId>/<filename>)
    and stores a public download URL alongside each file's metadata, so the editor can open
    the actual PDF/DOCX/etc. — not just its name. */
-const EMS_MAX_FILE_MB = 2;
+const EMS_MAX_FILE_MB = 8;
 async function emsHandleFiles(fl){
   const cat=document.getElementById('f_fc')?.value||'Manuscript (main)';
   const ms=EMS.draftMs;
@@ -1271,6 +1442,7 @@ function emsRenderDetail(){
       <div class="ems-fw" style="margin-bottom:12px">
         <div class="ems-fst">Manuscript details</div>
         <table style="font-size:12px;width:100%;border-collapse:collapse">
+          ${ms.msNumber?`<tr><td style="color:#718096;padding:4px 0;width:120px;vertical-align:top">Manuscript ID</td><td style="font-weight:600">${emsFullMsId(ms)}</td></tr>`:''}
           <tr><td style="color:#718096;padding:4px 0;width:120px;vertical-align:top">Type</td><td>${ms.type||'—'}</td></tr>
           <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Authors</td><td>${(ms.authors||[]).map(a=>`${a.name}${a.corresponding?' <span style="font-size:10px;color:#2B3E6B">(corr.)</span>':''}`).join('<br/>')}</td></tr>
           <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Keywords</td><td>${ms.keywords||'—'}</td></tr>
@@ -1283,6 +1455,7 @@ function emsRenderDetail(){
       ${(ms.files||[]).length?`<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div></div>`:''}
       ${rc.length?`<div class="ems-fw"><div class="ems-fst">Reviewer comments</div>${rc.map((c,i)=>`<div class="ems-rc"><div class="ems-rc-lbl">Reviewer ${i+1}</div><div class="ems-rc-text">${c}</div></div>`).join('')}${isRev&&!ised?`<div style="margin-top:12px"><button class="ems-btn-new" onclick="emsEditMs('${ms.id}')"><i class="ti ti-upload"></i> Upload revision</button></div>`:''}</div>`:''}
       ${ised&&(ms.status==='submitted'||ms.status==='under_review')?`<div class="ems-fw" style="margin-top:12px"><div class="ems-fst">Editor actions</div><button class="ems-btn-sm blue" onclick="emsOpenReview('${ms.id}')"><i class="ti ti-clipboard-check"></i> Write review &amp; decision</button></div>`:''}
+      ${ised?`<div class="ems-fw" style="margin-top:12px;border-color:#FCA5A5"><div class="ems-fst" style="color:#9B1C1C;border-color:#FEE2E2">Danger zone</div><p style="font-size:12px;color:#718096;margin-bottom:10px">Permanently deletes this manuscript's record and all uploaded files from the database. This cannot be undone.</p><button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" onclick="emsDeleteMs('${ms.id}')"><i class="ti ti-trash"></i> Delete manuscript</button></div>`:''}
     </div>
     <div class="ems-fw"><div class="ems-fst">Editorial timeline</div>
       <div class="ems-tl">${tlE.map(e=>`<div class="ems-tl-item"><div class="ems-tl-dot ${e.done?'done':(e.active?'active':'pend')}">${e.done?'<i class="ti ti-check"></i>':(e.active?'<i class="ti ti-clock"></i>':'')}</div><div><div class="ems-tl-ev">${e.event}</div>${e.done&&e.date?`<div class="ems-tl-dt">${e.date}</div>`:''}</div></div>`).join('')}</div>
@@ -1335,6 +1508,48 @@ async function emsSubmitReview(){
   if(!ms.timeline)ms.timeline=[];
   ms.timeline.push({event:`Decision: ${dec}`,date:dateStr(),done:true});
   EMS.manuscripts[ms.id]=ms; await emsSaveMs(ms);
+
+  const recipients=(ms.authors||[]).map(a=>a.email).filter(Boolean);
+  const corr=(ms.authors||[]).find(a=>a.corresponding)||(ms.authors||[])[0];
+  const fullId=emsFullMsId(ms);
+  const commentBlock=comm.trim()?`<p><strong>Reviewer comments:</strong></p><p style="white-space:pre-line">${comm.trim()}</p>`:'';
+
+  let subject, html;
+  if(ms.status==='revision_required'){
+    subject=`Manuscript ${fullId}: Revision requested`;
+    html=`
+      <p>${emsGreetingLine(corr)}</p>
+      <p>Thank you for submitting your manuscript entitled &quot;${ms.title}&quot; (Manuscript ID ${fullId}) to <em>Physical Limnology: Monitoring &amp; Methods</em>. Before we can consider your paper further for publication, we ask that you revise your manuscript and resubmit it for further consideration.</p>
+      <p><strong>To submit your revised manuscript:</strong></p>
+      <ol>
+        <li>Sign in to the editorial system.</li>
+        <li>Open "My manuscripts" and select this submission.</li>
+        <li>Click "Submit revision" and follow the on-screen steps.</li>
+        <li>File upload: remove any files you are replacing (including the previous manuscript file) and upload your revised manuscript and any updated supplementary files.</li>
+        <li>Review each step carefully, then submit.</li>
+      </ol>
+      ${commentBlock}
+      <p>Once again, thank you for submitting your manuscript to <em>Physical Limnology: Monitoring &amp; Methods</em>. We look forward to receiving your revision.</p>
+      <p>Sincerely,<br>PLMM Editorial Office</p>`;
+  } else if(ms.status==='accepted'){
+    subject=`Manuscript ${fullId}: Accepted for publication`;
+    html=`
+      <p>${emsGreetingLine(corr)}</p>
+      <p>It is my pleasure to inform you that your manuscript entitled &quot;${ms.title}&quot; (Manuscript ID ${fullId}) has been accepted for publication in <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
+      ${commentBlock}
+      <p>Thank you for your contribution to the journal.</p>
+      <p>Sincerely,<br>PLMM Editorial Office</p>`;
+  } else {
+    subject=`Manuscript ${fullId}: Decision on your submission`;
+    html=`
+      <p>${emsGreetingLine(corr)}</p>
+      <p>Thank you for submitting your manuscript entitled &quot;${ms.title}&quot; (Manuscript ID ${fullId}) to <em>Physical Limnology: Monitoring &amp; Methods</em>. After careful consideration, we regret to inform you that we are unable to accept your manuscript for publication at this time.</p>
+      ${commentBlock}
+      <p>We appreciate your interest in <em>Physical Limnology: Monitoring &amp; Methods</em> and wish you success in placing your work elsewhere.</p>
+      <p>Sincerely,<br>PLMM Editorial Office</p>`;
+  }
+  emsSendEmail(recipients, subject, html);
+
   alert(`Decision submitted: "${dec}". The author has been notified.`);
   EMS.view='admin'; emsRender();
 }
@@ -1374,7 +1589,7 @@ function emsRenderAdminDb(filt,cnt){
     <colgroup><col style="width:30%"><col style="width:14%"><col style="width:14%"><col style="width:13%"><col style="width:13%"><col style="width:16%"></colgroup>
     <thead><tr><th>Title</th><th>Type</th><th>Author</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
     <tbody>${filt.sort((a,b)=>(b.updated||'').localeCompare(a.updated||'')).map(m=>`<tr>
-      <td style="font-weight:500">${m.title||'(Untitled)'}</td>
+      <td style="font-weight:500">${m.msNumber?`<div style="font-weight:400;font-size:10px;color:#A0AEC0">${emsFullMsId(m)}</div>`:''}${m.title||'(Untitled)'}</td>
       <td style="color:#4A5568">${(m.type||'—').split(' ').slice(0,2).join(' ')}</td>
       <td style="color:#4A5568">${m.ownerName||m.owner||'—'}</td>
       <td><span class="etag ${SC[m.status]||'etag-draft'}">${SL[m.status]||m.status}</span></td>
@@ -1394,14 +1609,15 @@ function emsRenderAdminUsers(){
   return `<div class="ems-ph"><div class="ems-pt">Registered authors</div><div class="ems-pd">${users.length} user(s)</div></div>
   ${users.length===0?`<div class="ems-empty"><i class="ti ti-users"></i><p>No registered authors yet.</p></div>`:
   `<div class="ems-fw" style="padding:0;overflow:hidden"><table class="ems-db-table" style="table-layout:fixed">
-    <colgroup><col style="width:22%"><col style="width:28%"><col style="width:26%"><col style="width:12%"><col style="width:12%"></colgroup>
-    <thead><tr><th>Name</th><th>Email</th><th>Institution</th><th>Role</th><th>Manuscripts</th></tr></thead>
+    <colgroup><col style="width:19%"><col style="width:25%"><col style="width:22%"><col style="width:10%"><col style="width:10%"><col style="width:14%"></colgroup>
+    <thead><tr><th>Name</th><th>Email</th><th>Institution</th><th>Role</th><th>Manuscripts</th><th>Actions</th></tr></thead>
     <tbody>${users.map(u=>`<tr>
       <td style="font-weight:500">${u.name||'—'}</td>
       <td style="color:#4A5568">${u.email}</td>
       <td style="color:#4A5568">${u.inst||'—'}</td>
       <td><span class="etag etag-sub">${u.role||'author'}</span></td>
       <td style="color:#718096">${(msByUser[u.email]||[]).length}</td>
+      <td><button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" onclick="emsDeleteUser('${u.email}')"><i class="ti ti-trash"></i></button></td>
     </tr>`).join('')}</tbody>
   </table></div>`}`;
 }

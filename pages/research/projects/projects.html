@@ -127,18 +127,41 @@ Licence URI: http://www.os-templates.com/template-terms
     <div class="content">
 
        <div class="tools-container">
-         <!--
+
+         <!-- MixLake -->
          <div class="tool">
            <div class="tool-preview">
-             <figure><p><img src="smart/img/logo-project-smart.png"/></figure>
+             <div class="tool-preview-inner">
+               <span class="tool-preview-title">MixLake</span>
+               <svg class="tool-preview-wave" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true">
+                 <path d="M0,22 C30,36 50,6 80,20 C110,34 130,6 160,20 C190,34 210,8 240,18" fill="none" stroke="#E3A857" stroke-width="2.5"/>
+               </svg>
+             </div>
            </div>
            <div class="tool-info">
-             <h6>SMART</h6>
-             <h2>This project is</h2>
-             <a class="btn-tool" href="smart/smart.html" target="_blank"> Page </a>
+             <span class="tool-year">2023 – 2026</span>
+             <h6>MixLake</h6>
+             <h2>Theory, numerical modelling and open-source software for predicting internal waves and mixing in lakes and reservoirs.</h2>
+             <a class="btn-tool" href="mixlake/mixlake.html"> Page </a>
            </div>
          </div>
-       -->
+
+         <!--
+         Copy the block above for each new project:
+         <div class="tool">
+           <div class="tool-preview">
+             <div class="tool-preview-inner">
+               <span class="tool-preview-title">NAME</span>
+             </div>
+           </div>
+           <div class="tool-info">
+             <span class="tool-year">YEAR</span>
+             <h6>NAME</h6>
+             <h2>Brief description.</h2>
+             <a class="btn-tool" href="folder/page.html"> Page </a>
+           </div>
+         </div>
+         -->
 
        </div>
 
@@ -202,7 +225,7 @@ Licence URI: http://www.os-templates.com/template-terms
 }
 
 .tool-info{
-  padding: 20px;
+  padding: 20px 20px 70px 20px;
   position:relative;
   width:100%;
 }
@@ -224,6 +247,49 @@ Licence URI: http://www.os-templates.com/template-terms
   .floating-btn-tool{
      right: 10px;
   }
+}
+
+/* ---------- project card preview panel + year label ---------- */
+.tool-preview{
+  position:relative;
+  background:linear-gradient(160deg,#123049 0%, #0B2338 100%);
+  min-height:150px;
+}
+.tool-preview-inner{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:16px;
+  text-align:center;
+}
+.tool-preview-title{
+  font-family:Verdana, Arial, sans-serif;
+  font-weight:bold;
+  font-size:20px;
+  color:#fff;
+  letter-spacing:.02em;
+}
+.tool-preview-wave{
+  width:80%;
+  height:24px;
+  margin-top:10px;
+}
+.tool-year{
+  display:block;
+  font-family:Verdana, Arial, sans-serif;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:#8a97a8;
+  margin-bottom:4px;
+}
+
+/* stack the preview above the info panel on narrow screens */
+@media screen and (max-width: 700px){
+  .tool{ flex-direction:column; width:100%; }
+  .tool-preview{ width:100%; min-height:110px; }
+  .tool h2{ max-width:100%; }
+  .tool-info{ padding:20px; }
+  .btn-tool{ position:static; display:inline-block; margin-top:14px; }
 }
 </style>
 
