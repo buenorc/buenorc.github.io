@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Passaúna Reservoir — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="The Passaúna reservoir: setting, morphometry, basin and monitoring locations.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <div class="content">
+    <span class="eyebrow">Case study</span>
+    <h1>The Passaúna reservoir</h1>
+    <p class="lead">A headwater reservoir in the west of the Metropolitan Region of Curitiba, Paraná,
+       and one of the principal public water-supply sources for the region. Its consolidated
+       monitoring history makes it an ideal natural laboratory for developing and validating the
+       digital twin.</p>
+  </div>
+
+  <div class="grid cols-4 btmspace-50 mt30">
+    <div class="pillar"><div class="n">≈9 km²</div><div class="l">Surface area</div></div>
+    <div class="pillar"><div class="n">≈6×10⁷ m³</div><div class="l">Volume</div></div>
+    <div class="pillar"><div class="n">≈11 km</div><div class="l">Length</div></div>
+    <div class="pillar"><div class="n">≈17 m</div><div class="l">Max depth</div></div>
+  </div>
+
+  <div class="panel">
+    <div class="phead"><div><h3><i class="fa fa-map-marker accent"></i> Reservoir &amp; monitoring network</h3>
+      <div class="sub">Demonstration station layout — pan/zoom the map</div></div>
+      <span class="badge demo" data-demo-badge><span class="dot"></span> demo layout</span></div>
+    <div class="pbody">
+      <div id="map" class="mapbox"></div>
+      <div class="legend mt30">
+        <span><i style="background:#2e9e5b"></i> Online node</span>
+        <span><i style="background:#e0a100"></i> Demo / planned node</span>
+        <span><i style="background:#6785b8"></i> Reservoir outline (schematic)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="group btmspace-50">
+    <h2 class="section-title">The basin</h2>
+    <p>The Passaúna river basin lies in the western portion of the Curitiba metropolitan region,
+       within the Upper Iguaçu basin. The river runs about 57 km, with headwaters in the Serras de
+       São Luiz do Purunã and Bocaina near 1,040 m elevation. A dam built in the late 1980s for
+       public supply formed the reservoir in 1990. Today it supplies more than 650,000 inhabitants.</p>
+  </div>
+
+  <div class="group btmspace-50">
+    <h2 class="section-title">Why its dynamics matter</h2>
+    <div class="grid cols-3">
+      <div class="card"><div class="ic"><i class="fa fa-thermometer-half"></i></div><h3>Stratification</h3>
+        <p>Warm, subtropical climate drives seasonal thermal stratification — strong in summer,
+           weakening toward winter mixing — which governs vertical transport of oxygen and nutrients.</p></div>
+      <div class="card"><div class="ic"><i class="fa fa-random"></i></div><h3>Circulation &amp; internal waves</h3>
+        <p>Wind forcing generates basin-scale internal seiches and upwelling that can rapidly
+           redistribute heat and dissolved properties along the elongated basin.</p></div>
+      <div class="card"><div class="ic"><i class="fa fa-flask"></i></div><h3>Water quality</h3>
+        <p>These physical processes set the stage for algal blooms and oxygen depletion — the
+           conditions the twin is built to anticipate.</p></div>
+    </div>
+  </div>
+
+  <div class="note info"><i class="fa fa-info-circle"></i>
+    <div>Station coordinates shown here are illustrative placeholders for the demo. Once the LoRa
+      network is deployed, real station positions and status flow from the <code>stations</code>
+      table in Supabase and this map updates automatically.</div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script src="assets/demo-data.js"></script>
+<script>
+Portal.chrome({active:"reservoir"});
+window.addEventListener("load", function(){
+  if (typeof L === "undefined") { document.getElementById("map").innerHTML =
+      '<div class="note warn" style="margin:16px"><i class="fa fa-exclamation-triangle"></i><div>Map library blocked in this preview — it renders normally when deployed online.</div></div>'; return; }
+  var map = L.map("map",{scrollWheelZoom:false}).setView([-25.487,-49.378], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {maxZoom:18, attribution:"© OpenStreetMap"}).addTo(map);
+  // schematic reservoir centre-line (dam south → inflow north)
+  var line = [[-25.5205,-49.3880],[-25.505,-49.383],[-25.487,-49.376],[-25.466,-49.371],[-25.444,-49.367]];
+  L.polyline(line,{color:"#6785b8",weight:6,opacity:.6}).addTo(map);
+  Demo.stations.forEach(function(s){
+    var col = s.status==="online" ? "#2e9e5b" : "#e0a100";
+    L.circleMarker([s.lat,s.lon],{radius:9,color:"#fff",weight:2,fillColor:col,fillOpacity:1})
+     .addTo(map).bindPopup("<b>"+s.id+" — "+s.name+"</b><br>Status: "+s.status);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SMART · LAKE TWIN — Passaúna Reservoir Digital Twin | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A digital-twin monitoring and forecasting portal for the Passaúna reservoir, integrating low-cost IoT sensors, Delft3D and General Lake Model simulations, data assimilation and machine learning.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <!-- HERO -->
+  <section class="hero btmspace-50">
+    <span class="eyebrow">SMART &nbsp;·&nbsp; LAKE TWIN</span>
+    <h1>A living digital twin of the Passaúna reservoir</h1>
+    <p>An integrated platform that fuses continuous low-cost sensing, hydrodynamic
+       modelling (Delft3D &amp; General Lake Model), data assimilation and machine
+       learning to <strong>monitor the reservoir now</strong> and <strong>forecast
+       how it will evolve</strong> — supporting water security for the Metropolitan
+       Region of Curitiba.</p>
+    <div class="actions">
+      <a class="btn" href="monitoring.html"><i class="fa fa-rss"></i> View live sensors</a>
+      <a class="btn ghost" href="models.html"><i class="fa fa-cubes"></i> Explore model results</a>
+      <a class="btn ghost" href="importance.html">Why it matters</a>
+    </div>
+  </section>
+
+  <!-- KEY FACTS -->
+  <div class="pillars btmspace-50">
+    <div class="pillar"><div class="n">≈9 km²</div><div class="l">Surface area</div></div>
+    <div class="pillar"><div class="n">17 m</div><div class="l">Max depth</div></div>
+    <div class="pillar"><div class="n">≈11 km</div><div class="l">Length</div></div>
+    <div class="pillar"><div class="n">650k+</div><div class="l">People supplied</div></div>
+  </div>
+
+  <!-- WHAT IS IT -->
+  <div class="group btmspace-50">
+    <span class="eyebrow">The concept</span>
+    <h2 class="section-title">From reactive monitoring to predictive limnology</h2>
+    <p class="lead">Reservoir management in Brazil still relies largely on the past — sparse field
+       campaigns and models applied retrospectively. This project builds a <em>digital twin</em>:
+       a continuously updated virtual replica of Passaúna that reproduces its current state,
+       learns from observed data, and predicts its future thermal structure, circulation and
+       water quality.</p>
+    <div class="grid cols-3 mt30">
+      <div class="card">
+        <div class="ic"><i class="fa fa-rss"></i></div>
+        <h3>Sense</h3>
+        <p>A cascading LoRa network of low-cost Heltec WiFi LoRa nodes streams water &amp; air
+           temperature, humidity and water level from across the reservoir in near real time.</p>
+        <a class="more" href="monitoring.html">Live sensors →</a>
+      </div>
+      <div class="card">
+        <div class="ic"><i class="fa fa-cubes"></i></div>
+        <h3>Simulate</h3>
+        <p>A 1-D General Lake Model runs continuously for fast operational forecasts; a 3-D
+           Delft3D-FLOW model resolves circulation, upwelling and spatial temperature.</p>
+        <a class="more" href="models.html">Model results →</a>
+      </div>
+      <div class="card">
+        <div class="ic"><i class="fa fa-line-chart"></i></div>
+        <h3>Predict</h3>
+        <p>Data assimilation (Ensemble Kalman Filter) plus machine learning correct the models
+           with new observations and extend forecasts of stratification and water quality.</p>
+        <a class="more" href="dashboard.html">Twin dashboard →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TWO PROJECTS -->
+  <div class="group btmspace-50">
+    <span class="eyebrow">Two complementary projects, one platform</span>
+    <h2 class="section-title">SMART &amp; LAKE TWIN</h2>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3><i class="fa fa-microchip accent"></i> SMART</h3>
+        <p><strong>Sistema de Monitoramento Avançado de Reservatórios e Tributários.</strong>
+           An intelligent, economical IoT monitoring network for rivers and reservoirs. Low-cost
+           LoRa sensors measure water level, temperature, turbidity, pH, chlorophyll, conductivity
+           and meteorology, feeding an online platform with machine-learning analysis accessible to
+           the public and to water authorities.</p>
+      </div>
+      <div class="card">
+        <h3><i class="fa fa-clone accent"></i> LAKE TWIN</h3>
+        <p><strong>Digital twins for forecasting the hydrodynamics and water quality of tropical
+           reservoirs.</strong> Combines the monitoring network with hierarchical hydrodynamic
+           modelling, near-real-time data assimilation and machine learning, plus
+           <em>Interwave Analyzer</em> indicators (thermocline depth, Schmidt stability, Lake
+           number, internal-wave modes) to anticipate change.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPERATIONAL CYCLE -->
+  <div class="group btmspace-50">
+    <span class="eyebrow">How the twin stays in sync</span>
+    <h2 class="section-title">The operational forecast cycle</h2>
+    <div class="steps mt30">
+      <div class="step"><h4>Force</h4><p>Fetch global-model forecasts — wind, solar radiation, air
+        temperature, rainfall (GFS / Open-Meteo) and river inflow (GloFAS).</p></div>
+      <div class="step"><h4>Simulate</h4><p>Run GLM &amp; Delft3D forward from the last state to
+        predict the next window (e.g. every 50 h).</p></div>
+      <div class="step"><h4>Assimilate</h4><p>Blend fresh sensor observations into the model state
+        with an Ensemble Kalman Filter to correct drift.</p></div>
+      <div class="step"><h4>Publish</h4><p>Push updated fields &amp; indicators to this portal —
+        maps, profiles, time series and alerts.</p></div>
+    </div>
+  </div>
+
+  <!-- EXPLORE -->
+  <div class="group btmspace-50">
+    <span class="eyebrow">Explore the portal</span>
+    <h2 class="section-title">Where to go next</h2>
+    <div class="grid cols-4">
+      <a class="card" href="importance.html" style="text-decoration:none"><div class="ic"><i class="fa fa-lightbulb-o"></i></div><h3>Why it matters</h3><p>Water security, the science, and the impact of the project.</p></a>
+      <a class="card" href="reservoir.html" style="text-decoration:none"><div class="ic"><i class="fa fa-map-marker"></i></div><h3>Passaúna</h3><p>The reservoir, its basin and the monitoring locations.</p></a>
+      <a class="card" href="monitoring.html" style="text-decoration:none"><div class="ic"><i class="fa fa-rss"></i></div><h3>Live sensors</h3><p>Real-time tiles &amp; trends from the LoRa network.</p></a>
+      <a class="card" href="models.html" style="text-decoration:none"><div class="ic"><i class="fa fa-cubes"></i></div><h3>Model results</h3><p>Animated temperature, velocity &amp; surface fields.</p></a>
+    </div>
+  </div>
+
+  <!-- PARTNERS -->
+  <div class="group">
+    <h2 class="section-title center" style="text-align:center">Institutions &amp; partners</h2>
+    <p class="center muted" style="text-align:center;max-width:760px;margin:0 auto 8px">Developed at the
+       Federal University of Paraná (PPGEA / PPGERHA) in cooperation with SANEPAR, with international
+       collaboration from RPTU Kaiserslautern-Landau, the University of Tartu and Berkeley Lab.</p>
+    <div class="note info" style="max-width:820px;margin:20px auto 0">
+      <i class="fa fa-info-circle"></i>
+      <div>This portal is a working prototype. Sensor and model panels currently show
+        <strong>physically-plausible demo data</strong> <span class="badge demo" data-demo-badge><span class="dot"></span> demo</span>
+        so every feature works today; they switch to live Supabase feeds once the network and models are online.</div>
+    </div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+
+<!-- scripts -->
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script>Portal.chrome({active:"overview"});</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign in — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2><i class="fa fa-lock accent"></i> Member access</h2>
+      <p class="sub">Sign in with an approved email to view forecast forcing and the full digital-twin
+        dashboard.</p>
+
+      <div class="note warn hide" data-demo-badge style="margin-bottom:18px"><i class="fa fa-flask"></i>
+        <div><b>Demo mode.</b> Supabase isn't configured yet, so any email + a password of 4+
+          characters signs you in locally. Your own email signs in as <b>admin</b>.</div></div>
+
+      <div class="auth-msg" id="msg"></div>
+
+      <div class="field"><label>Email</label>
+        <input type="email" id="email" placeholder="you@institution.br" autocomplete="username"></div>
+      <div class="field"><label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"></div>
+
+      <button class="btn block" id="signin"><i class="fa fa-sign-in"></i> Sign in</button>
+      <div class="auth-alt">
+        New approved member? <a href="#" id="show-signup">Create your password</a><br>
+        <a href="index.html" style="display:inline-block;margin-top:8px">← Back to the portal</a>
+      </div>
+    </div>
+
+    <p class="muted center" style="text-align:center;margin-top:16px;font-size:.82rem">
+      Access is restricted to emails pre-approved by an administrator. Contact
+      <a href="mailto:decarvalhobueno@gmail.com">decarvalhobueno@gmail.com</a> to request access.</p>
+  </div>
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script>
+Portal.chrome({active:null, crumb:"Sign in"});
+var mode="signin";
+function qs(k){ return new URLSearchParams(location.search).get(k); }
+function show(cls,txt){ var m=document.getElementById("msg"); m.className="auth-msg "+cls; m.textContent=txt; }
+
+document.getElementById("show-signup").addEventListener("click",function(e){
+  e.preventDefault(); mode = mode==="signin" ? "signup" : "signin";
+  document.getElementById("signin").innerHTML = mode==="signup"
+    ? '<i class="fa fa-user-plus"></i> Create account' : '<i class="fa fa-sign-in"></i> Sign in';
+  this.textContent = mode==="signup" ? "I already have a password" : "Create your password";
+});
+
+document.getElementById("signin").addEventListener("click", async function(){
+  var email=document.getElementById("email").value, pw=document.getElementById("password").value;
+  this.disabled=true; show("", "");
+  try{
+    if(mode==="signup"){
+      var r=await PortalAuth.signUp(email,pw);
+      if(r && r.pendingConfirmation){ show("ok","Account created — check your inbox to confirm, then sign in."); this.disabled=false; return; }
+    } else {
+      await PortalAuth.signIn(email,pw);
+    }
+    show("ok","Signed in. Redirecting…");
+    var next=qs("next")||"dashboard.html";
+    setTimeout(function(){ location.href=next; },700);
+  }catch(err){ show("err", err.message||String(err)); this.disabled=false; }
+});
+document.getElementById("password").addEventListener("keydown",function(e){ if(e.key==="Enter") document.getElementById("signin").click(); });
+</script>
+</body>
+</html>

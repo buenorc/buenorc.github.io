@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Forecast Inputs — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <div class="content">
+    <span class="eyebrow">Model forcing · restricted</span>
+    <h1>Forecast inputs</h1>
+    <p class="lead">The meteorological and hydrological forcing that drives the operational model runs,
+       pulled from global forecast products. Knowing exactly what goes <em>in</em> is essential to
+       interpreting what comes <em>out</em>.</p>
+  </div>
+
+  <div data-guard>
+    <div class="panel"><div class="phead">
+      <div><h3><i class="fa fa-cloud accent"></i> Current forcing cycle</h3>
+        <div class="sub" id="cycle-info">—</div></div>
+      <span class="badge demo" data-demo-badge><span class="dot"></span> demo forcing</span>
+    </div></div>
+
+    <div class="grid cols-2">
+      <div class="panel"><div class="phead"><h3>Wind speed &amp; gusts</h3><div class="sub">m/s · GFS 0.25°</div></div>
+        <div class="pbody"><div id="c-wind" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Wind direction rose</h3><div class="sub">mean speed by sector</div></div>
+        <div class="pbody"><div id="c-rose" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Solar radiation</h3><div class="sub">W/m² · shortwave down</div></div>
+        <div class="pbody"><div id="c-solar" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Air temperature</h3><div class="sub">°C at 2 m</div></div>
+        <div class="pbody"><div id="c-airt" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Rainfall</h3><div class="sub">mm / 3 h</div></div>
+        <div class="pbody"><div id="c-rain" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>River inflow</h3><div class="sub">m³/s · GloFAS / rating curve</div></div>
+        <div class="pbody"><div id="c-inflow" class="chart" style="min-height:200px"></div></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><h3><i class="fa fa-list accent"></i> Data sources</h3></div>
+      <div class="pbody" style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>Variable</th><th>Product</th><th>Resolution</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>Wind, air T, humidity, radiation</td><td>NOAA GFS 0.25° / Open-Meteo</td><td>3-hourly</td><td>Surface energy &amp; momentum forcing</td></tr>
+            <tr><td>Precipitation</td><td>GFS / GPM (demo)</td><td>3-hourly</td><td>Basin rainfall → inflow</td></tr>
+            <tr><td>River inflow</td><td>GloFAS / rainfall-runoff</td><td>Daily→3-hourly</td><td>Tributary boundary condition</td></tr>
+            <tr><td>Alternative NWP</td><td>ECMWF IFS, ECCC GDPS</td><td>—</td><td>Ensemble / comparison</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note info"><i class="fa fa-refresh"></i>
+      <div>In production these panels read the <code>forecast_inputs</code> table, refreshed by the
+        Python fetchers (<code>code/forecast/</code>) each model cycle. See the setup guide for the
+        automation that runs every N hours.</div></div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+Portal.chrome({active:"forecast"});
+async function init(){
+  var ok = await PortalAuth.guard({mode:"soft"});
+  if(!ok) return;
+  var f = Demo.forecastForcing(120);
+  document.getElementById("cycle-info").textContent = "Model cycle "+f.cycle+" · issued "+new Date(f.issued).toLocaleString()+" · "+f.model;
+  if(!window.Plotly){ document.querySelectorAll("[data-guard] .chart").forEach(function(c){ c.innerHTML='<div class="note warn" style="margin:12px"><i class="fa fa-exclamation-triangle"></i><div>Chart library blocked in preview — renders online.</div></div>'; }); return; }
+  Charts.forcingChart("c-wind", f.wind.map(function(p){return p[0];}), f.wind.map(function(p){return p[1];}), {unit:"m/s",fill:true});
+  Charts.windRose("c-rose", f);
+  Charts.forcingChart("c-solar", f.solar.map(function(p){return p[0];}), f.solar.map(function(p){return p[1];}), {unit:"W/m²",color:"#ef8f4c",fill:true});
+  Charts.forcingChart("c-airt", f.air_temp.map(function(p){return p[0];}), f.air_temp.map(function(p){return p[1];}), {unit:"°C",color:"#d24b4b"});
+  Charts.forcingChart("c-rain", f.rain.map(function(p){return p[0];}), f.rain.map(function(p){return p[1];}), {unit:"mm",color:"#56AED4",bars:true});
+  Charts.forcingChart("c-inflow", f.inflow.map(function(p){return p[0];}), f.inflow.map(function(p){return p[1];}), {unit:"m³/s",color:"#2e9e5b",fill:true});
+}
+(function wait(){ if(PortalAuth.state.ready) init(); else setTimeout(wait,120); })();
+</script>
+</body>
+</html>

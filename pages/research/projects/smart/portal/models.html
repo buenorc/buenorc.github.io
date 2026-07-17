@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Model Results — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Delft3D and General Lake Model results for Passaúna: temperature structure, velocity, surface fields and water level.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <div class="content">
+    <span class="eyebrow">Hydrodynamic modelling</span>
+    <h1>Model results</h1>
+    <p class="lead">Outputs from the hierarchical modelling system — a 1-D General Lake Model for the
+       vertical thermal structure and a 3-D Delft3D-FLOW model for spatial circulation and surface
+       fields. Use the animations to step through time.</p>
+    <span class="badge demo" data-demo-badge><span class="dot"></span> demo simulation output</span>
+  </div>
+
+  <div class="tabs mt30" id="tabs">
+    <button data-t="vertical" class="active"><i class="fa fa-align-left"></i> Vertical structure (GLM)</button>
+    <button data-t="surface"><i class="fa fa-th"></i> Surface fields (Delft3D)</button>
+    <button data-t="level"><i class="fa fa-tint"></i> Water level</button>
+  </div>
+
+  <!-- ============ VERTICAL ============ -->
+  <div class="tabpane active" id="pane-vertical">
+    <div class="panel">
+      <div class="phead"><div><h3>Temperature — depth vs time</h3><div class="sub">10-day window, 3-hour steps</div></div>
+        <div class="seg" id="dt-var"><button data-v="temp" class="active">Temperature</button><button data-v="u">Velocity</button></div>
+      </div>
+      <div class="pbody"><div id="dtheat" class="chart tall"></div></div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><div><h3>Vertical profile — animated</h3><div class="sub">Water column at the selected time</div></div></div>
+      <div class="pbody">
+        <div class="grid cols-2" style="align-items:center">
+          <div id="vprof" class="chart tall"></div>
+          <div>
+            <div class="playbar btmspace-30">
+              <button class="iconbtn" id="play"><i class="fa fa-play" id="play-i"></i></button>
+              <input class="rng" type="range" id="frame" min="0" value="0">
+              <span class="stamp" id="frame-stamp">—</span>
+            </div>
+            <p class="muted">The profile sweeps through the simulation. In summer a sharp thermocline
+               separates a warm surface layer from cooler deep water; wind events drive a two-layer
+               velocity structure — surface flow with wind, return flow beneath the thermocline.</p>
+            <div class="legend"><span><i style="background:#6785b8"></i> Temperature (°C)</span>
+              <span><i style="background:#d24b4b"></i> Velocity (cm/s)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SURFACE ============ -->
+  <div class="tabpane" id="pane-surface">
+    <div class="panel">
+      <div class="phead"><div><h3>Reservoir surface field — animated</h3><div class="sub">Plan view, dam (left) to riverine inflow (right)</div></div>
+        <div class="seg" id="sf-var"><button data-k="sst" class="active">Surface temp</button><button data-k="level">Level</button><button data-k="vel">Velocity</button></div>
+      </div>
+      <div class="pbody">
+        <div id="sfmap" class="chart tall"></div>
+        <div class="playbar mt30">
+          <button class="iconbtn" id="splay"><i class="fa fa-play" id="splay-i"></i></button>
+          <input class="rng" type="range" id="sframe" min="0" max="23" value="0">
+          <span class="stamp" id="sframe-stamp">frame 0</span>
+        </div>
+      </div>
+    </div>
+    <div class="note info"><i class="fa fa-info-circle"></i><div>Surface fields are schematic 2-D frames
+      on a stylised Passaúna footprint. When Delft3D output is available, these panels load NetCDF-derived
+      grids for the true bathymetry.</div></div>
+  </div>
+
+  <!-- ============ LEVEL ============ -->
+  <div class="tabpane" id="pane-level">
+    <div class="panel">
+      <div class="phead"><div><h3>Water level</h3><div class="sub">Simulated reservoir level, last 14 days</div></div></div>
+      <div class="pbody"><div id="levelchart" class="chart"></div></div>
+    </div>
+  </div>
+
+  <!-- model info -->
+  <div class="grid cols-2 mt50">
+    <div class="card"><h3><i class="fa fa-align-left accent"></i> General Lake Model (1-D)</h3>
+      <p>Vertically-resolved, computationally cheap — ideal for continuous high-frequency operation.
+         Runs in operational mode with sequential state updates, so each forecast starts from the
+         previous reservoir state plus new meteorological forcing (as done for Lake Erie).</p></div>
+    <div class="card"><h3><i class="fa fa-th accent"></i> Delft3D-FLOW (3-D)</h3>
+      <p>Resolves horizontal circulation, upwelling and spatial temperature that a 1-D model cannot.
+         Calibrated on historical Passaúna campaigns and validated against the continuous monitoring
+         network; supports data assimilation (EnKF) for near-real-time correction.</p></div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+Portal.chrome({active:"models"});
+var HAS_PLOTLY = !!window.Plotly;
+function warnNoPlot(id){ var e=document.getElementById(id); if(e) e.innerHTML='<div class="note warn" style="margin:14px"><i class="fa fa-exclamation-triangle"></i><div>Chart library blocked in this preview — renders normally when deployed online.</div></div>'; }
+
+// ---- tabs
+document.getElementById("tabs").addEventListener("click",function(e){
+  var b=e.target.closest("button"); if(!b) return;
+  [].forEach.call(this.children,function(x){x.classList.remove("active");}); b.classList.add("active");
+  ["vertical","surface","level"].forEach(function(t){ document.getElementById("pane-"+t).classList.toggle("active",t===b.dataset.t); });
+  if(b.dataset.t==="surface" && HAS_PLOTLY) setTimeout(function(){Plotly.Plots.resize("sfmap");},50);
+});
+
+// ---- vertical structure
+var field = Demo.profileTimeDepth(10,3);
+var dtVar="temp", vIdx=0, vTimer=null;
+document.getElementById("frame").max = field.times.length-1;
+function drawHeat(){ if(!HAS_PLOTLY) return warnNoPlot("dtheat"); Charts.depthTimeHeatmap("dtheat", field, dtVar); }
+function drawProfile(){ if(!HAS_PLOTLY) return warnNoPlot("vprof"); Charts.verticalProfile("vprof", field, vIdx, dtVar);
+  document.getElementById("frame-stamp").textContent=new Date(field.times[vIdx]).toLocaleString([], {month:"short",day:"numeric",hour:"2-digit"}); }
+document.getElementById("dt-var").addEventListener("click",function(e){ if(!e.target.dataset.v) return;
+  [].forEach.call(this.children,function(b){b.classList.remove("active");}); e.target.classList.add("active");
+  dtVar=e.target.dataset.v; drawHeat(); drawProfile(); });
+document.getElementById("frame").addEventListener("input",function(){ vIdx=+this.value; drawProfile(); });
+document.getElementById("play").addEventListener("click",function(){
+  var i=document.getElementById("play-i");
+  if(vTimer){ clearInterval(vTimer); vTimer=null; i.className="fa fa-play"; return; }
+  i.className="fa fa-pause";
+  vTimer=setInterval(function(){ vIdx=(vIdx+1)%field.times.length; document.getElementById("frame").value=vIdx; drawProfile(); },500);
+});
+
+// ---- surface fields
+var sfKind="sst", sIdx=0, sTimer=null;
+function drawSurface(){ if(!HAS_PLOTLY) return warnNoPlot("sfmap"); Charts.surfaceMap("sfmap", Demo.surfaceField(sIdx, sfKind));
+  document.getElementById("sframe-stamp").textContent="frame "+sIdx; }
+document.getElementById("sf-var").addEventListener("click",function(e){ if(!e.target.dataset.k) return;
+  [].forEach.call(this.children,function(b){b.classList.remove("active");}); e.target.classList.add("active");
+  sfKind=e.target.dataset.k; drawSurface(); });
+document.getElementById("sframe").addEventListener("input",function(){ sIdx=+this.value; drawSurface(); });
+document.getElementById("splay").addEventListener("click",function(){
+  var i=document.getElementById("splay-i");
+  if(sTimer){ clearInterval(sTimer); sTimer=null; i.className="fa fa-play"; return; }
+  i.className="fa fa-pause";
+  sTimer=setInterval(function(){ sIdx=(sIdx+1)%24; document.getElementById("sframe").value=sIdx; drawSurface(); },450);
+});
+
+// ---- level
+function drawLevel(){ if(!HAS_PLOTLY) return warnNoPlot("levelchart");
+  Charts.timeSeries("levelchart",[{name:"Water level",data:Demo.series("water_level",336,180,"PS-01"),color:"#2e9e5b"}],{yTitle:"m",fill:true}); }
+
+drawHeat(); drawProfile(); drawSurface(); drawLevel();
+</script>
+</body>
+</html>

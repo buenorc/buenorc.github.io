@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <div class="content">
+    <span class="eyebrow">Administration</span>
+    <h1>Access control</h1>
+    <p class="lead">Add or remove the emails allowed to view restricted pages, and grant or revoke
+       administrator rights.</p>
+  </div>
+
+  <div data-guard>
+    <div class="panel">
+      <div class="phead"><h3><i class="fa fa-user-plus accent"></i> Add an approved email</h3></div>
+      <div class="pbody">
+        <div class="controls">
+          <input class="fld" type="email" id="new-email" placeholder="person@institution.br" style="min-width:280px">
+          <label style="margin-left:10px"><input type="checkbox" id="new-admin"> administrator</label>
+          <button class="btn" id="add-btn"><i class="fa fa-plus"></i> Add</button>
+        </div>
+        <div class="auth-msg" id="admin-msg" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="phead"><h3><i class="fa fa-users accent"></i> Approved members</h3>
+        <div class="sub" id="count">—</div></div>
+      <div class="pbody" style="overflow-x:auto">
+        <table class="tbl" id="allow-tbl">
+          <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Added</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note info"><i class="fa fa-shield"></i>
+      <div>In production, these actions call the Supabase <code>allowed_emails</code> table, protected
+        by Row-Level-Security so only administrators can modify it (see <code>sql/schema.sql</code>).
+        In demo mode changes are kept in your browser session only.</div>
+    </div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script>
+Portal.chrome({active:"admin"});
+
+function msg(cls,t){ var m=document.getElementById("admin-msg"); m.className="auth-msg "+cls; m.textContent=t; if(t) setTimeout(function(){m.className="auth-msg";m.textContent="";},3500); }
+
+async function render(){
+  var ok = await PortalAuth.guard({admin:true, mode:"soft"});
+  if(!ok) return;
+  var rows = await PortalAuth.listAllowed();
+  var tb=document.querySelector("#allow-tbl tbody"); tb.innerHTML="";
+  document.getElementById("count").textContent=rows.length+" member"+(rows.length!==1?"s":"");
+  rows.forEach(function(r){
+    var when=r.created_at?new Date(r.created_at).toLocaleDateString():"—";
+    var role=r.is_admin?'<span class="badge online"><span class="dot"></span>admin</span>':'<span class="badge demo"><span class="dot"></span>member</span>';
+    var status=r.enabled?'<span style="color:#2e9e5b"><i class="fa fa-check-circle"></i> enabled</span>':'<span style="color:#d24b4b"><i class="fa fa-ban"></i> disabled</span>';
+    tb.insertAdjacentHTML("beforeend",
+      "<tr><td><b>"+r.email+"</b></td><td>"+role+"</td><td>"+status+"</td><td>"+when+"</td>"+
+      '<td style="text-align:right;white-space:nowrap">'+
+        '<button class="btn small ghost" data-act="admin" data-e="'+r.email+'" data-v="'+(!r.is_admin)+'">'+(r.is_admin?"Revoke admin":"Make admin")+'</button> '+
+        '<button class="btn small ghost" data-act="toggle" data-e="'+r.email+'" data-v="'+(!r.enabled)+'">'+(r.enabled?"Disable":"Enable")+'</button> '+
+        '<button class="btn small" data-act="remove" data-e="'+r.email+'" style="background:#d24b4b;border-color:#d24b4b">Remove</button>'+
+      '</td></tr>');
+  });
+}
+
+document.getElementById("add-btn").addEventListener("click", async function(){
+  var email=document.getElementById("new-email").value, adm=document.getElementById("new-admin").checked;
+  try{ await PortalAuth.addAllowed(email,adm); document.getElementById("new-email").value=""; document.getElementById("new-admin").checked=false; msg("ok","Added "+email); render(); }
+  catch(e){ msg("err", e.message||String(e)); }
+});
+document.querySelector("#allow-tbl").addEventListener("click", async function(e){
+  var b=e.target.closest("button"); if(!b) return;
+  var email=b.dataset.e, act=b.dataset.act;
+  try{
+    if(act==="remove"){ await PortalAuth.removeAllowed(email); }
+    else if(act==="toggle"){ await PortalAuth.setEnabled(email, b.dataset.v==="true"); }
+    else if(act==="admin"){ await PortalAuth.setAdmin(email, b.dataset.v==="true"); }
+    render();
+  }catch(err){ msg("err", err.message||String(err)); }
+});
+
+// wait for auth to resolve then render
+(function wait(){ if(PortalAuth.state.ready) render(); else setTimeout(wait,120); })();
+</script>
+</body>
+</html>

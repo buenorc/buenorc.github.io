@@ -1,0 +1,17 @@
+# SMART · LAKE TWIN — Python pipeline dependencies
+# Install:  pip install -r requirements.txt
+requests>=2.31
+pyyaml>=6.0
+numpy>=1.24
+pandas>=2.0
+python-dateutil>=2.8
+supabase>=2.4            # Supabase Python client (uses the service-role key)
+netCDF4>=1.6            # read GLM/Delft3D NetCDF output
+xarray>=2023.1         # convenient NetCDF handling
+schedule>=1.2          # simple in-process scheduling (alternative: cron/systemd)
+
+# --- Model-specific (install only if you run the models locally) -------------
+# glm-py>=1.0           # Python wrapper to build/run the General Lake Model
+#                       # https://github.com/AquaticEcoDynamics/glm-py
+# The Delft3D runner shells out to the Delft3D-FLOW executable (d_hydro /
+# dimr). Install Delft3D separately (Deltares) — no pip package is required.

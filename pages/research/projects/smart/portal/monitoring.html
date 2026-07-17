@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Live Sensors — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Near real-time data from the Passaúna low-cost LoRa sensor network.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <div class="content clear">
+    <div class="fl_left" style="max-width:70%">
+      <span class="eyebrow">Live monitoring</span>
+      <h1>Passaúna sensor network</h1>
+      <p class="lead">Near real-time readings from the low-cost Heltec WiFi LoRa nodes deployed across
+         the reservoir. Values refresh automatically.</p>
+    </div>
+    <div class="fl_right" style="text-align:right;padding-top:10px">
+      <span class="badge online" id="net-status"><span class="dot live"></span> network online</span><br>
+      <span class="badge demo mt30" data-demo-badge style="margin-top:8px"><span class="dot"></span> demo data</span>
+    </div>
+  </div>
+
+  <!-- station + refresh controls -->
+  <div class="panel"><div class="phead">
+    <div class="controls">
+      <label>Station</label>
+      <select id="station"></select>
+      <label style="margin-left:10px">Auto-refresh</label>
+      <div class="seg" id="refresh-seg">
+        <button data-r="5000" class="active">5s</button>
+        <button data-r="15000">15s</button>
+        <button data-r="0">Off</button>
+      </div>
+    </div>
+    <div class="sub">Last update <span id="last-upd" class="stamp">—</span></div>
+  </div></div>
+
+  <!-- KPI tiles -->
+  <div class="tiles btmspace-50" id="tiles"></div>
+
+  <!-- trend chart -->
+  <div class="panel">
+    <div class="phead">
+      <div><h3>Trend</h3><div class="sub" id="trend-station">—</div></div>
+      <div class="controls">
+        <div class="seg" id="metric-seg">
+          <button data-m="water_temp" class="active">Water T</button>
+          <button data-m="air_temp">Air T</button>
+          <button data-m="humidity">Humidity</button>
+          <button data-m="water_level">Level</button>
+        </div>
+        <div class="seg" id="range-seg" style="margin-left:8px">
+          <button data-h="24">24h</button>
+          <button data-h="48" class="active">48h</button>
+          <button data-h="168">7d</button>
+        </div>
+      </div>
+    </div>
+    <div class="pbody"><div id="trend" class="chart"></div></div>
+  </div>
+
+  <!-- all stations table -->
+  <div class="panel">
+    <div class="phead"><h3>All stations — latest reading</h3><div class="sub">Battery &amp; link quality included</div></div>
+    <div class="pbody" style="overflow-x:auto">
+      <table class="tbl" id="stations-tbl">
+        <thead><tr><th>Station</th><th>Status</th><th>Water °C</th><th>Air °C</th><th>Humidity %</th><th>Level m</th><th>Battery V</th><th>RSSI dBm</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="note info"><i class="fa fa-plug"></i>
+    <div>Each tile and chart reads from <code>Demo.*</code> today. To go live, point the same code at
+      the Supabase <code>sensor_readings</code> table (see <code>assets/data-source.js</code> and the
+      setup guide) — the page logic does not change.</div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+Portal.chrome({active:"monitoring"});
+
+var TILE_DEFS = [
+  {k:"water_temp", name:"Water temperature", u:"°C", icon:"fa-thermometer-half", col:"#6785b8"},
+  {k:"air_temp",   name:"Air temperature",   u:"°C", icon:"fa-sun-o",           col:"#ef8f4c"},
+  {k:"humidity",   name:"Rel. humidity",     u:"%",  icon:"fa-tint",            col:"#56AED4"},
+  {k:"water_level",name:"Water level",       u:"m",  icon:"fa-arrows-v",        col:"#2e9e5b"}
+];
+var curStation="PS-01", curMetric="water_temp", curHours=48, timer=null;
+
+function buildStations(){
+  var sel=document.getElementById("station");
+  Demo.stations.forEach(function(s){ var o=document.createElement("option"); o.value=s.id; o.textContent=s.id+" — "+s.name; sel.appendChild(o); });
+  sel.value=curStation;
+  sel.onchange=function(){ curStation=this.value; renderAll(); };
+}
+function buildTiles(){
+  var host=document.getElementById("tiles"); host.innerHTML="";
+  TILE_DEFS.forEach(function(d){
+    host.insertAdjacentHTML("beforeend",
+     '<div class="tile"><div class="top"><span class="name">'+d.name+'</span>'+
+     '<span class="icon" style="background:linear-gradient(135deg,'+d.col+',#56AED4)"><i class="fa '+d.icon+'"></i></span></div>'+
+     '<div class="val" id="v-'+d.k+'">—<span class="u">'+d.u+'</span></div>'+
+     '<div class="sub"><span class="trend" id="t-'+d.k+'"></span> vs 1h ago</div>'+
+     '<div class="spark" id="s-'+d.k+'"></div></div>');
+  });
+}
+function renderTiles(){
+  var L=Demo.latest(curStation);
+  TILE_DEFS.forEach(function(d){
+    document.getElementById("v-"+d.k).innerHTML=L[d.k]+'<span class="u">'+d.u+'</span>';
+    var ser=Demo.series(d.k,3,10,curStation);
+    if(window.Plotly) Charts.spark("s-"+d.k, ser, d.col);
+    var a=ser[ser.length-1][1], b=ser[Math.max(0,ser.length-7)][1], diff=(a-b);
+    var el=document.getElementById("t-"+d.k);
+    el.className="trend "+(diff>=0?"up":"down");
+    el.innerHTML=(diff>=0?'▲ ':'▼ ')+Math.abs(diff).toFixed(d.k==="humidity"?0:2);
+  });
+  document.getElementById("last-upd").textContent=new Date().toLocaleTimeString();
+}
+function renderTrend(){
+  document.getElementById("trend-station").textContent=curStation+"  ·  last "+(curHours>=168?"7 days":curHours+" hours");
+  var def=TILE_DEFS.filter(function(x){return x.k===curMetric;})[0];
+  if(window.Plotly) Charts.timeSeries("trend",[{name:def.name,data:Demo.series(curMetric,curHours,curHours>72?60:15,curStation),color:def.col}],{yTitle:def.u,fill:true});
+}
+function renderTable(){
+  var tb=document.querySelector("#stations-tbl tbody"); tb.innerHTML="";
+  Demo.stations.forEach(function(s){
+    var L=Demo.latest(s.id);
+    var badge=s.status==="online"?'<span class="badge online"><span class="dot"></span>online</span>':'<span class="badge demo"><span class="dot"></span>demo</span>';
+    tb.insertAdjacentHTML("beforeend","<tr><td><b>"+s.id+"</b> "+s.name+"</td><td>"+badge+"</td><td>"+L.water_temp+"</td><td>"+L.air_temp+"</td><td>"+L.humidity+"</td><td>"+L.water_level+"</td><td>"+L.battery+"</td><td>"+L.rssi+"</td></tr>");
+  });
+}
+function renderAll(){ renderTiles(); renderTrend(); renderTable(); }
+
+function setRefresh(ms){ if(timer) clearInterval(timer); if(ms>0) timer=setInterval(function(){ renderTiles(); renderTable(); },ms); }
+
+document.getElementById("metric-seg").addEventListener("click",function(e){ if(e.target.dataset.m){ [].forEach.call(this.children,function(b){b.classList.remove("active");}); e.target.classList.add("active"); curMetric=e.target.dataset.m; renderTrend(); }});
+document.getElementById("range-seg").addEventListener("click",function(e){ if(e.target.dataset.h){ [].forEach.call(this.children,function(b){b.classList.remove("active");}); e.target.classList.add("active"); curHours=+e.target.dataset.h; renderTrend(); }});
+document.getElementById("refresh-seg").addEventListener("click",function(e){ if(e.target.dataset.r!==undefined){ [].forEach.call(this.children,function(b){b.classList.remove("active");}); e.target.classList.add("active"); setRefresh(+e.target.dataset.r); }});
+
+buildStations(); buildTiles(); renderAll(); setRefresh(5000);
+</script>
+</body>
+</html>

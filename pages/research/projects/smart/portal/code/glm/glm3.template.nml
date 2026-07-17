@@ -1,0 +1,60 @@
+!-----------------------------------------------------------------------------!
+!  glm3.template.nml — General Lake Model config template for Passauna         !
+!  Placeholders {{...}} are filled by glm/run_glm.py each cycle.               !
+!  Reference: https://aquaticecodynamics.github.io/glm-workbook/               !
+!-----------------------------------------------------------------------------!
+&glm_setup
+   sim_name = 'Passauna'
+   max_layers = 200
+   min_layer_vol = 0.025
+   min_layer_thick = 0.15
+   max_layer_thick = 0.50
+   density_model = 1
+/
+&morphometry
+   lake_name = 'Passauna'
+   latitude = -25.487
+   longitude = -49.378
+   bsn_len = 11000
+   bsn_wid = 900
+   bsn_vals = 6
+   !  H(m, from bottom)      A(m^2)  — REPLACE with your hypsography
+   H = 0, 4, 8, 12, 15, 17
+   A = 0, 1.2e6, 3.0e6, 5.5e6, 7.8e6, 9.0e6
+/
+&time
+   timefmt = 2
+   start = '{{START}}'
+   stop  = '{{STOP}}'
+   dt = 3600
+   timezone = -3.0
+/
+&output
+   out_dir = 'output'
+   out_fn = 'output'
+   nsave = 6
+/
+&init_profiles
+   lake_depth = {{MAX_DEPTH}}
+   num_depths = 4
+   the_depths = 0, 5, 10, 16
+   the_temps  = 22, 20, 17, 15
+   the_sals   = 0, 0, 0, 0
+/
+&meteorology
+   met_sw = .true.
+   meteo_fl = '{{MET_FILE}}'
+   subdaily = .true.
+   rad_mode = 1
+   albedo_mode = 1
+   cloud_mode = 4
+   time_fmt = 'YYYY-MM-DD hh:mm:ss'
+   !  columns in met.csv produced by fetch_meteo.to_glm_meteo_csv:
+   !  time, ShortWave, AirTemp, RelHum, WindSpeed, Rain
+/
+&inflow
+   num_inflows = 0        ! set >0 and add inflow files to couple river discharge
+/
+&outflow
+   num_outlet = 0
+/

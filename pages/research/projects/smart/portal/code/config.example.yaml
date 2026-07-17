@@ -1,0 +1,45 @@
+# =============================================================================
+#  SMART · LAKE TWIN — pipeline configuration
+#  Copy to  config.yaml  and fill in. NEVER commit config.yaml (see .gitignore).
+# =============================================================================
+
+supabase:
+  url: "https://YOUR-PROJECT.supabase.co"
+  # SERVICE ROLE key — server-side only, bypasses Row Level Security.
+  # Get it from Supabase -> Project Settings -> API -> service_role.  KEEP SECRET.
+  service_key: "PASTE_SERVICE_ROLE_KEY"
+
+reservoir:
+  name: "Passauna"
+  latitude: -25.487        # representative point over the reservoir
+  longitude: -49.378
+  max_depth_m: 17.0
+  surface_area_km2: 9.0
+  timezone: "America/Sao_Paulo"
+
+# tributary / inflow points for river-discharge forecasts (GloFAS grid points)
+inflows:
+  - name: "Passauna river (upstream)"
+    latitude: -25.444
+    longitude: -49.367
+
+# operational cadence
+cycle:
+  hours: 50                # re-run the forecast every N hours (user requested ~50)
+  forecast_days: 5         # horizon to pull from global models
+  history_days: 10         # spin-up / assimilation window
+
+# model executables & working dirs (edit to your install)
+glm:
+  enabled: true
+  work_dir: "./runs/glm"
+  # if using glm-py this is ignored; if shelling out, path to the glm binary:
+  binary: "glm"
+  nml_template: "./glm/glm3.template.nml"
+
+delft3d:
+  enabled: false           # turn on once your .mdf model exists
+  work_dir: "./runs/delft3d"
+  mdf_template: "./delft3d/passauna.template.mdf"
+  # command that runs a Delft3D-FLOW simulation in work_dir:
+  run_command: "d_hydro.exe config_d_hydro.xml"

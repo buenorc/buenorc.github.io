@@ -1,0 +1,18 @@
+# secrets & local config — never commit
+config.yaml
+*.key
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# model run outputs
+runs/
+*.nc
+output/
+
+# logs
+*.log

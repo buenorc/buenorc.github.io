@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Twin Dashboard — SMART · LAKE TWIN | de Carvalho Bueno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/freestyle-script">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body id="top">
+<div id="chrome"></div>
+
+<div class="wrapper row3"><div class="container hoc clear">
+
+  <div class="content clear">
+    <div class="fl_left" style="max-width:70%">
+      <span class="eyebrow">Digital twin · restricted</span>
+      <h1>Passaúna twin dashboard</h1>
+      <p class="lead">The reservoir's current state and its forecast, with limnological indicators
+         from Interwave Analyzer. Observations are assimilated into the models each cycle.</p>
+    </div>
+    <div class="fl_right" style="text-align:right;padding-top:12px">
+      <span class="badge online" id="assim"><span class="dot live"></span> assimilated 42 min ago</span><br>
+      <span class="badge demo mt30" data-demo-badge style="margin-top:8px"><span class="dot"></span> demo twin</span>
+    </div>
+  </div>
+
+  <div data-guard>
+    <!-- state KPIs -->
+    <div class="tiles btmspace-50" id="kpis"></div>
+
+    <!-- observed vs forecast -->
+    <div class="panel">
+      <div class="phead"><div><h3>Surface temperature — observed &amp; forecast</h3>
+        <div class="sub">assimilated history + <span id="hz-label">72 h</span> forecast</div></div>
+        <div class="seg" id="hz"><button data-h="48">48 h</button><button data-h="72" class="active">72 h</button><button data-h="120">120 h</button></div>
+      </div>
+      <div class="pbody"><div id="obsfc" class="chart"></div>
+        <div class="legend mt30"><span><i style="background:#6785b8"></i> Observed / assimilated</span>
+          <span><i style="background:#ef8f4c"></i> Forecast</span></div></div>
+    </div>
+
+    <!-- forecast depth-time -->
+    <div class="panel">
+      <div class="phead"><div><h3>Forecast thermal structure</h3><div class="sub">depth vs time — next model window</div></div></div>
+      <div class="pbody"><div id="fcheat" class="chart tall"></div></div>
+    </div>
+
+    <!-- indicators -->
+    <div class="grid cols-2">
+      <div class="panel"><div class="phead"><h3>Thermocline depth</h3><div class="sub">m below surface</div></div>
+        <div class="pbody"><div id="i-thermo" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Schmidt stability</h3><div class="sub">J/m² — resistance to mixing</div></div>
+        <div class="pbody"><div id="i-schmidt" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Lake number (L<sub>N</sub>)</h3><div class="sub">tilt / upwelling susceptibility</div></div>
+        <div class="pbody"><div id="i-ln" class="chart" style="min-height:200px"></div></div></div>
+      <div class="panel"><div class="phead"><h3>Surface heat flux</h3><div class="sub">W/m² net</div></div>
+        <div class="pbody"><div id="i-flux" class="chart" style="min-height:200px"></div></div></div>
+    </div>
+
+    <!-- alerts -->
+    <div class="panel">
+      <div class="phead"><h3><i class="fa fa-bell accent"></i> Forecast alerts</h3><div class="sub">rule-based on twin output</div></div>
+      <div class="pbody" id="alerts"></div>
+    </div>
+
+    <div class="note info"><i class="fa fa-cogs"></i>
+      <div>Indicators are computed by the extended Interwave Analyzer module on both observed and
+        forecast profiles. This demo derives them from synthetic fields; production reads the
+        <code>model_outputs</code> and <code>indicators</code> tables.</div></div>
+  </div>
+
+</div></div>
+
+<div id="chrome-footer"></div>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/layout.js"></script>
+<script src="assets/demo-data.js"></script>
+<script src="assets/charts.js"></script>
+<script>
+Portal.chrome({active:"dashboard"});
+
+// derive Interwave-style indicators from a depth-time field
+function indicators(field){
+  var thermo=[], schmidt=[], ln=[], flux=[];
+  for(var i=0;i<field.times.length;i++){
+    var T=field.temp[i], d=field.depths;
+    // thermocline = depth of max |dT/dz|
+    var maxg=0, zt=d[Math.floor(d.length/2)];
+    for(var k=1;k<d.length;k++){ var g=Math.abs(T[k]-T[k-1]); if(g>maxg){maxg=g; zt=d[k];} }
+    thermo.push([field.times[i], zt]);
+    // schmidt stability proxy ~ integral of density anomaly * (z - zcv)
+    var surf=T[0], bott=T[T.length-1], strat=surf-bott;
+    schmidt.push([field.times[i], Math.round(60+ strat*22 + maxg*40)]);
+    // lake number proxy: lower when wind strong relative to stratification
+    var wind=Math.abs(field.u[i][0]);
+    ln.push([field.times[i], Math.round((strat*3+4)/(0.4+wind*0.12)*10)/10]);
+    // net surface heat flux proxy (diel)
+    var h=new Date(field.times[i]).getHours();
+    flux.push([field.times[i], Math.round(180*Math.sin((h-7)/12*Math.PI) - 60 + strat*4)]);
+  }
+  return {thermo:thermo, schmidt:schmidt, ln:ln, flux:flux};
+}
+
+async function init(){
+  var ok = await PortalAuth.guard({mode:"soft"});
+  if(!ok) return;
+  var L = Demo.latest("PS-02");
+  var field = Demo.profileTimeDepth(6,2);
+  var ind = indicators(field);
+  var lastT=ind.thermo[ind.thermo.length-1][1], lastS=ind.schmidt[ind.schmidt.length-1][1], lastL=ind.ln[ind.ln.length-1][1];
+
+  // KPI tiles
+  var kpis=[
+    {name:"Surface temp",     v:L.water_temp, u:"°C",   icon:"fa-thermometer-three-quarters"},
+    {name:"Thermocline depth",v:lastT,        u:"m",    icon:"fa-arrows-v"},
+    {name:"Schmidt stability",v:lastS,        u:"J/m²", icon:"fa-lock"},
+    {name:"Lake number",      v:lastL,        u:"",     icon:"fa-balance-scale"}
+  ];
+  document.getElementById("kpis").innerHTML = kpis.map(function(k){
+    return '<div class="tile"><div class="top"><span class="name">'+k.name+'</span>'+
+      '<span class="icon"><i class="fa '+k.icon+'"></i></span></div>'+
+      '<div class="val">'+k.v+'<span class="u">'+k.u+'</span></div>'+
+      '<div class="sub">current twin state</div></div>';
+  }).join("");
+
+  if(!window.Plotly){ document.querySelectorAll("[data-guard] .chart").forEach(function(c){ c.innerHTML='<div class="note warn" style="margin:12px"><i class="fa fa-exclamation-triangle"></i><div>Chart library blocked in preview — renders online.</div></div>'; }); buildAlerts(lastL,lastS); return; }
+
+  drawObsFc(72);
+  Charts.depthTimeHeatmap("fcheat", field, "temp");
+  Charts.forcingChart("i-thermo", ind.thermo.map(function(p){return p[0];}), ind.thermo.map(function(p){return p[1];}), {unit:"m",color:"#6785b8"});
+  Charts.forcingChart("i-schmidt", ind.schmidt.map(function(p){return p[0];}), ind.schmidt.map(function(p){return p[1];}), {unit:"J/m²",color:"#2e9e5b",fill:true});
+  Charts.forcingChart("i-ln", ind.ln.map(function(p){return p[0];}), ind.ln.map(function(p){return p[1];}), {unit:"",color:"#ef8f4c"});
+  Charts.forcingChart("i-flux", ind.flux.map(function(p){return p[0];}), ind.flux.map(function(p){return p[1];}), {unit:"W/m²",color:"#d24b4b"});
+  buildAlerts(lastL,lastS);
+}
+
+function drawObsFc(hz){
+  document.getElementById("hz-label").textContent=hz+" h";
+  var obs=Demo.series("water_temp",96,120,"PS-02");
+  var splitT=obs[obs.length-1][0];
+  // forecast continues from last obs
+  var fc=[[splitT, obs[obs.length-1][1]]], base=obs[obs.length-1][1];
+  for(var i=1;i<=hz/2;i++){ var t=splitT+i*2*3600000; base+= (Math.sin(i/6)*0.15 + (Math.random()-0.5)*0.12); fc.push([t, Math.round(base*100)/100]); }
+  Charts.timeSeries("obsfc",[
+    {name:"Observed", data:obs, color:"#6785b8"},
+    {name:"Forecast", data:fc,  color:"#ef8f4c"}
+  ],{yTitle:"°C"});
+}
+document.getElementById("hz").addEventListener("click",function(e){ if(!e.target.dataset.h) return;
+  [].forEach.call(this.children,function(b){b.classList.remove("active");}); e.target.classList.add("active");
+  if(window.Plotly) drawObsFc(+e.target.dataset.h); });
+
+function buildAlerts(ln,schmidt){
+  var a=[];
+  if(ln<2) a.push({lv:"warn",i:"fa-exclamation-triangle",t:"Upwelling likely",d:"Low Lake number ("+ln+") under forecast winds — expect tilting of the thermocline and possible upwelling at the dam."});
+  else a.push({lv:"info",i:"fa-check-circle",t:"Stable stratification",d:"Lake number ("+ln+") indicates a stable, wind-resistant stratification over the forecast window."});
+  if(schmidt<90) a.push({lv:"warn",i:"fa-random",t:"Weak stability — mixing risk",d:"Schmidt stability ("+schmidt+" J/m²) is low; a mixing event could redistribute oxygen and nutrients."});
+  a.push({lv:"info",i:"fa-tint",t:"Water quality outlook",d:"No bloom-favourable conditions detected in the current forecast window."});
+  document.getElementById("alerts").innerHTML = a.map(function(x){
+    return '<div class="note '+x.lv+'" style="margin-bottom:12px"><i class="fa '+x.i+'"></i><div><b>'+x.t+'</b><br>'+x.d+'</div></div>';
+  }).join("");
+}
+
+(function wait(){ if(PortalAuth.state.ready) init(); else setTimeout(wait,120); })();
+</script>
+</body>
+</html>
