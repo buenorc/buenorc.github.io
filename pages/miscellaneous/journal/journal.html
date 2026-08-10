@@ -799,9 +799,11 @@ hr.section-divider {
 <script src="../../../layout/scripts/jquery.placeholder.min.js"></script>
 <!-- / IE9 Placeholder Support -->
 
-<!-- Supabase (Editorial Management System backend) — loaded dynamically below with
+<!-- Firebase (Editorial Management System backend) — loaded dynamically below with
      explicit error handling, since a static <script src> can silently fail to run
-     (ad-blockers, CSP headers, or scripts stripped by a CMS) and leave `supabase` undefined. -->
+     (ad-blockers, CSP headers, or scripts stripped by a CMS) and leave `firebase` undefined.
+     Unlike the previous Supabase backend, a Firebase project is never paused for
+     inactivity, so the system keeps working even after a long gap between modules. -->
 
 <!-- ══════════════════════════════════════════════════
      MODAL: EDITORIAL MANAGEMENT SYSTEM
@@ -837,23 +839,63 @@ function closeEMS(){ document.getElementById('emsModal').classList.remove('open'
 document.getElementById('emsModal').addEventListener('click', function(e){ if(e.target===this) closeEMS(); });
 
 /* ══════════════════════════════════════════════════
-   SUPABASE CONFIGURATION
-   Paste your project's URL and PUBLISHABLE (anon) key below.
-   Get them from: Supabase Dashboard → Project Settings → API.
-   NEVER put your secret/service_role key here — this file runs
-   in the visitor's browser and anyone can view-source it. Only
-   the publishable/anon key is safe to expose client-side.
+   FIREBASE CONFIGURATION
+   Paste your project's web-app config below.
+   Get it from: Firebase Console → Project settings (⚙) → your Web app
+   → "SDK setup and configuration" → Config. Then enable, in the console:
+     • Firestore Database   (Build → Firestore Database → Create database)
+     • Storage              (Build → Storage → Get started)
+   All of these values are safe to expose in this page — a Firebase web
+   config is public by design; access is controlled by Firestore/Storage
+   Security Rules, not by hiding these keys. NEVER paste a service-account
+   / Admin SDK private key here — that one is secret and stays server-side.
 ══════════════════════════════════════════════════ */
-const SUPABASE_URL = "https://xgptgyogczjsfnpdvwqe.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_kJPrXJhA3HpFjCjFaKVd0A_4Xg0yGB4";
-const SUPABASE_FILES_BUCKET = "phylim-files";
+const firebaseConfig = {
+  apiKey: "AIzaSyC29DKPUEZuG8lyIsBrYp1DPUbPhD6mCdA",
+  authDomain: "phylim-system.firebaseapp.com",
+  projectId: "phylim-system",
+  storageBucket: "phylim-system.firebasestorage.app",
+  messagingSenderId: "834518297387",
+  appId: "1:834518297387:web:9d579c7ce88fdfba40736e",
+  measurementId: "G-6YY1E7X4NY"
+};
 
-/* ── DYNAMIC SUPABASE LOADER ───────────────────────────
-   Loads the supabase-js SDK from CDN with explicit error handling,
+/* Firestore collections (mirror the old Postgres tables). Uploaded files are
+   NOT kept in Firebase Storage (which requires a paid/billing plan); instead
+   each file is base64-encoded and split into ~700 KB pieces stored in
+   plmm_filechunks, then reassembled in the browser on download. This keeps the
+   whole system on Firestore's no-cost, no-credit-card, never-paused plan. */
+const FS_USERS_COLL  = "plmm_users";
+const FS_MS_COLL     = "plmm_manuscripts";
+const FS_CHUNKS_COLL = "plmm_filechunks";
+/* Base64 chars per chunk. Firestore's hard limit is 1 MiB per document; 700 000
+   leaves comfortable room for field names and document overhead. */
+const EMS_CHUNK_SIZE = 700000;
+
+/* ══════════════════════════════════════════════════
+   EMAILJS CONFIGURATION (confirmation / decision emails)
+   EmailJS sends transactional email straight from the browser — no server,
+   nothing to keep awake. Get these from https://dashboard.emailjs.com:
+     • Public key   → Account → General → "Public Key"
+     • Service ID   → Email Services → your connected service
+     • Template ID  → Email Templates → your template
+   The template must contain three variables: {{to_email}}, {{subject}},
+   and {{{message_html}}} (triple braces so the HTML body is not escaped).
+   Leaving these as placeholders simply disables outgoing email; everything
+   else (submissions, uploads, decisions) still works and shows on screen.
+══════════════════════════════════════════════════ */
+const EMAILJS_PUBLIC_KEY  = "1JOIkL6Urv6Y1HymW";
+const EMAILJS_SERVICE_ID  = "service_4tmp1aj";
+const EMAILJS_TEMPLATE_ID = "template_leoq7en";
+
+/* ── DYNAMIC FIREBASE LOADER ───────────────────────────
+   Loads the Firebase compat SDK from CDN with explicit error handling,
    since a static <script src> can silently fail (ad-blockers, CSP
    headers, a CMS stripping tags) and leave things undefined with a
-   confusing crash. */
-let sb = null;
+   confusing crash. The "compat" builds expose a global `firebase`
+   namespace, which keeps this drop-in close to the old supabase-js usage. */
+const FIREBASE_VER = "10.12.5";
+let app = null, db = null;
 let emsDbErr = null;
 
 function emsLoadScript(src){
@@ -867,22 +909,50 @@ function emsLoadScript(src){
   });
 }
 
+function emsConfigLooksPlaceholder(){
+  return !firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf('YOUR_')===0
+      || !firebaseConfig.projectId || firebaseConfig.projectId.indexOf('YOUR_')===0;
+}
+
 async function emsInitDb(){
   try {
-    if(typeof window.supabase === 'undefined'){
-      await emsLoadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+    if(typeof window.firebase === 'undefined' || !window.firebase.firestore){
+      await emsLoadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-app-compat.js`);
+      await emsLoadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-firestore-compat.js`);
     }
-    if(typeof window.supabase === 'undefined'){
-      throw new Error('Supabase script loaded but the "supabase" global is still undefined.');
+    if(typeof window.firebase === 'undefined'){
+      throw new Error('Firebase script loaded but the "firebase" global is still undefined.');
     }
-    if(SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_PUBLISHABLE_KEY'){
-      throw new Error('Supabase config has not been filled in yet (still contains placeholder values).');
+    if(emsConfigLooksPlaceholder()){
+      throw new Error('Firebase config has not been filled in yet (still contains placeholder values).');
     }
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
     emsDbErr = null;
   } catch(e){
-    console.error('Supabase failed to initialize:', e);
+    console.error('Firebase failed to initialize:', e);
     emsDbErr = e.message || String(e);
+  }
+}
+
+/* ── EMAILJS LOADER ────────────────────────────────────
+   Loaded lazily on first send so a missing/blocked EmailJS never delays
+   or breaks database initialization. Returns true once ready to send. */
+let emsEmailReady = false;
+async function emsInitEmail(){
+  if(emsEmailReady) return true;
+  if(!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY.indexOf('YOUR_')===0) return false;
+  try{
+    if(typeof window.emailjs === 'undefined'){
+      await emsLoadScript('https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js');
+    }
+    if(typeof window.emailjs === 'undefined') return false;
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    emsEmailReady = true;
+    return true;
+  }catch(e){
+    console.error('EmailJS failed to initialize:', e);
+    return false;
   }
 }
 
@@ -958,43 +1028,42 @@ const EMS = {
   users:{}, manuscripts:{}, ready:false
 };
 
-let emsChannel = null;
+let emsUnsub = null;
 
 function uid(){ return 'ms_'+Math.random().toString(36).slice(2)+Date.now(); }
 function dateStr(){ return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
 
-/* ── SUPABASE SYNC ─────────────────────────────────────
-   Fetches everyone's users/manuscripts from Postgres tables, then
-   subscribes to realtime changes so EMS.users / EMS.manuscripts stay
-   in sync across everyone who opens the page (editor + all authors),
-   and survive reloads. Expects two tables:
-     plmm_users        (email text primary key, data jsonb)
-     plmm_manuscripts  (id text primary key, data jsonb) */
-function emsDescribeErr(err, tableLabel){
+/* ── FIRESTORE SYNC ────────────────────────────────────
+   Fetches everyone's users/manuscripts from Firestore, then subscribes to
+   realtime snapshots so EMS.users / EMS.manuscripts stay in sync across
+   everyone who opens the page (editor + all authors), and survive reloads.
+   Two collections, each document holding one record as its fields:
+     plmm_users        (document id = email,  fields = the user object)
+     plmm_manuscripts  (document id = ms.id,  fields = the manuscript object) */
+function emsDescribeErr(err, label){
   const parts = [];
   if(err?.message) parts.push(err.message);
-  if(err?.details) parts.push(err.details);
-  if(err?.hint) parts.push(`Hint: ${err.hint}`);
   if(err?.code) parts.push(`(code ${err.code})`);
   const msg = parts.length ? parts.join(' — ') : JSON.stringify(err);
-  return `Error reading "${tableLabel}": ${msg}`;
+  return `Error reading "${label}": ${msg}`;
 }
 
 async function emsFetchAll(){
-  const { data: uRows, error: uErr } = await sb.from('plmm_users').select('*');
-  if(uErr){ const msg = emsDescribeErr(uErr, 'plmm_users'); console.error(msg, uErr); throw new Error(msg); }
-  const u={}; (uRows||[]).forEach(row=>{ u[row.email]=row.data; }); EMS.users=u;
+  let uSnap, mSnap;
+  try{ uSnap = await db.collection(FS_USERS_COLL).get(); }
+  catch(err){ const msg = emsDescribeErr(err, FS_USERS_COLL); console.error(msg, err); throw new Error(msg); }
+  const u={}; uSnap.forEach(doc=>{ u[doc.id]=doc.data(); }); EMS.users=u;
 
-  const { data: mRows, error: mErr } = await sb.from('plmm_manuscripts').select('*');
-  if(mErr){ const msg = emsDescribeErr(mErr, 'plmm_manuscripts'); console.error(msg, mErr); throw new Error(msg); }
-  const m={}; (mRows||[]).forEach(row=>{ m[row.id]=row.data; }); EMS.manuscripts=m;
+  try{ mSnap = await db.collection(FS_MS_COLL).get(); }
+  catch(err){ const msg = emsDescribeErr(err, FS_MS_COLL); console.error(msg, err); throw new Error(msg); }
+  const m={}; mSnap.forEach(doc=>{ m[doc.id]=doc.data(); }); EMS.manuscripts=m;
 }
 
 async function emsLoad(){
   emsRender(); // shows "connecting..." until data arrives
-  if(emsChannel) return; // already connected
+  if(emsUnsub) return; // already connected
 
-  if(!sb){
+  if(!db){
     await emsInitDb();
     if(emsDbErr){ EMS.ready = true; emsRender(); return; }
   }
@@ -1009,45 +1078,49 @@ async function emsLoad(){
   EMS.ready = true;
   emsRender();
 
-  emsChannel = sb.channel('plmm-changes')
-    .on('postgres_changes', {event:'*', schema:'public', table:'plmm_users'}, async ()=>{
-      try{ await emsFetchAll(); if(EMS.view!=='form') emsRender(); }catch(e){ console.error(e); }
-    })
-    .on('postgres_changes', {event:'*', schema:'public', table:'plmm_manuscripts'}, async ()=>{
-      try{ await emsFetchAll(); if(EMS.view!=='form') emsRender(); }catch(e){ console.error(e); }
-    })
-    .subscribe();
+  // Realtime: a collection snapshot delivers the full set each time, so we
+  // simply rebuild the local map — same semantics as emsFetchAll().
+  const unsubU = db.collection(FS_USERS_COLL).onSnapshot(snap=>{
+    const u={}; snap.forEach(doc=>{ u[doc.id]=doc.data(); }); EMS.users=u;
+    if(EMS.view!=='form') emsRender();
+  }, err=>console.error('Users snapshot error:', err));
+  const unsubM = db.collection(FS_MS_COLL).onSnapshot(snap=>{
+    const m={}; snap.forEach(doc=>{ m[doc.id]=doc.data(); }); EMS.manuscripts=m;
+    if(EMS.view!=='form') emsRender();
+  }, err=>console.error('Manuscripts snapshot error:', err));
+  emsUnsub = ()=>{ try{ unsubU(); }catch(e){} try{ unsubM(); }catch(e){} };
 }
 
 async function emsSaveUser(email){
   try {
-    const { error } = await sb.from('plmm_users').upsert({ email, data: EMS.users[email] });
-    if(error) throw error;
-  } catch(e){ console.error('Failed to save user:', e); alert('Could not save to the database. Check your connection and Supabase configuration.'); }
+    await db.collection(FS_USERS_COLL).doc(email).set(EMS.users[email]);
+  } catch(e){ console.error('Failed to save user:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
 }
 
 async function emsSaveMs(ms){
   try {
-    const { error } = await sb.from('plmm_manuscripts').upsert({ id: ms.id, data: ms });
-    if(error) throw error;
-  } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Supabase configuration.'); }
+    await db.collection(FS_MS_COLL).doc(ms.id).set(ms);
+  } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
 }
 
 /* ── DELETION (editor only) ───────────────────────────
-   Permanently removes data from Supabase — not a soft-delete. Storage files
-   are removed first (using the paths already tracked per file), then the
-   database row. Used both for single-manuscript deletion and, optionally,
-   when deleting a user account that owns manuscripts. */
+   Permanently removes data from Firebase — not a soft-delete. A file's base64
+   chunks are removed first, then the manuscript document. Used both for single-
+   manuscript deletion and, optionally, when deleting a user account that owns
+   manuscripts. */
+async function emsDeleteFileChunks(f){
+  if(!f || !f.fileId || !f.chunks) return;
+  for(let i=0;i<f.chunks;i++){
+    try{ await db.collection(FS_CHUNKS_COLL).doc(`${f.fileId}_${i}`).delete(); }
+    catch(e){ console.error('Failed to delete file chunk:', f.fileId, i, e); }
+  }
+}
 async function emsDeleteMsFiles(ms){
-  const paths=(ms.files||[]).map(f=>f.path).filter(Boolean);
-  if(!paths.length) return;
-  try{ await sb.storage.from(SUPABASE_FILES_BUCKET).remove(paths); }
-  catch(e){ console.error('Failed to delete some files from storage:', e); }
+  for(const f of (ms.files||[])){ await emsDeleteFileChunks(f); }
 }
 async function emsDeleteMsRecord(id){
   try{
-    const { error } = await sb.from('plmm_manuscripts').delete().eq('id', id);
-    if(error) throw error;
+    await db.collection(FS_MS_COLL).doc(id).delete();
   }catch(e){ console.error('Failed to delete manuscript row:', e); alert('Could not delete the manuscript from the database. Check your connection.'); throw e; }
   delete EMS.manuscripts[id];
 }
@@ -1077,31 +1150,32 @@ async function emsDeleteUser(email){
     }
   }
   try{
-    const { error } = await sb.from('plmm_users').delete().eq('email', email);
-    if(error) throw error;
+    await db.collection(FS_USERS_COLL).doc(email).delete();
   }catch(e){ console.error('Failed to delete user:', e); alert('Could not delete the user from the database. Check your connection.'); return; }
   delete EMS.users[email];
   emsRender();
 }
 
-/* Sends an email via the "send-email" Supabase Edge Function (which relays to Resend).
+/* Sends an email via EmailJS, straight from the browser (no server to keep awake).
+   The EmailJS template must define {{to_email}}, {{subject}} and {{{message_html}}}.
    Fire-and-forget from the UI's perspective — a failed email should never block a
-   submission or decision from being saved, so callers don't await this on the critical path. */
+   submission or decision from being saved, so callers don't await this on the critical
+   path. One recipient per send keeps delivery reliable across EmailJS templates. */
 async function emsSendEmail(to, subject, html){
   const recipients = (Array.isArray(to) ? to : [to]).filter(Boolean);
   if(!recipients.length) return;
-  try{
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: recipients, subject, html })
-    });
-    if(!resp.ok){
-      const errBody = await resp.text();
-      console.error('Email send failed:', resp.status, errBody);
+  const ready = await emsInitEmail();
+  if(!ready){ console.warn('EmailJS not configured — skipping email:', subject); return; }
+  for(const addr of recipients){
+    try{
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email: addr,
+        subject: subject,
+        message_html: html
+      });
+    }catch(e){
+      console.error('Email send failed for', addr, ':', e);
     }
-  }catch(e){
-    console.error('Email send error:', e);
   }
 }
 
@@ -1120,8 +1194,8 @@ function emsRender(){
     vc.innerHTML=`<div class="ems-loading" style="text-align:left;max-width:520px;margin:40px auto;padding:20px 24px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;color:#9B1C1C">
       <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><i class="ti ti-alert-circle"></i> Couldn't connect to the database</div>
       <div style="font-size:13px;line-height:1.6;margin-bottom:10px">${emsDbErr}</div>
-      <div style="font-size:12px;color:#7F1D1D;line-height:1.6">This usually means: (1) the Supabase config still has placeholder values, (2) the tables/policies described in the setup instructions haven't been created yet in your Supabase project, (3) an ad-blocker or browser privacy extension is blocking the CDN script, or (4) a Content-Security-Policy on this site is blocking external scripts. Check the browser console for more detail, then reload the page.</div>
-      <button class="ems-btn-sm" style="margin-top:12px" onclick="emsDbErr=null;sb=null;emsChannel=null;EMS.ready=false;emsLoad()"><i class="ti ti-refresh"></i> Try again</button>
+      <div style="font-size:12px;color:#7F1D1D;line-height:1.6">This usually means: (1) the Firebase config still has placeholder values, (2) Firestore/Storage haven't been enabled yet, or the Security Rules deny access, (3) an ad-blocker or browser privacy extension is blocking the CDN script, or (4) a Content-Security-Policy on this site is blocking external scripts. Check the browser console for more detail, then reload the page.</div>
+      <button class="ems-btn-sm" style="margin-top:12px" onclick="emsDbErr=null;db=null;emsUnsub=null;EMS.ready=false;emsLoad()"><i class="ti ti-refresh"></i> Try again</button>
     </div>`;
     return;
   }
@@ -1298,7 +1372,7 @@ function emsStep3(ms){
   const fl=F.length?`<div class="ems-flist">${F.map((f,i)=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span><button class="ems-btn-icon" onclick="emsRemFile(${i})" style="flex-shrink:0"><i class="ti ti-x"></i></button></div>`).join('')}</div>`:'';
   return `<div class="ems-fst">Upload files</div>
   <div class="ems-fg" style="margin-bottom:10px"><div class="ems-ff"><label class="el">File category</label><select class="es" id="f_fc"><option>Manuscript (main)</option><option>Cover letter</option><option>Supplementary material</option><option>Figures (high-res)</option><option>Revised manuscript</option><option>Response to reviewers</option><option>Data file</option><option>Other</option></select></div><div></div></div>
-  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, ZIP, XLSX, PNG — max ${EMS_MAX_FILE_MB} MB per file</small></div>
+  <div class="ems-file-drop" onclick="document.getElementById('efi').click()"><i class="ti ti-cloud-upload"></i><p>Click to select files</p><small>PDF, DOCX, TEX, TXT, ZIP, XLSX, PNG — max ${EMS_MAX_FILE_MB} MB per file</small></div>
   <input type="file" id="efi" multiple style="display:none" onchange="emsHandleFiles(this.files)"/>
   ${fl}`;
 }
@@ -1322,13 +1396,48 @@ function emsStep4(ms){
   </div>`;
 }
 
-/* Renders a file name as a clickable download link once uploaded to Supabase Storage,
-   or a status label while uploading / if the upload failed. */
+/* Renders a file name as a clickable link that reassembles the file from its
+   Firestore chunks and opens it, or a status label while uploading / if it failed. */
 function emsFileLink(f){
-  if(f.uploading) return `<span class="fn">${f.name} <em style="color:#A0AEC0;font-style:normal">(uploading…)</em></span>`;
+  if(f.uploading) return `<span class="fn">${f.name} <em style="color:#A0AEC0;font-style:normal">(uploading… ${f.progress||0}%)</em></span>`;
   if(f.error) return `<span class="fn">${f.name} <em style="color:#9B1C1C;font-style:normal">(upload failed${f.errorMsg?': '+f.errorMsg:''})</em></span>`;
-  if(f.url) return `<a class="fn" href="${f.url}" target="_blank" style="color:#2B3E6B;text-decoration:underline">${f.name}</a>`;
+  if(f.fileId) return `<a class="fn" href="javascript:void(0)" onclick="emsOpenFile('${f.fileId}')" style="color:#2B3E6B;text-decoration:underline;cursor:pointer">${f.name}</a>`;
   return `<span class="fn">${f.name}</span>`;
+}
+
+/* Reassembles a file from its base64 chunks in Firestore and opens it in a new
+   tab (falling back to a download). Chunks are fetched by deterministic document
+   id (<fileId>_<index>), so no Firestore composite index is required. */
+async function emsOpenFile(fileId){
+  // Locate the file's metadata across all manuscripts to learn chunk count + mime.
+  let meta=null;
+  for(const ms of Object.values(EMS.manuscripts)){
+    const hit=(ms.files||[]).find(x=>x.fileId===fileId);
+    if(hit){ meta=hit; break; }
+  }
+  if(!meta){ alert('Could not locate this file.'); return; }
+  try{
+    const parts=[];
+    for(let i=0;i<meta.chunks;i++){
+      const snap=await db.collection(FS_CHUNKS_COLL).doc(`${fileId}_${i}`).get();
+      if(!snap.exists) throw new Error(`Missing piece ${i+1} of ${meta.chunks}. The file may be corrupted or still uploading.`);
+      parts.push(snap.data().data);
+    }
+    const b64=parts.join('');
+    const bin=atob(b64);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const blob=new Blob([bytes], {type: meta.mime || 'application/octet-stream'});
+    const url=URL.createObjectURL(blob);
+    const w=window.open(url,'_blank');
+    if(!w){ // popup blocked → force a download instead
+      const a=document.createElement('a'); a.href=url; a.download=meta.name||'download'; document.body.appendChild(a); a.click(); a.remove();
+    }
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  }catch(e){
+    console.error('Failed to open file:', e);
+    alert('Could not open this file: '+(e.message||e));
+  }
 }
 
 function emsCollect(step){
@@ -1381,9 +1490,21 @@ function emsAddAuth(){ emsCollect(1); EMS.draftMs.authors.push({name:'',email:''
 function emsRemAuth(i){ emsCollect(1); EMS.draftMs.authors.splice(i,1); emsRender(); }
 function emsSetCorr(i){ emsCollect(1); EMS.draftMs.authors.forEach((a,j)=>a.corresponding=j===i); emsRender(); }
 
-/* Uploads real files to Supabase Storage (bucket: phylim-files, path: <manuscriptId>/<filename>)
-   and stores a public download URL alongside each file's metadata, so the editor can open
-   the actual PDF/DOCX/etc. — not just its name. */
+/* Reads a File as a base64 string (without the "data:...;base64," prefix). */
+function emsFileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const r=new FileReader();
+    r.onload=()=>{ const s=String(r.result); const c=s.indexOf(','); resolve(c>=0?s.slice(c+1):s); };
+    r.onerror=()=>reject(r.error||new Error('Could not read file'));
+    r.readAsDataURL(file);
+  });
+}
+
+/* Stores an uploaded file in Firestore by base64-encoding it and splitting it
+   into ~700 KB documents in plmm_filechunks (doc id "<fileId>_<index>"). The
+   manuscript record keeps only lightweight metadata (name, mime, chunk count),
+   so the realtime manuscript sync stays small; the heavy chunks are fetched
+   on demand by emsOpenFile(). No Firebase Storage / billing plan required. */
 const EMS_MAX_FILE_MB = 8;
 async function emsHandleFiles(fl){
   const cat=document.getElementById('f_fc')?.value||'Manuscript (main)';
@@ -1394,19 +1515,26 @@ async function emsHandleFiles(fl){
       continue;
     }
     const sz=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';
-    const path=`${ms.id}/${Date.now()}_${f.name}`;
-    const entry={name:f.name,category:cat,size:sz,path,uploading:true};
+    const fileId='f_'+Math.random().toString(36).slice(2)+Date.now();
+    const entry={name:f.name,category:cat,size:sz,mime:f.type||'application/octet-stream',fileId,chunks:0,uploading:true,progress:0};
     ms.files.push(entry);
     emsRender();
     try{
-      const { error: upErr } = await sb.storage.from(SUPABASE_FILES_BUCKET).upload(path, f, { upsert:true });
-      if(upErr) throw upErr;
-      const { data: urlData } = sb.storage.from(SUPABASE_FILES_BUCKET).getPublicUrl(path);
-      entry.url = urlData.publicUrl;
-      entry.uploading = false;
+      const b64=await emsFileToBase64(f);
+      const total=Math.max(1, Math.ceil(b64.length/EMS_CHUNK_SIZE));
+      for(let i=0;i<total;i++){
+        const piece=b64.slice(i*EMS_CHUNK_SIZE,(i+1)*EMS_CHUNK_SIZE);
+        await db.collection(FS_CHUNKS_COLL).doc(`${fileId}_${i}`).set({ fileId, i, data: piece });
+        entry.progress=Math.round(((i+1)/total)*100);
+        emsRender();
+      }
+      entry.chunks=total;
+      entry.uploading=false;
     }catch(e){
       const msg = e?.message || e?.error_description || JSON.stringify(e);
       console.error('Upload failed for', f.name, ':', msg, e);
+      // Best-effort cleanup of any chunks already written before the failure.
+      try{ await emsDeleteFileChunks({fileId, chunks: entry.chunks||0}); }catch(_){ }
       entry.uploading = false;
       entry.error = true;
       entry.errorMsg = msg;
@@ -1418,7 +1546,7 @@ async function emsHandleFiles(fl){
 }
 async function emsRemFile(i){
   const f=EMS.draftMs.files[i];
-  if(f && f.path){ try{ await sb.storage.from(SUPABASE_FILES_BUCKET).remove([f.path]); }catch(e){ console.warn('Could not delete file from storage:', e); } }
+  if(f){ try{ await emsDeleteFileChunks(f); }catch(e){ console.warn('Could not delete file chunks:', e); } }
   EMS.draftMs.files.splice(i,1);
   emsRender();
   EMS.manuscripts[EMS.draftMs.id]=EMS.draftMs;
