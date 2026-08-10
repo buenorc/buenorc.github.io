@@ -1091,15 +1091,21 @@ async function emsLoad(){
   emsUnsub = ()=>{ try{ unsubU(); }catch(e){} try{ unsubM(); }catch(e){} };
 }
 
+/* Firestore rejects any `undefined` field value (unlike the old Postgres jsonb).
+   A JSON round-trip drops undefined-valued keys and any functions, guaranteeing
+   a clean, plain-data object for every write — a safety net so a stray optional
+   field can never again abort a save. */
+function emsClean(obj){ return JSON.parse(JSON.stringify(obj)); }
+
 async function emsSaveUser(email){
   try {
-    await db.collection(FS_USERS_COLL).doc(email).set(EMS.users[email]);
+    await db.collection(FS_USERS_COLL).doc(email).set(emsClean(EMS.users[email]));
   } catch(e){ console.error('Failed to save user:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
 }
 
 async function emsSaveMs(ms){
   try {
-    await db.collection(FS_MS_COLL).doc(ms.id).set(ms);
+    await db.collection(FS_MS_COLL).doc(ms.id).set(emsClean(ms));
   } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
 }
 
@@ -1216,7 +1222,6 @@ function emsRenderAuth(){
     <div class="ems-auth-sub">${r?'Register to submit to PLMM':'Access the editorial system'}</div>
     ${EMS.authErr?`<div class="ems-err">${EMS.authErr}</div>`:''}
     ${EMS.authOk?`<div class="ems-ok">${EMS.authOk}</div>`:''}
-    ${!r?`<div class="ems-hint"><strong>Editor login:</strong> xxxxxxxx &nbsp;·&nbsp; password: xxxxxxxx</div>`:''}
     ${r?`<div class="ef"><label class="el">Full name</label><input class="ei" id="eaN" placeholder="Your full name"/></div>`:''}
     <div class="ef"><label class="el">Email</label><input class="ei" id="eaE" type="email" placeholder="you@university.edu"/></div>
     <div class="ef"><label class="el">Password</label><input class="ei" id="eaP" type="password" placeholder="Password"/></div>
@@ -1310,7 +1315,7 @@ function emsOpenReview(id){ EMS.viewingId=id; EMS.view='review'; emsRender(); }
 
 function emsInitDraft(){
   const u=EMS.users[EMS.currentUser]||{};
-  return {id:uid(),title:'',type:'',abstract:'',keywords:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',title:'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
+  return {id:uid(),title:'',type:'',shortTitle:'',abstract:'',keywords:'',highlights:'',sugReviewers:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',title:'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
 }
 
 /* ── FORM ──────────────────────────────────────────── */
