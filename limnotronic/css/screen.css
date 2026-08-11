@@ -1,7 +1,10 @@
 /****************************** MAIN STYLES - backgorund,deviders ******************************/
 
-@import url("fontawesome-4.5.0.min.css");
-@import url("framework.css");
+/* NOTE: this file previously @imported "fontawesome-4.5.0.min.css" and
+   "framework.css", neither of which exists in this folder — both 404'd.
+   Icons now come from ../css/fontawesome-4.5.0.min.css (see modern.css) and
+   the grid stays local to this site. Do not import the personal site's
+   framework here: the two sites deliberately use different design systems. */
 
 /* Main Container */
 img, embed, object, video {
@@ -1401,8 +1404,6 @@ margin-top: 13px;
 
 /* publications
 ================================================== */
-
---------------------------------------------------------------------------------------------------------------- */
 @media screen and (max-width:650px){
 	.scrollable{display:block; width:100%; margin:0 0 30px 0; padding:0 0 15px 0; overflow:auto; overflow-x:scroll;}
 	.scrollable table{margin:0; padding:0; white-space:nowrap;}

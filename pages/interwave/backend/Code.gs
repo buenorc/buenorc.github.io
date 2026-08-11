@@ -60,6 +60,7 @@ function doGet() {
 
 function doPost(e) {
   try {
+    buildCache_ = null;                 // always look at the folder as it is now
     var data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
 
     // 1. honeypot: only bots fill the hidden "website" field
@@ -157,7 +158,11 @@ function deliveryTarget_() {
  * Publishing a new release is then just dropping the new .exe in that folder -
  * no property to edit, no deployment to redo.
  */
+var buildCache_ = null;      // one folder listing per execution is enough
+
 function latestBuild_() {
+  if (buildCache_) { return buildCache_; }
+
   var folderId = config_('DRIVE_FOLDER_ID');
   if (!folderId) { return null; }
 
@@ -170,7 +175,35 @@ function latestBuild_() {
     if (!pattern.test(file.getName())) { continue; }
     if (!newest || file.getLastUpdated() > newest.getLastUpdated()) { newest = file; }
   }
+  buildCache_ = newest;
   return newest;
+}
+
+/**
+ * Checksum of the build being sent.
+ *
+ * `build.py --release` writes "<build>.sha256" next to the executable, so in
+ * folder mode the right value is already in the folder: reading it there keeps
+ * the e-mail honest without anyone having to remember to update a property.
+ */
+function currentChecksum_() {
+  if (config_('DELIVERY_MODE') === 'folder') {
+    try {
+      var build = latestBuild_();
+      if (build) {
+        var sidecars = DriveApp.getFolderById(config_('DRIVE_FOLDER_ID'))
+                               .getFilesByName(build.getName() + '.sha256');
+        if (sidecars.hasNext()) {
+          var found = sidecars.next().getBlob().getDataAsString().match(/[0-9a-fA-F]{64}/);
+          if (found) { return found[0].toUpperCase(); }
+        }
+      }
+      return '';         // no sidecar: better no checksum than a stale one
+    } catch (err) {
+      return '';
+    }
+  }
+  return config_('CHECKSUM');
 }
 
 /** Version shown in the e-mail: read from the build file name when possible. */
@@ -248,7 +281,7 @@ function sendToApplicant_(name, email, link, expiresAt, version) {
   var faq      = config_('FAQ_URL');
   var site     = config_('SITE_URL');
   var contact  = config_('REPLY_TO');
-  var checksum = config_('CHECKSUM');
+  var checksum = currentChecksum_();
   var expiry   = formatDate_(expiresAt);
 
   var subject = 'Interwave Analyzer ' + version + ' - precompiled version for Windows';
@@ -443,6 +476,7 @@ function setup() {
  * after every release, before trusting the live form.
  */
 function checkConfig() {
+  buildCache_ = null;
   var mode = config_('DELIVERY_MODE');
   Logger.log('Delivery mode : ' + mode);
 
@@ -476,6 +510,7 @@ function checkConfig() {
   }
 
   Logger.log('Version sent  : ' + currentVersion_());
+  Logger.log('Checksum sent : ' + (currentChecksum_() || '(none - upload the .sha256 file)'));
   Logger.log('E-mail from   : ' + Session.getEffectiveUser().getEmail());
   Logger.log('Notifications : ' + config_('OWNER_EMAIL'));
   Logger.log('Quota left    : ' + MailApp.getRemainingDailyQuota() + ' e-mails today');

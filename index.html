@@ -3,11 +3,11 @@
 Ligerrat
 Licence URI: http://www.os-templates.com/template-terms
 -->
-<html>
+<html lang="en">
 <head>
 <title> de Carvalho Bueno</title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.cdnfonts.com/css/freestyle-script" rel="stylesheet">
 <link href="layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
 <style>
@@ -117,25 +117,22 @@ Licence URI: http://www.os-templates.com/template-terms
 
 <!-- My introduction -->
 <div class="wrapper bgded overlay" style="background-image:url('images/background/bg-blue.svg');">
-  <div id="pageintro" class="hoc clear">
-    <div style="width: 90%">
-      <div style="margin-left: 0px">
-        <article class="introtxt">
-          <p>
-            <box-info>
-              Collaborating Professor and postdoctoral research fellow (2023) in the Graduate Program in Environmental Engineering of the Federal University of Paraná (UFPR) in Curitiba, Brazil. He is an Environmental Engineer (2017) from the Federal University of Paraná (UFPR), Brazil. He holds a doctor degree in natural science from the University of Kaiserslautern-Landau (RPTU) in Germany and in Environmental Engineering from the Federal University of Paraná (UFPR). He is a member of the Laboratory of Limnological Research and Sensor Technology as part of the Professor Parigot de Souza Center for Hydraulics and Hydrology, UFPR. Rafael de Carvalho Bueno has experience in Physical Limnology, with a focus on numerical modelling of mixing and transport processes on lakes and reservoirs.
-            </box-info>
-          </p>
-        </article>
-      </div>
-      <div style="width: 200px; float: right; margin-top:20px ">
-        <figure><p><img src="images/background/field-b1.jpg"/></figure>
-          <footer>
-            <ul class="nospace inline pushright">
-              <li><a class="btn" href="pages/about-me.html">About me</a></li>
-            </ul>
-          </footer>
-      </div>
+  <div id="pageintro" class="hoc">
+    <div class="intro-grid">
+      <article class="introtxt">
+        <p class="intro-eyebrow">Physical limnology &middot; Environmental fluid mechanics &middot; Sensor technology</p>
+        <box-info>
+          Collaborating Professor and postdoctoral research fellow (2023) in the Graduate Program in Environmental Engineering of the Federal University of Paraná (UFPR) in Curitiba, Brazil. He is an Environmental Engineer (2017) from the Federal University of Paraná (UFPR), Brazil. He holds a doctor degree in natural science from the University of Kaiserslautern-Landau (RPTU) in Germany and in Environmental Engineering from the Federal University of Paraná (UFPR). He is a member of the Laboratory of Limnological Research and Sensor Technology as part of the Professor Parigot de Souza Center for Hydraulics and Hydrology, UFPR. Rafael de Carvalho Bueno has experience in Physical Limnology, with a focus on numerical modelling of mixing and transport processes on lakes and reservoirs.
+        </box-info>
+      </article>
+      <aside class="introside">
+        <figure><img src="images/background/field-b1.jpg" alt="Rafael de Carvalho Bueno during field work"></figure>
+        <footer>
+          <ul class="nospace inline">
+            <li><a class="btn" href="pages/about-me.html">About me</a></li>
+          </ul>
+        </footer>
+      </aside>
     </div>
   </div>
 </div>
@@ -144,58 +141,59 @@ Licence URI: http://www.os-templates.com/template-terms
 
 <!-- White options - internal menu (tools and calendar) -->
 <div class="wrapper row3">
-  <main class="hoc container clear">
-    <div class="group center btmspace-80">
-      <article class="one_third first"><div id="content-inner"><a href="pages/textbook/internal-wave/book.html"><img src="icons/svg/textbook.svg"/></a></div>
-      </article>
-      <article class="one_third"><div id="content-inner"><a href="pages/interwave.html" target="_blank"><img src="icons/svg/interwave.svg"/></a></div>
-      </article>
-      <article class="one_third"><div id="content-inner"><a href="delft3d/index.html"  target="_blank"><img src="icons/svg/delft3d.svg"/></a></div>
-      </article>
-    </div>
+  <main class="hoc container">
+    <ul class="nospace tilerow">
+      <li><a class="tile" href="pages/textbook/internal-wave/book.html"><img src="icons/svg/textbook.svg" alt="Internal wave textbook"></a></li>
+      <li><a class="tile" href="pages/interwave.html" target="_blank"><img src="icons/svg/interwave.svg" alt="Interwave Analyzer"></a></li>
+      <li><a class="tile" href="delft3d/index.html" target="_blank"><img src="icons/svg/delft3d.svg" alt="Delft3D resources"></a></li>
+    </ul>
   </main>
 </div>
 
 
 <!-- Research -->
-<div class="wrapper bgded overlay" style="">
-  <section class="hoc container clear">
+<div class="wrapper row2">
+  <section class="hoc container">
 
-    <h2 class="font-x3 uppercase btmspace-10">Research <a href="#"> Pesquisa</a></h2>
-    <div class="group center btmspace-10">
+    <header class="section-head">
+      <h2>Research <a href="#">Pesquisa</a></h2>
+      <p>Three connected lines of work on the physics of lakes and reservoirs — and the instruments needed to observe them.</p>
+    </header>
+
+    <div class="group cardgrid">
       <figure class="one_third first">
-        <div class="frame"  style="opacity:1">
+        <div class="frame">
           <a href="pages/research/wave/wave.html">
-            <img src="images/intro-research/internalwave.png" alt="">
+            <img src="images/intro-research/internalwave.png" alt="Internal gravity waves in a stratified lake">
           </a>
         </div>
-        <figcaption style="opacity:1; color: #DCDCDC; background-color: #6e89bc">
-          <p><a style="font-size:18px; font-family: 'Freestyle Script', sans-serif;font-size: 30px; color:#FFFFFF" href="pages/research/wave/wave.html">Internal Gravity Waves</a></p>
-          <p style="text-align:left;">Analysis of internal waves in thermally stratified lakes and their implications for water quality</p>
+        <figcaption>
+          <h3><a href="pages/research/wave/wave.html">Internal Gravity Waves</a></h3>
+          <p>Analysis of internal waves in thermally stratified lakes and their implications for water quality.</p>
         </figcaption>
       </figure>
 
       <figure class="one_third">
-        <div class="frame"  style="opacity:1">
+        <div class="frame">
           <a href="pages/research/monitoring/monitoring.html">
-            <img src="images/intro-research/sensor.png" alt="">
+            <img src="images/intro-research/sensor.png" alt="Low-cost environmental sensor">
           </a>
         </div>
-        <figcaption style="opacity:1; color: #DCDCDC; background-color: #6e89bc">
-          <p><a style="font-size:18px; font-family: 'Freestyle Script', sans-serif; font-size: 30px; color:#FFFFFF" href="pages/research/monitoring/monitoring.html">Environmental monitoring</a></p>
-          <p style="text-align:left;">Low-cost sensors and automation system for environmental monitoring and field investigations </p>
+        <figcaption>
+          <h3><a href="pages/research/monitoring/monitoring.html">Environmental Monitoring</a></h3>
+          <p>Low-cost sensors and automation systems for environmental monitoring and field investigations.</p>
         </figcaption>
       </figure>
 
       <figure class="one_third">
-        <div class="frame" style="opacity:1">
+        <div class="frame">
           <a href="pages/research/current/current.html">
-            <img src="images/intro-research/current.png" alt="">
+            <img src="images/intro-research/current.png" alt="Gravity current in a laboratory tank">
           </a>
         </div>
-        <figcaption style="opacity:1; color: #DCDCDC; background-color: #6e89bc">
-          <p><a style="font-size:18px; font-family: 'Freestyle Script', sans-serif; font-size: 30px; color:#FFFFFF" href="pages/research/current/current.html">Gravity Currents</a></p>
-          <p  style="text-align:left;">Analysis of gravity currents in lakes and reservoirs and their implications for water quality</p>
+        <figcaption>
+          <h3><a href="pages/research/current/current.html">Gravity Currents</a></h3>
+          <p>Analysis of gravity currents in lakes and reservoirs and their implications for water quality.</p>
         </figcaption>
       </figure>
 
@@ -271,8 +269,31 @@ Licence URI: http://www.os-templates.com/template-terms
 
 <!-- Page Footer -->
 <div class="wrapper row4">
-
-
+  <footer id="footer" class="hoc">
+    <div class="group">
+      <div class="one_third first">
+        <h6 class="title">de Carvalho Bueno</h6>
+        <p>Physical limnology, environmental fluid mechanics and sensor development at the Federal University of Paraná (UFPR), Curitiba, Brazil.</p>
+      </div>
+      <div class="one_third">
+        <h6 class="footer-heading">Explore</h6>
+        <ul class="nospace linklist">
+          <li><a href="pages/about-me.html">About me</a></li>
+          <li><a href="pages/publications.html">Publications</a></li>
+          <li><a href="pages/tools.html">Tools &amp; software</a></li>
+          <li><a href="limnotronic/index.html">Limnotronic laboratory</a></li>
+        </ul>
+      </div>
+      <div class="one_third">
+        <h6 class="footer-heading">Contact</h6>
+        <ul class="nospace linklist contact">
+          <li><i class="fa fa-envelope-o" aria-hidden="true"></i><a href="mailto:decarvalhobueno@gmail.com">decarvalhobueno@gmail.com</a></li>
+          <li><i class="fa fa-map-marker" aria-hidden="true"></i>Centro Politécnico, UFPR<br>Curitiba – PR, Brazil</li>
+          <li><i class="fa fa-comments-o" aria-hidden="true"></i><a href="pages/contact-me.html">Send a message</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 </div>
 <!-- ################################################################################################ -->
 <!-- ################################################################################################ -->
@@ -280,7 +301,7 @@ Licence URI: http://www.os-templates.com/template-terms
 <div class="wrapper row5">
   <div id="copyright" class="hoc clear">
     <!-- ################################################################################################ -->
-    <p class="fl_left">Copyright &copy; 2022 - All Rights Reserved - <a href="#">de Carvalho Bueno</a></p>
+    <p class="fl_left">Copyright &copy; 2026 &middot; All rights reserved &middot; <a href="#">de Carvalho Bueno</a></p>
     <!-- ################################################################################################ -->
   </div>
 </div>
@@ -288,12 +309,6 @@ Licence URI: http://www.os-templates.com/template-terms
 <!-- ################################################################################################ -->
 <!-- ################################################################################################ -->
 <a id="backtotop" href="#top"><i class="fa fa-chevron-up"></i></a>
-<!-- JAVASCRIPTS -->
-<script src="layout/scripts/jquery.min.js"></script>
-<script src="layout/scripts/jquery.backtotop.js"></script>
-<script src="layout/scripts/jquery.mobilemenu.js"></script>
-<!-- IE9 Placeholder Support -->
-<script src="layout/scripts/jquery.placeholder.min.js"></script>
-<!-- / IE9 Placeholder Support -->
+<script src="layout/scripts/site.js" defer></script>
 </body>
 </html>
