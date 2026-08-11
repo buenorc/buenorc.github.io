@@ -1,0 +1,60 @@
+name: Interwave request service check
+
+# Checks every day that the "precompiled version" request service is alive.
+# The endpoint is read directly from pages/interwave/precompiled.html, so there
+# is nothing to configure here: if the page works, this check follows it.
+#
+# When the service is down the workflow fails and GitHub e-mails you.
+
+on:
+  schedule:
+    - cron: '17 6 * * *'      # every day at 06:17 UTC
+  workflow_dispatch:           # ...and on demand, from the Actions tab
+  push:
+    paths:
+      - 'pages/interwave/precompiled.html'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the endpoint from the page
+        id: endpoint
+        run: |
+          url=$(sed -n "s/.*var ENDPOINT *= *'\([^']*\)'.*/\1/p" pages/interwave/precompiled.html | head -1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          if [ -z "$url" ]; then
+            echo "::error::No ENDPOINT found in pages/interwave/precompiled.html"
+            exit 1
+          fi
+          case "$url" in
+            https://script.google.com/*/exec) : ;;
+            https://*/exec) echo "::warning::Unexpected endpoint host: $url" ;;
+            *dev) echo "::error::The page points to the /dev test URL. Only the /exec deployment URL works for visitors."; exit 1 ;;
+            *) echo "::error::The page does not contain a deployed endpoint URL (found: $url)"; exit 1 ;;
+          esac
+
+      - name: Ask the service for its status
+        run: |
+          url='${{ steps.endpoint.outputs.url }}'
+          echo "Checking $url"
+          body=$(curl -sSL --max-time 45 --retry 2 --retry-delay 10 "$url") || {
+            echo "::error::The request service is unreachable. Visitors cannot receive Interwave Analyzer automatically."
+            exit 1
+          }
+          echo "$body" | head -c 2000
+          echo
+
+          # A healthy service answers {"status":"ok", ..., "ready":true}
+          if ! echo "$body" | jq -e '.status == "ok"' >/dev/null 2>&1; then
+            echo "::error::The service did not answer with status=ok (it usually means the web app deployment was removed, the authorisation expired, or the answer is a Google login page)."
+            exit 1
+          fi
+          if ! echo "$body" | jq -e '.ready == true' >/dev/null 2>&1; then
+            echo "::error::The service is running but no download is configured (DOWNLOAD_URL / DRIVE_FILE_ID is empty in the script properties)."
+            exit 1
+          fi
+
+          echo "Service OK - version $(echo "$body" | jq -r '.version') in '$(echo "$body" | jq -r '.mode')' mode."

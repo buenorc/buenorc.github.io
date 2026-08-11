@@ -20,6 +20,55 @@ Licence URI: http://www.os-templates.com/template-terms
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="../../layout/styles/layout.css" rel="stylesheet" type="text/css" media="all">
 <link href="https://fonts.cdnfonts.com/css/freestyle-script" rel="stylesheet">
+
+<!-- Request form (precompiled version) -->
+<style>
+.iw-release{border:1px solid #d7d7d7; border-left:4px solid #6785b8; background:#f7f9fc; padding:18px 20px; margin:20px 0; max-width:520px;}
+.iw-release p{margin:0 0 6px 0;}
+.iw-release p:last-child{margin-bottom:0;}
+
+.iw-request{border:1px solid #d7d7d7; background:#ffffff; padding:26px 28px; margin:25px 0 10px 0; max-width:760px; box-shadow:0 0 14px 1px rgba(0,0,0,.06);}
+.iw-request h3{margin-top:0;}
+.iw-note{font-size:13px; color:#777777; margin-bottom:22px;}
+
+.iw-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px 20px;}
+.iw-field{display:flex; flex-direction:column;}
+.iw-field.iw-full{grid-column:1 / -1;}
+.iw-field label{font-size:13px; font-weight:600; color:#333333; margin-bottom:5px;}
+.iw-request .iw-req{color:#c0392b; background-color:inherit;}
+.iw-field input, .iw-field select, .iw-field textarea{width:100%; padding:9px 11px; border:1px solid #d7d7d7; background:#ffffff; color:#333333; font-size:14px; font-family:inherit; border-radius:4px; transition:border-color .2s;}
+.iw-field textarea{min-height:96px; resize:vertical;}
+.iw-field input:focus, .iw-field select:focus, .iw-field textarea:focus{border-color:#6785b8; outline:none;}
+.iw-field .iw-hint{font-size:12px; color:#888888; margin-top:4px;}
+.iw-field.iw-invalid input, .iw-field.iw-invalid select, .iw-field.iw-invalid textarea{border-color:#c0392b;}
+.iw-error{display:none; font-size:12px; color:#c0392b; margin-top:4px;}
+.iw-field.iw-invalid .iw-error{display:block;}
+
+.iw-check{grid-column:1 / -1; display:flex; align-items:flex-start; gap:9px; font-size:13px; margin-top:4px;}
+.iw-check input{width:16px; height:16px; margin-top:2px; flex:0 0 auto;}
+.iw-check > span{color:#555555; background-color:inherit;}   /* overrides the global "label span{color:red}" */
+.iw-check.iw-invalid > span{color:#c0392b;}
+
+.iw-hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
+
+.iw-actions{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+.iw-submit{padding:11px 30px; background:#6785b8; color:#ffffff; border:2px solid #6785b8; border-radius:25px; font-size:14px; font-weight:600; cursor:pointer; transition:.3s;}
+.iw-submit:hover:not(:disabled){background:transparent; color:#6785b8;}
+.iw-submit:disabled{opacity:.6; cursor:not-allowed;}
+.iw-status{font-size:13px;}
+
+.iw-result{display:none; border:1px solid #d7d7d7; border-left:4px solid #4a9c5d; background:#f4faf5; padding:26px 28px; margin:25px 0; max-width:760px;}
+.iw-result h3{margin-top:0; color:#3d7f4c;}
+.iw-result.iw-fail{border-left-color:#c0392b; background:#fdf5f4;}
+.iw-result.iw-fail h3{color:#c0392b;}
+.iw-mailto{display:inline-block; padding:11px 26px; background:#6785b8; color:#ffffff !important; border:2px solid #6785b8; border-radius:25px; font-size:14px; font-weight:600; text-decoration:none; transition:.3s;}
+.iw-mailto:hover{background:transparent; color:#6785b8 !important;}
+
+@media screen and (max-width:700px){
+  .iw-grid{grid-template-columns:1fr;}
+  .iw-request{padding:20px;}
+}
+</style>
 </head>
 
 <body id="top">
@@ -133,27 +182,145 @@ Licence URI: http://www.os-templates.com/template-terms
         the latest features for analyzing thermally stratified lakes and reservoirs.
       </p>
 
-      <div style="border: 2px solid #000; padding: 15px; margin: 20px 0; background-color: #f5f5f5; max-width: 400px;">
+      <div class="iw-release">
         <p><strong>Interwave Analyzer - Version 2</strong></p>
-        <p>Version: <strong>2.260303</strong></p>
-        <p>Release Date: <strong>March 2026</strong></p>
+        <p>Version: <strong id="iw-version">2.260810</strong></p>
+        <p>Release date: <strong id="iw-release-date">August 2026</strong></p>
+        <p>Platform: <strong>Windows (64-bit)</strong></p>
       </div>
 
       <p>
-        Please fill out the form below, and we will provide you with a download link
-        for the executable.
+        Fill out the form below with your details. The download link is sent
+        <strong>automatically to the e-mail address you provide</strong>, so please make
+        sure it is correct. The access granted with this link expires after 30&nbsp;days.
       </p>
 
-      <br>
-      <!-- ================= Example 1 ================= -->
-      <iframe width="640px" height="480px" src="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAZ__po9HsVUOVk5T1BHOTdIWE9aQ0hEUlI3MzAxSzc3TC4u&embed=true" frameborder="0" marginwidth="0" marginheight="0" style="border: none; max-width:100%; max-height:100vh" allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen> </iframe>
+      <!-- ================= Request form ================= -->
+      <div class="iw-request" id="iw-request-box">
+
+        <h3>Request the precompiled version</h3>
+        <p class="iw-note">
+          Fields marked with <span style="color:#c0392b">*</span> are required. Your data is
+          used only to register the request and to send you the software; it is never shared
+          with third parties.
+        </p>
+
+        <form id="iw-form" novalidate>
+
+          <div class="iw-grid">
+
+            <div class="iw-field iw-full">
+              <label for="iw-name">Full name <span class="iw-req">*</span></label>
+              <input type="text" id="iw-name" name="name" maxlength="120" autocomplete="name" required>
+              <span class="iw-error">Please enter your full name.</span>
+            </div>
+
+            <div class="iw-field">
+              <label for="iw-email">E-mail <span class="iw-req">*</span></label>
+              <input type="email" id="iw-email" name="email" maxlength="150" autocomplete="email" required>
+              <span class="iw-hint">The software link is sent to this address.</span>
+              <span class="iw-error">Please enter a valid e-mail address.</span>
+            </div>
+
+            <div class="iw-field">
+              <label for="iw-email2">Confirm e-mail <span class="iw-req">*</span></label>
+              <input type="email" id="iw-email2" name="email_confirm" maxlength="150" required>
+              <span class="iw-error">The two e-mail addresses do not match.</span>
+            </div>
+
+            <div class="iw-field">
+              <label for="iw-institution">Institution / Company <span class="iw-req">*</span></label>
+              <input type="text" id="iw-institution" name="institution" maxlength="150" autocomplete="organization" required>
+              <span class="iw-error">Please enter your institution.</span>
+            </div>
+
+            <div class="iw-field">
+              <label for="iw-country">Country <span class="iw-req">*</span></label>
+              <input type="text" id="iw-country" name="country" maxlength="80" autocomplete="country-name" required>
+              <span class="iw-error">Please enter your country.</span>
+            </div>
+
+            <div class="iw-field">
+              <label for="iw-role">Position <span class="iw-req">*</span></label>
+              <select id="iw-role" name="role" required>
+                <option value="">Select...</option>
+                <option>Undergraduate student</option>
+                <option>Graduate student (MSc / PhD)</option>
+                <option>Postdoctoral researcher</option>
+                <option>Professor / Lecturer</option>
+                <option>Researcher (institute / agency)</option>
+                <option>Consultant / Industry</option>
+                <option>Government / Water authority</option>
+                <option>Other</option>
+              </select>
+              <span class="iw-error">Please select your position.</span>
+            </div>
+
+            <div class="iw-field">
+              <label for="iw-field-of-use">Field of application</label>
+              <select id="iw-field-of-use" name="application">
+                <option value="">Select...</option>
+                <option>Lakes</option>
+                <option>Reservoirs</option>
+                <option>Coastal / Estuarine systems</option>
+                <option>Laboratory experiments</option>
+                <option>Numerical model validation</option>
+                <option>Teaching</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="iw-field iw-full">
+              <label for="iw-purpose">How do you intend to use Interwave Analyzer? <span class="iw-req">*</span></label>
+              <textarea id="iw-purpose" name="purpose" maxlength="1200" required
+                placeholder="Briefly describe your study site, project or research question."></textarea>
+              <span class="iw-error">Please describe briefly your intended use.</span>
+            </div>
+
+            <label class="iw-check" id="iw-terms-box">
+              <input type="checkbox" id="iw-terms" name="terms" required>
+              <span>
+                I agree to use Interwave Analyzer for academic and non-commercial purposes,
+                not to redistribute the executable, and to cite
+                <a href="https://doi.org/10.1016/j.envsoft.2020.104950" target="_blank">de Carvalho Bueno et al. (2021)</a>
+                in publications that make use of the software. <span class="iw-req">*</span>
+              </span>
+            </label>
+
+            <label class="iw-check">
+              <input type="checkbox" id="iw-updates" name="updates">
+              <span>Keep me informed about new releases and important fixes.</span>
+            </label>
+
+          </div>
+
+          <!-- anti-spam honeypot: hidden from users, filled only by bots -->
+          <div class="iw-hp" aria-hidden="true">
+            <label for="iw-website">Website</label>
+            <input type="text" id="iw-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="iw-actions">
+            <button type="submit" class="iw-submit" id="iw-submit">Send request</button>
+            <span class="iw-status" id="iw-status"></span>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Result panel, shown after submission -->
+      <div class="iw-result" id="iw-result">
+        <h3 id="iw-result-title">Request sent</h3>
+        <p id="iw-result-text"></p>
+      </div>
 
       <div style="margin-top: 40px;">
       <h3>Previous Releases</h3>
         <p>The following versions are no longer publicly available. To request access, please contact <a href="mailto:decarvalhobueno@gmail.com">decarvalhobueno@gmail.com</a>:</p>
         <br>
         <ul>
-          Interwave Analyzer V2.260301
+          <li>Interwave Analyzer V2.260305</li>
+          <li>Interwave Analyzer V2.260301</li>
         </ul>
       </div>
 
@@ -179,5 +346,194 @@ Licence URI: http://www.os-templates.com/template-terms
 <!-- IE9 Placeholder Support -->
 <script src="layout/scripts/jquery.placeholder.min.js"></script>
 <!-- / IE9 Placeholder Support -->
+
+<!-- Request form handler -->
+<script>
+(function () {
+  // Google Apps Script web app URL (see backend/README.md to deploy it).
+  // It MUST be the deployment URL ending in /exec - never the /dev test URL,
+  // which only works while you are logged in with your own Google account.
+  var ENDPOINT = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+  var CONTACT  = 'rafael.bueno.itt@gmail.com';
+
+  var form     = document.getElementById('iw-form');
+  var box      = document.getElementById('iw-request-box');
+  var button   = document.getElementById('iw-submit');
+  var status   = document.getElementById('iw-status');
+  var result   = document.getElementById('iw-result');
+  var rTitle   = document.getElementById('iw-result-title');
+  var rText    = document.getElementById('iw-result-text');
+
+  function fieldOf(el) {
+    var node = el.closest ? el.closest('.iw-field, .iw-check') : null;
+    return node || el.parentNode;
+  }
+
+  function mark(el, invalid) {
+    var f = fieldOf(el);
+    if (f) { f.className = f.className.replace(/\s*iw-invalid/g, '') + (invalid ? ' iw-invalid' : ''); }
+  }
+
+  function validEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+  }
+
+  function escapeHtml_(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function validate() {
+    var ok = true;
+    var first = null;
+
+    var required = ['iw-name', 'iw-institution', 'iw-country', 'iw-role', 'iw-purpose'];
+    required.forEach(function (id) {
+      var el = document.getElementById(id);
+      var bad = !el.value.trim();
+      mark(el, bad);
+      if (bad) { ok = false; first = first || el; }
+    });
+
+    var email  = document.getElementById('iw-email');
+    var email2 = document.getElementById('iw-email2');
+    var badEmail = !validEmail(email.value.trim());
+    mark(email, badEmail);
+    if (badEmail) { ok = false; first = first || email; }
+
+    var badConfirm = email.value.trim().toLowerCase() !== email2.value.trim().toLowerCase();
+    mark(email2, badConfirm);
+    if (badConfirm) { ok = false; first = first || email2; }
+
+    var terms = document.getElementById('iw-terms');
+    mark(terms, !terms.checked);
+    if (!terms.checked) { ok = false; first = first || terms; }
+
+    if (first && first.focus) { first.focus(); }
+    return ok;
+  }
+
+  // clear the error mark as soon as the user edits the field
+  form.addEventListener('input', function (ev) { mark(ev.target, false); });
+  form.addEventListener('change', function (ev) { mark(ev.target, false); });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    status.style.color = '#c0392b';
+
+    if (!validate()) {
+      status.textContent = 'Please review the highlighted fields.';
+      return;
+    }
+
+    var payload = {
+      name:        document.getElementById('iw-name').value.trim(),
+      email:       document.getElementById('iw-email').value.trim(),
+      institution: document.getElementById('iw-institution').value.trim(),
+      country:     document.getElementById('iw-country').value.trim(),
+      role:        document.getElementById('iw-role').value,
+      application: document.getElementById('iw-field-of-use').value,
+      purpose:     document.getElementById('iw-purpose').value.trim(),
+      updates:     document.getElementById('iw-updates').checked,
+      terms:       document.getElementById('iw-terms').checked,
+      website:     document.getElementById('iw-website').value,   // honeypot
+      page:        location.href
+    };
+
+    button.disabled = true;
+    status.style.color = '#6785b8';
+    status.textContent = 'Sending your request...';
+
+    if (ENDPOINT.indexOf('http') !== 0) {          // endpoint never configured
+      showFallback(payload, 'service not configured');
+      return;
+    }
+
+    // give up after 20 s instead of leaving the visitor waiting for ever
+    var options = {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids the CORS preflight Apps Script cannot answer
+      body: JSON.stringify(payload)
+    };
+    var timer = null;
+    if (typeof AbortController === 'function') {
+      var controller = new AbortController();
+      options.signal = controller.signal;
+      timer = setTimeout(function () { controller.abort(); }, 20000);
+    }
+
+    fetch(ENDPOINT, options)
+    .then(function (r) { if (timer) { clearTimeout(timer); } return r.json(); })
+    .then(function (data) {
+      if (!data || data.status !== 'ok') { throw new Error((data && data.message) || 'Unexpected response'); }
+
+      box.style.display = 'none';
+      result.className = 'iw-result';
+      result.style.display = 'block';
+      rTitle.textContent = 'Request received';
+      rText.innerHTML =
+        'Thank you, <strong>' + escapeHtml_(payload.name) + '</strong>. ' +
+        'An e-mail with the download link for Interwave Analyzer has just been sent to <strong>' +
+        escapeHtml_(payload.email) + '</strong>.<br><br>' +
+        'If it does not arrive within a few minutes, please check your spam or junk folder, ' +
+        'and then contact <a href="mailto:rafael.bueno.itt@gmail.com">rafael.bueno.itt@gmail.com</a>.';
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'precompiled_request', { event_category: 'interwave' });
+      }
+    })
+    .catch(function (err) {
+      if (timer) { clearTimeout(timer); }
+      showFallback(payload, err.message);
+    });
+  });
+
+  /**
+   * The automatic service is unreachable (offline, blocked, out of quota, broken
+   * deployment...). Never leave the visitor with nothing: offer a one-click manual
+   * request carrying exactly the same information they already typed.
+   */
+  function showFallback(payload, reason) {
+    button.disabled = false;
+    status.textContent = '';
+
+    var subject = 'Interwave Analyzer - request for the precompiled version';
+    var body =
+      'Dear Rafael,\n\n' +
+      'I would like to receive the precompiled version of Interwave Analyzer.\n' +
+      '(The automatic form on the website could not be sent: ' + reason + ')\n\n' +
+      'Name        : ' + payload.name + '\n' +
+      'E-mail      : ' + payload.email + '\n' +
+      'Institution : ' + payload.institution + '\n' +
+      'Country     : ' + payload.country + '\n' +
+      'Position    : ' + payload.role + '\n' +
+      'Application : ' + (payload.application || '-') + '\n\n' +
+      'Intended use:\n' + payload.purpose + '\n\n' +
+      'Kind regards,\n' + payload.name;
+
+    var mailto = 'mailto:' + CONTACT +
+                 '?subject=' + encodeURIComponent(subject) +
+                 '&body='    + encodeURIComponent(body);
+
+    box.style.display = 'none';
+    result.className = 'iw-result iw-fail';
+    result.style.display = 'block';
+    rTitle.textContent = 'The automatic service did not answer';
+    rText.innerHTML =
+      'Sorry &mdash; your request could not be delivered automatically (' + escapeHtml_(reason) + '). ' +
+      'Nothing you typed was lost: click the button below and your e-mail program opens with the ' +
+      'request already written. It will then be answered manually.' +
+      '<br><br><a class="iw-mailto" href="' + mailto + '">Send the request by e-mail</a>' +
+      '<br><br><span style="font-size:12px;color:#777777">If no e-mail program opens, please write to ' +
+      '<a href="mailto:' + CONTACT + '">' + CONTACT + '</a>.</span>';
+    result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    if (typeof gtag === 'function') {
+      gtag('event', 'precompiled_request_failed', { event_category: 'interwave', event_label: reason });
+    }
+  }
+})();
+</script>
 </body>
 </html>
