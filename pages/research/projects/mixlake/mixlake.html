@@ -249,8 +249,6 @@ Licence URI: http://www.os-templates.com/template-terms
       </div>
       <figure class="ml-figure ml-figure-wide">
         <img src="img/fig-monitoring-station.jpeg" alt="Photographs of field monitoring equipment used at Passaúna Reservoir: thermistor chain, ADCP deployment, and weather station.">
-        <figcaption>Field instrumentation: thermistor chain and ADCP deployment at the central
-          monitoring station, and the adjacent weather station.</figcaption>
       </figure>
     </div>
   </section>
@@ -374,20 +372,25 @@ Licence URI: http://www.os-templates.com/template-terms
               <button type="button" class="ml-grid-btn" data-grid="unstructured">Unstructured</button>
             </div>
             <svg viewBox="0 0 260 190" class="ml-grid-svg" aria-hidden="true">
+              <defs>
+                <clipPath id="basinClip">
+                  <path d="M20,150 C20,60 60,25 130,25 C205,25 240,70 240,150 Z"/>
+                </clipPath>
+              </defs>
               <rect x="0" y="0" width="260" height="190" rx="10" fill="#0B2338"/>
-              <g id="gridStructured" class="ml-grid-layer">
-                <path d="M20,150 C20,60 60,25 130,25 C205,25 240,70 240,150 Z" fill="#123049" stroke="#3E7CA6" stroke-width="1.5"/>
-                <g stroke="#5FA0C4" stroke-width="1" opacity="0.85">
-                  <path d="M30,140 h200 M30,120 h200 M30,100 h200 M30,80 h200 M30,60 h200"/>
-                  <path d="M50,30 v130 M80,25 v135 M110,25 v135 M140,25 v135 M170,25 v135 M200,30 v130 M220,50 v110"/>
-                </g>
+              <path d="M20,150 C20,60 60,25 130,25 C205,25 240,70 240,150 Z" fill="#123049"/>
+              <!-- structured: rectangular cells of a single, uniform size everywhere -->
+              <g id="gridStructured" class="ml-grid-layer" clip-path="url(#basinClip)">
+                <path fill="none" stroke="#5FA0C4" stroke-width="0.9" opacity="0.85"
+                      d="M30,18 v140 M50,18 v140 M70,18 v140 M90,18 v140 M110,18 v140 M130,18 v140 M150,18 v140 M170,18 v140 M190,18 v140 M210,18 v140 M230,18 v140
+                         M14,30 h232 M14,50 h232 M14,70 h232 M14,90 h232 M14,110 h232 M14,130 h232 M14,150 h232"/>
               </g>
-              <g id="gridUnstructured" class="ml-grid-layer" style="display:none">
-                <path d="M20,150 C20,60 60,25 130,25 C205,25 240,70 240,150 Z" fill="#123049" stroke="#3E7CA6" stroke-width="1.5"/>
-                <g stroke="#5FA0C4" stroke-width="0.9" opacity="0.9" fill="none">
-                  <path d="M35,140 L70,110 L60,80 L35,140 M70,110 L100,130 L60,80 M100,130 L140,140 L70,110 M60,80 L100,60 L100,130 M100,60 L140,45 L100,130 L140,140 M140,45 L175,60 L140,140 M175,60 L210,90 L140,140 L145,70 M140,45 L145,70 M175,60 L145,70 M210,90 L225,120 L140,140 M225,120 L200,145 L140,140"/>
-                </g>
+              <!-- unstructured: irregular triangular tessellation, refined near the monitoring station -->
+              <g id="gridUnstructured" class="ml-grid-layer" clip-path="url(#basinClip)" style="display:none">
+                <path fill="none" stroke="#5FA0C4" stroke-width="0.8" stroke-linejoin="round" opacity="0.9"
+                      d="M12,18 L45.7,18 L51.9,48.4 Z M12,18 L51.9,48.4 L12,50.6 Z M12,50.6 L51.9,48.4 L12,77 Z M51.9,48.4 L45.7,74.7 L12,77 Z M12,77 L45.7,74.7 L46.4,96.4 Z M12,77 L46.4,96.4 L12,98.4 Z M12,98.4 L46.4,96.4 L12,109.4 Z M46.4,96.4 L52.3,109.8 L12,109.4 Z M12,109.4 L52.3,109.8 L52.5,126.1 Z M12,109.4 L52.5,126.1 L12,130.3 Z M12,130.3 L52.5,126.1 L12,150.8 Z M52.5,126.1 L54.2,156.2 L12,150.8 Z M12,150.8 L54.2,156.2 L52.2,158 Z M12,150.8 L52.2,158 L12,158 Z M45.7,18 L89.3,18 L51.9,48.4 Z M89.3,18 L92,51.6 L51.9,48.4 Z M51.9,48.4 L92,51.6 L91.4,79.3 Z M51.9,48.4 L91.4,79.3 L45.7,74.7 Z M45.7,74.7 L91.4,79.3 L46.4,96.4 Z M91.4,79.3 L84.5,92.3 L46.4,96.4 Z M46.4,96.4 L84.5,92.3 L83.8,107 Z M46.4,96.4 L83.8,107 L52.3,109.8 Z M52.3,109.8 L83.8,107 L52.5,126.1 Z M83.8,107 L86.7,132.1 L52.5,126.1 Z M52.5,126.1 L86.7,132.1 L91,151.8 Z M52.5,126.1 L91,151.8 L54.2,156.2 Z M54.2,156.2 L91,151.8 L52.2,158 Z M91,151.8 L84.6,158 L52.2,158 Z M89.3,18 L120.5,18 L119.7,47.1 Z M89.3,18 L119.7,47.1 L92,51.6 Z M92,51.6 L119.7,47.1 L91.4,79.3 Z M119.7,47.1 L122.2,79.4 L91.4,79.3 Z M91.4,79.3 L122.2,79.4 L123.7,98.3 Z M91.4,79.3 L123.7,98.3 L84.5,92.3 Z M84.5,92.3 L123.7,98.3 L83.8,107 Z M123.7,98.3 L117.4,107.5 L83.8,107 Z M83.8,107 L117.4,107.5 L121.7,126.4 Z M83.8,107 L121.7,126.4 L86.7,132.1 Z M86.7,132.1 L121.7,126.4 L91,151.8 Z M121.7,126.4 L122.2,150.3 L91,151.8 Z M91,151.8 L122.2,150.3 L121.3,158 Z M91,151.8 L121.3,158 L84.6,158 Z M120.5,18 L145.3,18 L119.7,47.1 Z M145.3,18 L141.9,52.7 L119.7,47.1 Z M119.7,47.1 L141.9,52.7 L143.5,73 Z M119.7,47.1 L143.5,73 L122.2,79.4 Z M122.2,79.4 L143.5,73 L123.7,98.3 Z M143.5,73 L143.1,96 L123.7,98.3 Z M123.7,98.3 L143.1,96 L141.3,110.4 Z M123.7,98.3 L141.3,110.4 L117.4,107.5 Z M117.4,107.5 L141.3,110.4 L121.7,126.4 Z M141.3,110.4 L147.5,127.7 L121.7,126.4 Z M121.7,126.4 L147.5,127.7 L140.6,153.3 Z M121.7,126.4 L140.6,153.3 L122.2,150.3 Z M122.2,150.3 L140.6,153.3 L121.3,158 Z M140.6,153.3 L142,158 L121.3,158 Z M145.3,18 L159.2,18 L161.8,53.2 Z M145.3,18 L161.8,53.2 L141.9,52.7 Z M141.9,52.7 L161.8,53.2 L143.5,73 Z M161.8,53.2 L166,77.2 L143.5,73 Z M143.5,73 L166,77.2 L167.2,95.8 Z M143.5,73 L167.2,95.8 L143.1,96 Z M143.1,96 L167.2,95.8 L141.3,110.4 Z M167.2,95.8 L166.8,108.1 L141.3,110.4 Z M141.3,110.4 L166.8,108.1 L163.3,125.9 Z M141.3,110.4 L163.3,125.9 L147.5,127.7 Z M147.5,127.7 L163.3,125.9 L140.6,153.3 Z M163.3,125.9 L161.5,152.5 L140.6,153.3 Z M140.6,153.3 L161.5,152.5 L166,158 Z M140.6,153.3 L166,158 L142,158 Z M159.2,18 L185.3,18 L161.8,53.2 Z M185.3,18 L183.2,49.2 L161.8,53.2 Z M161.8,53.2 L183.2,49.2 L181.3,78.8 Z M161.8,53.2 L181.3,78.8 L166,77.2 Z M166,77.2 L181.3,78.8 L167.2,95.8 Z M181.3,78.8 L185.8,95.6 L167.2,95.8 Z M167.2,95.8 L185.8,95.6 L184,113.7 Z M167.2,95.8 L184,113.7 L166.8,108.1 Z M166.8,108.1 L184,113.7 L163.3,125.9 Z M184,113.7 L181.8,125.7 L163.3,125.9 Z M163.3,125.9 L181.8,125.7 L178.8,156.5 Z M163.3,125.9 L178.8,156.5 L161.5,152.5 Z M161.5,152.5 L178.8,156.5 L166,158 Z M178.8,156.5 L182.1,158 L166,158 Z M185.3,18 L210.6,18 L208.2,50.9 Z M185.3,18 L208.2,50.9 L183.2,49.2 Z M183.2,49.2 L208.2,50.9 L181.3,78.8 Z M208.2,50.9 L206.3,79 L181.3,78.8 Z M181.3,78.8 L206.3,79 L205.2,96.3 Z M181.3,78.8 L205.2,96.3 L185.8,95.6 Z M185.8,95.6 L205.2,96.3 L184,113.7 Z M205.2,96.3 L204.3,109.6 L184,113.7 Z M184,113.7 L204.3,109.6 L205.5,127.2 Z M184,113.7 L205.5,127.2 L181.8,125.7 Z M181.8,125.7 L205.5,127.2 L178.8,156.5 Z M205.5,127.2 L211,150.8 L178.8,156.5 Z M178.8,156.5 L211,150.8 L209.6,158 Z M178.8,156.5 L209.6,158 L182.1,158 Z M210.6,18 L240.4,18 L208.2,50.9 Z M240.4,18 L236.5,53.2 L208.2,50.9 Z M208.2,50.9 L236.5,53.2 L242.1,78.5 Z M208.2,50.9 L242.1,78.5 L206.3,79 Z M206.3,79 L242.1,78.5 L205.2,96.3 Z M242.1,78.5 L236.4,99.2 L205.2,96.3 Z M205.2,96.3 L236.4,99.2 L242.2,107.6 Z M205.2,96.3 L242.2,107.6 L204.3,109.6 Z M204.3,109.6 L242.2,107.6 L205.5,127.2 Z M242.2,107.6 L241.5,128.9 L205.5,127.2 Z M205.5,127.2 L241.5,128.9 L243.1,150 Z M205.5,127.2 L243.1,150 L211,150.8 Z M211,150.8 L243.1,150 L209.6,158 Z M243.1,150 L238.7,158 L209.6,158 Z M240.4,18 L250,18 L250,49.9 Z M240.4,18 L250,49.9 L236.5,53.2 Z M236.5,53.2 L250,49.9 L242.1,78.5 Z M250,49.9 L250,74 L242.1,78.5 Z M242.1,78.5 L250,74 L250,98.7 Z M242.1,78.5 L250,98.7 L236.4,99.2 Z M236.4,99.2 L250,98.7 L242.2,107.6 Z M250,98.7 L250,112.3 L242.2,107.6 Z M242.2,107.6 L250,112.3 L250,133.2 Z M242.2,107.6 L250,133.2 L241.5,128.9 Z M241.5,128.9 L250,133.2 L243.1,150 Z M250,133.2 L250,151 L243.1,150 Z M243.1,150 L250,151 L250,158 Z M243.1,150 L250,158 L238.7,158 Z"/>
               </g>
+              <path d="M20,150 C20,60 60,25 130,25 C205,25 240,70 240,150 Z" fill="none" stroke="#3E7CA6" stroke-width="1.5"/>
               <circle cx="150" cy="95" r="4" fill="#E3A857"/>
             </svg>
             <p class="ml-slope-note" id="gridNote">Uniform curvilinear grid — same resolution
@@ -613,7 +616,6 @@ Licence URI: http://www.os-templates.com/template-terms
   font-family:var(--ml-mono); font-size:12px; opacity:.65; margin-top:10px; line-height:1.5;
 }
 .ml-figure-wide{ margin-top:28px; }
-.ml-figure-wide img{ background:#fff; padding:6px; }
 
 .ml-objectives{ margin-top:32px; padding-top:28px; border-top:1px solid var(--ml-line); }
 .ml-check-list{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
@@ -631,7 +633,7 @@ Licence URI: http://www.os-templates.com/template-terms
 }
 .ml-hero-inner{ max-width:760px; text-align:left; position:relative; z-index:2; }
 .ml-eyebrow{ font-family:var(--ml-mono); letter-spacing:.14em; text-transform:uppercase; font-size:12px; color:var(--ml-amber); margin-bottom:18px; }
-.ml-title{ font-size:clamp(56px,9vw,104px); margin-bottom:2px; }
+.ml-title{ font-size:clamp(56px,9vw,104px); margin-bottom:2px; color:#BFE0EA; }
 .ml-subtitle{ font-family:var(--ml-display); font-weight:500; font-size:clamp(18px,2.4vw,24px); color:#BFE0EA; margin-bottom:26px; }
 .ml-lede{ font-size:18px; max-width:620px; opacity:.92; }
 .ml-cta-row{ display:flex; gap:16px; flex-wrap:wrap; margin:28px 0 22px; }
@@ -667,6 +669,8 @@ Licence URI: http://www.os-templates.com/template-terms
 .ml-gantt th, .ml-gantt td{ border:1px solid rgba(140,180,205,0.16); padding:10px 12px; text-align:center; color:#D9E7EE; }
 .ml-gantt thead th{ background:#0B2338; border-bottom:2px solid rgba(227,168,87,0.55); font-weight:700; color:var(--ml-amber); letter-spacing:.04em; }
 .ml-gantt-label{ text-align:left !important; min-width:270px; color:#EAF4F7; font-weight:500; }
+.ml-gantt tbody td.ml-gantt-label{ color:#1B2230; }
+#s-timeline h2, #s-docs h2{ color:#BFE0EA; }
 .ml-gantt tbody tr:nth-child(even){ background:rgba(255,255,255,0.04); }
 .ml-gantt td.on{ background:var(--ml-amber); color:#12233A; font-weight:800; border-color:rgba(227,168,87,0.55); }
 .ml-legend{ font-family:var(--ml-mono); font-size:11.5px; color:#D9E7EE; opacity:.85; margin-top:14px; }
@@ -827,7 +831,9 @@ Licence URI: http://www.os-templates.com/template-terms
 .ml-calc-grid label{
   display:flex; flex-direction:column; gap:5px;
   font-family:var(--ml-mono); font-size:11px; opacity:.85;
+  color:#BFE0EA;
 }
+.ml-calc-grid label strong{ color:#BFE0EA; }
 .ml-calc-wide{ grid-column:1 / -1; }
 .ml-calc-grid input[type="number"]{
   background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.25);
