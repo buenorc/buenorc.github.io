@@ -8,7 +8,8 @@ Rebuilt 2026 as a responsive, token-driven layer. Class names from the
 original template are preserved so existing markup keeps working.
 */
 
-@import url("fontawesome-4.5.0.min.css");
+/* fontawesome-4.5.0.min.css is linked directly from each page — see the note
+   at the top of layout.css for why the @import chain was removed. */
 
 /* ============================================================================
    Design tokens

@@ -8,7 +8,12 @@ This file is intentionally separate from /limnotronic, which has its own
 (navy + amber) design system. Do not share styles between the two.
 */
 
-@import url("framework.css");
+/* NOTE: framework.css and fontawesome are linked directly from every page
+   rather than @imported here. @import forces the browser to download and
+   parse this file before it can even discover them (a three-deep serial
+   waterfall on mobile), and the chain was also failing to apply on some
+   pages. Keep the link order fontawesome -> framework -> layout: it is the
+   cascade order the old imports produced. */
 
 /* The template puts .clear (a float clearfix) on containers that are now flex
    or grid. Its ::before/::after would otherwise become phantom items. */
@@ -188,12 +193,12 @@ nav ul,nav ol{margin:0; padding:0; list-style:none;}
 #mainav ul li:focus-within > ul{visibility:visible; opacity:1; transform:translateY(0);}
 
 /* Keep flyouts inside the viewport. The nav is right-aligned in the header, so
-   a third-level menu opening rightward (left:100%) always runs off screen —
-   it widens the document even while hidden, because it is still laid out.
-   Third-level menus therefore always open to the left, and the last top-level
-   item's dropdown is right-aligned to its trigger. */
+   a menu that opens rightward runs off screen — and because hidden dropdowns
+   are still laid out, that widens the whole document, not just the menu.
+   Every dropdown is therefore anchored to the right edge of its trigger, and
+   third-level menus open leftward. */
+#mainav > ul > li > ul{left:auto; right:0;}
 #mainav ul ul ul{top:-.5rem; left:auto; right:100%; margin-left:0; margin-right:var(--sp-2);}
-#mainav > ul > li:last-child > ul{left:auto; right:0;}
 
 #mainav li li{width:100%;}
 #mainav li li > a{
@@ -1364,6 +1369,149 @@ textarea.input{padding:.85rem 1.2rem; min-height:150px; border-radius:var(--radi
   font-size:.82rem;
   line-height:1.6;
 }
+
+/* ---------------------------------------------------------------------------
+   Software section (Interwave Analyzer)
+   The software carries its own black-and-white identity — a monochrome bar
+   logotype — so this section deliberately drops the site's slate blue for a
+   compact, monospaced, repo-toolbar look. Blue stays for the research pages.
+   ------------------------------------------------------------------------ */
+.sw-logo{margin:0; padding:0;}
+.sw-logo img{
+  display:block;
+  width:100%;
+  max-width:420px;
+  height:auto;
+  margin:0 auto;
+}
+
+.sw-release{
+  border:1px solid var(--line);
+  border-top:3px solid #111418;
+  border-radius:var(--radius);
+  background-color:var(--surface);
+  box-shadow:var(--shadow-xs);
+  overflow:hidden;
+}
+
+.sw-release-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:var(--sp-3) var(--sp-5);
+  padding:var(--sp-5);
+  border-bottom:1px solid var(--line);
+  background-color:var(--surface-alt);
+}
+.sw-version{
+  margin:0;
+  font-family:var(--font-mono);
+  font-size:1.05rem;
+  font-weight:500;
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.sw-version strong{font-weight:700;}
+.sw-meta{
+  margin:.25rem 0 0 0;
+  font-family:var(--font-mono);
+  font-size:.75rem;
+  letter-spacing:.02em;
+  color:var(--muted);
+}
+.sw-tagline{
+  flex:1 1 18rem;
+  margin:0;
+  max-width:34rem;
+  font-size:.9rem;
+  line-height:1.6;
+  color:var(--muted);
+}
+
+/* Six actions, so fix the track count rather than letting auto-fit strand a
+   single button on its own row: 3x2, then 2x3, then a single column. */
+.sw-actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:var(--sp-2);
+  margin:0;
+  padding:var(--sp-4);
+}
+.sw-actions li{margin:0;}
+@media screen and (max-width:860px){
+  .sw-actions{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
+.sw-btn{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.5rem .8rem;
+  border:1px solid #d5dae2;
+  border-radius:var(--radius-sm);
+  background-color:var(--surface);
+  color:#1b2230;
+  font-family:var(--font-mono);
+  font-size:.8rem;
+  font-weight:500;
+  line-height:1.4;
+  letter-spacing:-.01em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease);
+}
+.sw-btn i{
+  flex:0 0 auto;
+  width:1em;
+  font-size:.95rem;
+  text-align:center;
+  color:#6b7480;
+  transition:color .15s var(--ease);
+}
+.sw-btn:hover{
+  border-color:#111418;
+  background-color:#111418;
+  color:#fff;
+}
+.sw-btn:hover i{color:#fff;}
+
+/* The primary action reads as solid black from the start */
+.sw-btn--solid{
+  border-color:#111418;
+  background-color:#111418;
+  color:#fff;
+}
+.sw-btn--solid i{color:#fff;}
+.sw-btn--solid:hover{
+  border-color:#111418;
+  background-color:#2c333e;
+  color:#fff;
+}
+
+@media screen and (max-width:520px){
+  .sw-actions{grid-template-columns:1fr; padding:var(--sp-3);}
+  .sw-release-head{padding:var(--sp-4);}
+  .sw-logo img{max-width:280px;}
+}
+
+/* The manual page's download button belongs to the same software section */
+.manual-btn.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.5rem .9rem;
+  border:1px solid #111418;
+  border-radius:var(--radius-sm);
+  background-color:#111418;
+  color:#fff;
+  font-family:var(--font-mono);
+  font-size:.8rem;
+  font-weight:500;
+  letter-spacing:-.01em;
+}
+.manual-btn.btn:hover{background-color:#2c333e; border-color:#2c333e; color:#fff; transform:none;}
 
 .development-page,.manual-page,.faq-page{margin-top:var(--sp-6);}
 
