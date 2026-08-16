@@ -593,6 +593,58 @@ hr.section-divider {
   .ems-stat-row { grid-template-columns: 1fr; }
 }
 
+/* ── PEER REVIEW ─────────────────────────────────────────────────────
+   Reviewer assignments, invitations and submitted reports. Reuses the
+   existing .etag pill and .ems-fw sheet vocabulary so the reviewer panel
+   reads as the same system as the author and editor panels. */
+.etag-inv  { background: #EDE9FE; color: #5B21B6; }   /* invited, awaiting reply */
+.etag-prog { background: #DBEAFE; color: #1E40AF; }   /* accepted, in progress   */
+.etag-dec  { background: #FEE2E2; color: #991B1B; }   /* declined                */
+.etag-done { background: #D1FAE5; color: #065F46; }   /* review submitted        */
+.etag-canc { background: #E2E8F0; color: #4A5568; }   /* withdrawn by editor     */
+
+.ems-rv-list { display: flex; flex-direction: column; gap: 10px; }
+.ems-rv-card {
+  border: 1px solid #D0DAEB; border-radius: 6px; padding: 12px 14px;
+  background: #fff; transition: border-color .15s;
+}
+.ems-rv-card:hover { border-color: #A8B8D8; }
+.ems-rv-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+.ems-rv-name { font-size: 13px; font-weight: 600; color: #1A2744; }
+.ems-rv-meta { font-size: 11px; color: #718096; line-height: 1.6; }
+.ems-rv-acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+/* Due-date chip: neutral, then amber inside 3 days, then red once overdue. */
+.ems-rv-due { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 3px; background: #EDF2F7; color: #4A5568; white-space: nowrap; }
+.ems-rv-due.warn { background: #FEF3C7; color: #92400E; }
+.ems-rv-due.late { background: #FEE2E2; color: #991B1B; }
+
+/* Mandatory reviewer attestations — visually distinct from the optional
+   checklist so it is obvious these gate submission. */
+.ems-att { border: 1px solid #FCD34D; background: #FFFBEB; border-radius: 6px; padding: 12px 14px; margin-bottom: 14px; }
+.ems-att-t { font-size: 12px; font-weight: 600; color: #92400E; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.ems-att-d { font-size: 11px; color: #A16207; line-height: 1.6; margin-bottom: 10px; }
+.ems-att-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #4A5568; line-height: 1.55; padding: 5px 0; cursor: pointer; }
+.ems-att-item input { margin-top: 2px; flex-shrink: 0; accent-color: #92400E; }
+
+/* A reviewer's submitted report, shown to the editor. */
+.ems-rp { border: 1px solid #D0DAEB; border-left: 3px solid #2B3E6B; border-radius: 4px; padding: 10px 12px; margin-bottom: 10px; background: #F7F9FC; }
+.ems-rp-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.ems-rp-t { font-size: 11px; font-weight: 600; color: #2B3E6B; text-transform: uppercase; letter-spacing: .4px; }
+.ems-rp-rec { font-size: 12px; font-weight: 600; color: #1A2744; }
+.ems-rp-sc { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: #718096; margin-bottom: 8px; }
+.ems-rp-sc b { color: #2B3E6B; font-weight: 600; }
+.ems-rp-body { font-size: 12px; color: #2D3748; line-height: 1.6; white-space: pre-line; }
+.ems-rp-conf { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #D0DAEB; font-size: 12px; color: #7F1D1D; line-height: 1.6; white-space: pre-line; }
+
+/* Credentials handed to a newly-created reviewer. */
+.ems-cred { background: #F0F5FF; border: 1px solid #A8B8D8; border-radius: 6px; padding: 12px 14px; margin: 10px 0; font-size: 12px; color: #2B3E6B; line-height: 1.7; }
+.ems-cred code { background: #fff; border: 1px solid #D0DAEB; border-radius: 3px; padding: 1px 6px; font-size: 12px; color: #1A2744; }
+
+@media (max-width: 860px) {
+  .ems-rv-head { flex-direction: column; }
+}
+
 /* ── Respect the reduced-motion preference ───────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .btn, .ems-sb-it, .ems-btn-icon, .modal-box { transition: none !important; }
@@ -1018,6 +1070,13 @@ const firebaseConfig = {
 const FS_USERS_COLL  = "plmm_users";
 const FS_MS_COLL     = "plmm_manuscripts";
 const FS_CHUNKS_COLL = "plmm_filechunks";
+/* The reviewer pool the editor curates. Kept separate from plmm_users so the
+   "Registered authors" list stays a list of authors, and so a person can hold
+   an author account and a reviewer account on the same address without one
+   overwriting the other. Individual review assignments are NOT stored here —
+   they live on the manuscript document (ms.reviews[]), which already syncs in
+   realtime to everyone who has it open. */
+const FS_REVIEWERS_COLL = "plmm_reviewers";
 /* Base64 chars per chunk. Firestore's hard limit is 1 MiB per document; 700 000
    leaves comfortable room for field names and document overhead. */
 const EMS_CHUNK_SIZE = 700000;
@@ -1170,18 +1229,91 @@ function emsFullMsId(ms){
   return (ms.msNumber||ms.id) + (ms.revisionRound>0?`.R${ms.revisionRound}`:'');
 }
 
+/* Default review window, in days, offered when the editor invites a reviewer. */
+const EMS_DEFAULT_REVIEW_DAYS = 15;
+/* Recommendation vocabulary shared by the reviewer form and the editor's
+   decision screen, so a reviewer's wording maps onto the editor's options. */
+const RV_RECS = ['Accept as is','Minor revisions required','Major revisions required','Reject with invitation to resubmit','Reject'];
+const RV_CRITERIA = [
+  ['quality','Scientific quality','Rigor, methodology, and validity of results'],
+  ['novelty','Novelty','Originality and contribution to the field'],
+  ['clarity','Clarity','Writing quality, figures, and logical structure'],
+  ['complete','Completeness','Methods, data, references, and data availability']
+];
+/* Assignment lifecycle. An assignment is never deleted once a reviewer has
+   responded — withdrawing sets 'cancelled' so the editorial record stays intact. */
+const RVL = {invited:'Invitation sent',accepted:'Review in progress',declined:'Declined',submitted:'Review submitted',cancelled:'Withdrawn'};
+const RVC = {invited:'etag-inv',accepted:'etag-prog',declined:'etag-dec',submitted:'etag-done',cancelled:'etag-canc'};
+
 const EMS = {
   view:'login', authMode:'login', authErr:null, authOk:null,
   currentUser:null, currentRole:null,
   activeTab:'manuscripts', formStep:0, editingId:null, viewingId:null,
   draftMs:null, filterStatus:'all',
-  users:{}, manuscripts:{}, ready:false
+  users:{}, manuscripts:{}, reviewers:{}, ready:false,
+  /* Peer review: which assignment a reviewer is looking at, and the pending
+     account-type choice when one email holds both an author and a reviewer login. */
+  rvMsId:null, rvId:null, roleChoice:null, newReviewerCreds:null
 };
 
 let emsUnsub = null;
 
 function uid(){ return 'ms_'+Math.random().toString(36).slice(2)+Date.now(); }
 function dateStr(){ return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+/* ── DATES FOR REVIEW DEADLINES ────────────────────────
+   dateStr() produces a human label ("05 Sep 2026") that cannot be compared or
+   sorted. Deadlines therefore store an ISO yyyy-mm-dd alongside it, which is
+   both sortable and safe to do arithmetic on. */
+function emsIsoToday(){ const d=new Date(); d.setHours(0,0,0,0); return emsIso(d); }
+function emsIso(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function emsIsoPlusDays(n){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+Number(n||0)); return emsIso(d); }
+function emsFmtIso(iso){
+  if(!iso) return '—';
+  const p=iso.split('-');
+  if(p.length!==3) return iso;
+  return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+/* Whole days from today until `iso`. Negative once the deadline has passed. */
+function emsDaysLeft(iso){
+  if(!iso) return null;
+  const p=iso.split('-'); if(p.length!==3) return null;
+  const due=new Date(+p[0],+p[1]-1,+p[2]); due.setHours(0,0,0,0);
+  const today=new Date(); today.setHours(0,0,0,0);
+  return Math.round((due-today)/86400000);
+}
+/* Renders the due-date chip, escalating from neutral → amber (≤3 days) → red. */
+function emsDueChip(iso){
+  const n=emsDaysLeft(iso);
+  if(n===null) return '';
+  const cls = n<0 ? 'late' : (n<=3 ? 'warn' : '');
+  const lbl = n<0 ? `Overdue by ${Math.abs(n)} day${Math.abs(n)===1?'':'s'}`
+            : n===0 ? 'Due today'
+            : `${n} day${n===1?'':'s'} left`;
+  return `<span class="ems-rv-due ${cls}"><i class="ti ti-clock"></i> ${lbl}</span>`;
+}
+
+/* ── HTML ESCAPING ─────────────────────────────────────
+   Reviewer reports and invitation messages are free text written by one user
+   and rendered into another user's panel, so they are escaped before being
+   interpolated into innerHTML. */
+function emsEsc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* Reviewer logins are issued by the system, not chosen by the reviewer, so the
+   invitation email can carry a working password. Avoids look-alike characters
+   (0/O, 1/l) that get mistyped when copied out of an email. */
+function emsRvGenPass(){
+  const cs='abcdefghjkmnpqrstuvwxyz23456789';
+  let s=''; for(let i=0;i<8;i++) s+=cs[Math.floor(Math.random()*cs.length)];
+  return 'plmm-'+s;
+}
+function rvid(){ return 'rv_'+Math.random().toString(36).slice(2)+Date.now(); }
 
 /* ── FIRESTORE SYNC ────────────────────────────────────
    Fetches everyone's users/manuscripts from Firestore, then subscribes to
@@ -1199,7 +1331,7 @@ function emsDescribeErr(err, label){
 }
 
 async function emsFetchAll(){
-  let uSnap, mSnap;
+  let uSnap, mSnap, rSnap;
   try{ uSnap = await db.collection(FS_USERS_COLL).get(); }
   catch(err){ const msg = emsDescribeErr(err, FS_USERS_COLL); console.error(msg, err); throw new Error(msg); }
   const u={}; uSnap.forEach(doc=>{ u[doc.id]=doc.data(); }); EMS.users=u;
@@ -1207,6 +1339,12 @@ async function emsFetchAll(){
   try{ mSnap = await db.collection(FS_MS_COLL).get(); }
   catch(err){ const msg = emsDescribeErr(err, FS_MS_COLL); console.error(msg, err); throw new Error(msg); }
   const m={}; mSnap.forEach(doc=>{ m[doc.id]=doc.data(); }); EMS.manuscripts=m;
+
+  /* The reviewer pool is optional: a project that has never invited a reviewer
+     simply has no plmm_reviewers collection yet, which must not block sign-in. */
+  try{ rSnap = await db.collection(FS_REVIEWERS_COLL).get(); }
+  catch(err){ console.warn('Could not read the reviewer pool (continuing without it):', err); EMS.reviewers={}; return; }
+  const r={}; rSnap.forEach(doc=>{ r[doc.id]=doc.data(); }); EMS.reviewers=r;
 }
 
 async function emsLoad(){
@@ -1230,15 +1368,23 @@ async function emsLoad(){
 
   // Realtime: a collection snapshot delivers the full set each time, so we
   // simply rebuild the local map — same semantics as emsFetchAll().
+  /* Views holding unsaved keystrokes must not be torn down by an incoming
+     snapshot, or the user loses whatever they were part-way through typing. */
+  const typing = ()=> ['form','rvform','invite','review'].includes(EMS.view);
+
   const unsubU = db.collection(FS_USERS_COLL).onSnapshot(snap=>{
     const u={}; snap.forEach(doc=>{ u[doc.id]=doc.data(); }); EMS.users=u;
-    if(EMS.view!=='form') emsRender();
+    if(!typing()) emsRender();
   }, err=>console.error('Users snapshot error:', err));
   const unsubM = db.collection(FS_MS_COLL).onSnapshot(snap=>{
     const m={}; snap.forEach(doc=>{ m[doc.id]=doc.data(); }); EMS.manuscripts=m;
-    if(EMS.view!=='form') emsRender();
+    if(!typing()) emsRender();
   }, err=>console.error('Manuscripts snapshot error:', err));
-  emsUnsub = ()=>{ try{ unsubU(); }catch(e){} try{ unsubM(); }catch(e){} };
+  const unsubR = db.collection(FS_REVIEWERS_COLL).onSnapshot(snap=>{
+    const r={}; snap.forEach(doc=>{ r[doc.id]=doc.data(); }); EMS.reviewers=r;
+    if(!typing()) emsRender();
+  }, err=>console.warn('Reviewers snapshot error:', err));
+  emsUnsub = ()=>{ try{ unsubU(); }catch(e){} try{ unsubM(); }catch(e){} try{ unsubR(); }catch(e){} };
 }
 
 /* Firestore rejects any `undefined` field value (unlike the old Postgres jsonb).
@@ -1257,6 +1403,49 @@ async function emsSaveMs(ms){
   try {
     await db.collection(FS_MS_COLL).doc(ms.id).set(emsClean(ms));
   } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
+}
+
+async function emsSaveReviewer(email){
+  try {
+    await db.collection(FS_REVIEWERS_COLL).doc(email).set(emsClean(EMS.reviewers[email]));
+  } catch(e){ console.error('Failed to save reviewer:', e); alert('Could not save the reviewer to the database. Check your connection and Firebase configuration.'); throw e; }
+}
+
+/* Removes a reviewer's login. Their past reports stay on the manuscripts they
+   reviewed — deleting the account must not rewrite the editorial record — but
+   any assignment they had not yet answered is withdrawn, so the manuscript no
+   longer shows a deadline nobody can meet. */
+async function emsDeleteReviewer(email){
+  const r=EMS.reviewers[email];
+  if(!r) return;
+  const open=emsRvAssignmentsFor(email).filter(x=>['invited','accepted'].includes(x.rev.status));
+  const done=emsRvAssignmentsFor(email).filter(x=>x.rev.status==='submitted').length;
+  let msg=`Permanently delete the reviewer account for ${r.name||email} (${email})?\n\nThis removes their login from the system and cannot be undone.`;
+  if(open.length) msg+=`\n\n${open.length} pending assignment(s) will be withdrawn.`;
+  if(done)        msg+=`\n\n${done} review(s) they already submitted will be KEPT on the manuscript record.`;
+  if(!confirm(msg)) return;
+
+  for(const {ms,rev} of open){
+    rev.status='cancelled';
+    rev.cancelledDate=dateStr();
+    ms.updated=dateStr();
+    EMS.manuscripts[ms.id]=ms;
+    await emsSaveMs(ms);
+  }
+  try{
+    await db.collection(FS_REVIEWERS_COLL).doc(email).delete();
+  }catch(e){ console.error('Failed to delete reviewer:', e); alert('Could not delete the reviewer from the database. Check your connection.'); return; }
+  delete EMS.reviewers[email];
+  emsRender();
+}
+
+/* Every assignment held by one reviewer, paired with its manuscript. */
+function emsRvAssignmentsFor(email){
+  const out=[];
+  Object.values(EMS.manuscripts).forEach(ms=>{
+    (ms.reviews||[]).forEach(rev=>{ if(rev.reviewerEmail===email) out.push({ms,rev}); });
+  });
+  return out;
 }
 
 /* ── DELETION (editor only) ───────────────────────────
@@ -1343,8 +1532,12 @@ function emsRender(){
   if(!vc) return;
   if(EMS.currentUser){
     hr.style.display='flex';
-    document.getElementById('emsHdrUser').textContent = isEd(EMS.currentUser)?EDITOR.name:(EMS.users[EMS.currentUser]?.name||EMS.currentUser);
-    document.getElementById('emsHdrRole').textContent = isEd(EMS.currentUser)?'editor':'author';
+    const role = EMS.currentRole || (isEd(EMS.currentUser)?'editor':'author');
+    const nm = isEd(EMS.currentUser) ? EDITOR.name
+             : role==='reviewer' ? (EMS.reviewers[EMS.currentUser]?.name || EMS.currentUser)
+             : (EMS.users[EMS.currentUser]?.name || EMS.currentUser);
+    document.getElementById('emsHdrUser').textContent = nm;
+    document.getElementById('emsHdrRole').textContent = role;
   } else { hr.style.display='none'; }
   if(emsDbErr){
     vc.innerHTML=`<div class="ems-loading" style="text-align:left;max-width:520px;margin:40px auto;padding:20px 24px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;color:#9B1C1C">
@@ -1362,14 +1555,30 @@ function emsRender(){
   else if(EMS.view==='detail') vc.innerHTML=emsRenderDetail();
   else if(EMS.view==='review') vc.innerHTML=emsRenderReview();
   else if(EMS.view==='admin')  vc.innerHTML=emsRenderAdmin();
+  else if(EMS.view==='invite') vc.innerHTML=emsEdRenderInvite();
+  else if(EMS.view==='rvdash') vc.innerHTML=emsRvRenderDash();
+  else if(EMS.view==='rvms')   vc.innerHTML=emsRvRenderMs();
+  else if(EMS.view==='rvform') vc.innerHTML=emsRvRenderForm();
 }
 
 /* ── AUTH ──────────────────────────────────────────── */
 function emsRenderAuth(){
   const r=EMS.authMode==='register';
+  /* One email can hold both an author account (self-registered) and a reviewer
+     account (issued by the editor). When both passwords match, ask which panel
+     they want rather than silently picking one. */
+  if(EMS.roleChoice){
+    return `<div class="ems-auth-wrap"><div class="ems-auth-card">
+      <div class="ems-auth-title">Choose your panel</div>
+      <div class="ems-auth-sub">${emsEsc(EMS.roleChoice)} is registered both as an author and as a reviewer.</div>
+      <button class="ems-btn-p" onclick="emsPickRole('author')"><i class="ti ti-file-text"></i> Continue as author</button>
+      <button class="ems-btn-p" style="margin-top:8px;background:#4A5568" onclick="emsPickRole('reviewer')"><i class="ti ti-clipboard-check"></i> Continue as reviewer</button>
+      <div class="ems-sw"><span onclick="EMS.roleChoice=null;emsRender()">Back to sign in</span></div>
+    </div></div>`;
+  }
   return `<div class="ems-auth-wrap"><div class="ems-auth-card">
     <div class="ems-auth-title">${r?'Create account':'Sign in'}</div>
-    <div class="ems-auth-sub">${r?'Register to submit to PLMM':'Access the editorial system'}</div>
+    <div class="ems-auth-sub">${r?'Register to submit to PLMM':'Authors, reviewers and editors'}</div>
     ${EMS.authErr?`<div class="ems-err">${EMS.authErr}</div>`:''}
     ${EMS.authOk?`<div class="ems-ok">${EMS.authOk}</div>`:''}
     ${r?`<div class="ef"><label class="el">Full name</label><input class="ei" id="eaN" placeholder="Your full name"/></div>`:''}
@@ -1392,8 +1601,13 @@ async function emsDoAuth(){
       if(pass!==EDITOR.pass){ EMS.authErr='Incorrect editor password.'; emsRender(); return; }
       EMS.currentUser=EDITOR.email; EMS.currentRole='editor'; EMS.view='admin'; EMS.authErr=null; emsRender(); return;
     }
-    if(!EMS.users[email]||EMS.users[email].pass!==pass){ EMS.authErr='Incorrect email or password.'; emsRender(); return; }
-    EMS.currentUser=email; EMS.currentRole='author'; EMS.view='dash'; EMS.activeTab='manuscripts'; EMS.authErr=null; emsRender(); return;
+    const asAuthor   = !!EMS.users[email]     && EMS.users[email].pass===pass;
+    const asReviewer = !!EMS.reviewers[email] && EMS.reviewers[email].pass===pass;
+    if(!asAuthor && !asReviewer){ EMS.authErr='Incorrect email or password.'; emsRender(); return; }
+    if(asAuthor && asReviewer){ EMS.roleChoice=email; EMS.authErr=null; emsRender(); return; }
+    EMS.authErr=null;
+    if(asReviewer){ emsPickRole('reviewer', email); return; }
+    emsPickRole('author', email); return;
   }
   const name=(document.getElementById('eaN')?.value||'').trim();
   const inst=(document.getElementById('eaI')?.value||'').trim();
@@ -1405,7 +1619,19 @@ async function emsDoAuth(){
   EMS.authOk='Account created! You can now sign in.'; EMS.authMode='login'; EMS.authErr=null; emsRender();
 }
 
-function emsLogout(){ EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; emsRender(); }
+/* Signs the user into the panel for `role`. Called straight from the login
+   handler, or from the picker when one address holds both account types. */
+function emsPickRole(role, email){
+  const addr = email || EMS.roleChoice;
+  if(!addr) return;
+  EMS.currentUser=addr; EMS.currentRole=role;
+  EMS.roleChoice=null; EMS.authErr=null; EMS.authOk=null;
+  if(role==='reviewer'){ EMS.view='rvdash'; EMS.activeTab='assignments'; }
+  else { EMS.view='dash'; EMS.activeTab='manuscripts'; }
+  emsRender();
+}
+
+function emsLogout(){ EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; EMS.roleChoice=null; EMS.rvMsId=null; EMS.rvId=null; emsRender(); }
 
 /* ── DASHBOARD ─────────────────────────────────────── */
 function emsMyMss(){ return Object.values(EMS.manuscripts).filter(m=>m.owner===EMS.currentUser); }
@@ -1737,6 +1963,7 @@ function emsRenderDetail(){
       </div>
       ${(ms.files||[]).length?`<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div></div>`:''}
       ${rc.length?`<div class="ems-fw"><div class="ems-fst">Reviewer comments</div>${rc.map((c,i)=>`<div class="ems-rc"><div class="ems-rc-lbl">Reviewer ${i+1}</div><div class="ems-rc-text">${c}</div></div>`).join('')}${isRev&&!ised?`<div style="margin-top:12px"><button class="ems-btn-new" onclick="emsEditMs('${ms.id}')"><i class="ti ti-upload"></i> Upload revision</button></div>`:''}</div>`:''}
+      ${ised?emsEdReviewPanel(ms):''}
       ${ised&&(ms.status==='submitted'||ms.status==='under_review')?`<div class="ems-fw" style="margin-top:12px"><div class="ems-fst">Editor actions</div><button class="ems-btn-sm blue" onclick="emsOpenReview('${ms.id}')"><i class="ti ti-clipboard-check"></i> Write review &amp; decision</button></div>`:''}
       ${ised?`<div class="ems-fw" style="margin-top:12px;border-color:#FCA5A5"><div class="ems-fst" style="color:#9B1C1C;border-color:#FEE2E2">Danger zone</div><p style="font-size:12px;color:#718096;margin-bottom:10px">Permanently deletes this manuscript's record and all uploaded files from the database. This cannot be undone.</p><button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" onclick="emsDeleteMs('${ms.id}')"><i class="ti ti-trash"></i> Delete manuscript</button></div>`:''}
     </div>
@@ -1751,6 +1978,21 @@ function emsRenderReview(){
   const ms=EMS.manuscripts[EMS.viewingId];
   if(!ms){EMS.view='admin';emsRender();return'';}
   if(ms.status==='submitted'){ms.status='under_review';ms.updated=dateStr();if(!ms.timeline)ms.timeline=[];ms.timeline.push({event:'Review started',date:dateStr(),done:true});EMS.manuscripts[ms.id]=ms;emsSaveMs(ms);}
+
+  /* Reports from invited reviewers, each with a switch to forward its
+     author-facing comments verbatim in the decision letter. Confidential notes
+     are shown here but can never be forwarded. */
+  const submitted=(ms.reviews||[]).filter(r=>r.status==='submitted');
+  const pending=(ms.reviews||[]).filter(r=>['invited','accepted'].includes(r.status));
+  const rvSec = (submitted.length||pending.length) ? `
+    <div class="ems-fst">Reviewer reports</div>
+    ${pending.length?`<p style="font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:4px;padding:8px 10px;line-height:1.6;margin-bottom:10px"><i class="ti ti-clock"></i> ${pending.length} invited reviewer(s) have not yet reported. You can still issue a decision now.</p>`:''}
+    ${submitted.map((rev,i)=>`
+      ${emsRpBlock(rev,{showConf:true,label:`Reviewer ${i+1} — ${rev.reviewerName||rev.reviewerEmail}`})}
+      <label class="ems-cl-item" style="margin:-4px 0 14px 0"><input type="checkbox" id="rvfwd_${rev.id}" checked> Include this reviewer's comments to the authors in the decision letter</label>
+    `).join('')}
+    <div style="height:6px"></div>` : '';
+
   return `<div class="ems-main">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button class="ems-btn-back" onclick="EMS.view='admin';emsRender()"><i class="ti ti-arrow-left"></i> All manuscripts</button><div class="ems-pt">Reviewing: ${ms.title||'(Untitled)'}</div></div>
   <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
@@ -1762,9 +2004,10 @@ function emsRenderReview(){
         <tr><td style="color:#718096;padding:3px 0;vertical-align:top">Abstract</td><td style="line-height:1.5">${ms.abstract||'—'}</td></tr>
       </table>
       ${(ms.files||[]).length?`<div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist" style="margin-bottom:16px">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${f.category}</span><span class="fs">${f.size}</span></div>`).join('')}</div>`:''}
-      <div class="ems-fst">Evaluation criteria</div>
+      ${rvSec}
+      <div class="ems-fst">Editor's own assessment</div>
       ${[['Scientific quality','Rigor, methodology, and validity of results'],['Novelty','Originality and contribution to the field'],['Clarity','Writing quality, figures, and logical structure'],['Completeness','Methods, data, references, and data availability']].map(([l,d])=>`<div style="margin-bottom:14px"><label class="el">${l}</label><div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">${d}</div><div style="display:flex;gap:14px">${['Poor','Fair','Good','Excellent'].map((r,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;color:#4A5568"><input type="radio" name="r_${l.replace(/\s/g,'_')}" value="${i+1}" style="accent-color:#2B3E6B"> ${r}</label>`).join('')}</div></div>`).join('')}
-      <div class="ems-ff" style="margin-bottom:12px"><label class="el">Comments to authors (will be shared)</label><textarea class="eta" id="r_c" placeholder="Provide detailed, constructive feedback…" style="min-height:100px"></textarea></div>
+      <div class="ems-ff" style="margin-bottom:12px"><label class="el">Comments to authors (will be shared)</label><div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">Your own remarks. Reviewer comments you ticked above are appended automatically — you do not need to copy them here.</div><textarea class="eta" id="r_c" placeholder="Provide detailed, constructive feedback…" style="min-height:100px"></textarea></div>
       <div class="ems-ff" style="margin-bottom:14px"><label class="el">Confidential notes to editor (not shared)</label><textarea class="eta" id="r_p" placeholder="Private notes for the editor only…" style="min-height:60px"></textarea></div>
       <div class="ems-ff" style="margin-bottom:14px"><label class="el">Recommendation *</label>
         <select class="es" id="r_d"><option value="">Select a recommendation…</option><option>Accept as is</option><option>Minor revisions required</option><option>Major revisions required</option><option>Reject with invitation to resubmit</option><option>Reject</option></select>
@@ -1787,7 +2030,23 @@ async function emsSubmitReview(){
   if(!dec){alert('Please select a recommendation.');return;}
   const dm={'Accept as is':'accepted','Minor revisions required':'revision_required','Major revisions required':'revision_required','Reject with invitation to resubmit':'rejected','Reject':'rejected'};
   ms.status=dm[dec]||'under_review'; ms.updated=dateStr();
-  if(comm.trim()){if(!ms.reviewerComments)ms.reviewerComments=[];ms.reviewerComments.push(comm.trim());}
+
+  /* Comments the authors will see: the editor's own remarks, plus the
+     author-facing half of every reviewer report the editor chose to forward.
+     Confidential notes are never included. */
+  if(!ms.reviewerComments) ms.reviewerComments=[];
+  if(comm.trim()) ms.reviewerComments.push(comm.trim());
+  const fwd=[];
+  (ms.reviews||[]).filter(r=>r.status==='submitted').forEach((rev,i)=>{
+    if(!document.getElementById('rvfwd_'+rev.id)?.checked) return;
+    if(rev.forwardedOn) return; // already sent to the authors in an earlier round
+    const txt=(rev.commentsToAuthor||'').trim();
+    if(!txt) return;
+    rev.forwardedOn=dateStr();
+    fwd.push({n:i+1, txt, rec:rev.recommendation||''});
+    ms.reviewerComments.push(txt);
+  });
+
   if(!ms.timeline)ms.timeline=[];
   ms.timeline.push({event:`Decision: ${dec}`,date:dateStr(),done:true});
   EMS.manuscripts[ms.id]=ms; await emsSaveMs(ms);
@@ -1795,7 +2054,13 @@ async function emsSubmitReview(){
   const recipients=(ms.authors||[]).map(a=>a.email).filter(Boolean);
   const corr=(ms.authors||[]).find(a=>a.corresponding)||(ms.authors||[])[0];
   const fullId=emsFullMsId(ms);
-  const commentBlock=comm.trim()?`<p><strong>Reviewer comments:</strong></p><p style="white-space:pre-line">${comm.trim()}</p>`:'';
+  const editorBlock=comm.trim()?`<p><strong>Comments from the editor:</strong></p><p style="white-space:pre-line">${emsEsc(comm.trim())}</p>`:'';
+  const reviewerBlock=fwd.length
+    ? `<p><strong>Comments from the reviewers:</strong></p>` + fwd.map(f=>
+        `<p style="margin-bottom:4px"><strong>Reviewer ${f.n}</strong>${f.rec?` — recommendation: ${emsEsc(f.rec)}`:''}</p>
+         <p style="white-space:pre-line;margin-top:0">${emsEsc(f.txt)}</p>`).join('')
+    : '';
+  const commentBlock=editorBlock+reviewerBlock;
 
   let subject, html;
   if(ms.status==='revision_required'){
@@ -1837,22 +2102,803 @@ async function emsSubmitReview(){
   EMS.view='admin'; emsRender();
 }
 
+/* ══════════════════════════════════════════════════════
+   PEER REVIEW
+   An assignment is one reviewer invited to one manuscript. Assignments live on
+   the manuscript document (ms.reviews[]) rather than in their own collection,
+   so they arrive with the manuscript through the existing realtime sync and a
+   reviewer's dashboard updates the moment the editor invites or withdraws.
+══════════════════════════════════════════════════════ */
+
+/* Absolute URL of this page, for the "sign in here" line in every email. */
+function emsSystemUrl(){ return location.origin + location.pathname; }
+
+function emsRvFind(msId, revId){
+  const ms=EMS.manuscripts[msId];
+  if(!ms) return {ms:null, rev:null};
+  return {ms, rev:(ms.reviews||[]).find(r=>r.id===revId)||null};
+}
+/* Assignments visible to the signed-in reviewer, newest deadline first.
+   Withdrawn invitations are hidden — there is nothing left to act on. */
+function emsRvMine(){
+  return emsRvAssignmentsFor(EMS.currentUser)
+    .filter(x=>x.rev.status!=='cancelled')
+    .sort((a,b)=>(a.rev.dueIso||'').localeCompare(b.rev.dueIso||''));
+}
+
+/* ── REVIEWER DASHBOARD ──────────────────────────────── */
+function emsRvRenderDash(){
+  const mine=emsRvMine();
+  const t=EMS.activeTab||'assignments';
+  const pend=mine.filter(x=>x.rev.status==='invited').length;
+  const act =mine.filter(x=>x.rev.status==='accepted').length;
+  return `<div class="ems-dash">
+  <nav class="ems-sb">
+    <div class="ems-sb-sec">Peer review</div>
+    <div class="ems-sb-it ${t==='assignments'?'active':''}" onclick="emsSetTab('assignments')"><i class="ti ti-clipboard-check"></i> My assignments ${pend?`<span class="ems-bdc">${pend}</span>`:''}</div>
+    <div class="ems-sb-sec">Account</div>
+    <div class="ems-sb-it ${t==='profile'?'active':''}" onclick="emsSetTab('profile')"><i class="ti ti-user"></i> Profile</div>
+  </nav>
+  <div class="ems-main">${t==='profile'?emsRvRenderProfile():emsRvRenderList(mine,pend,act)}</div>
+  </div>`;
+}
+
+function emsRvRenderList(mine,pend,act){
+  if(!mine.length) return `<div class="ems-ph"><div class="ems-pt">My assignments</div><div class="ems-pd">Manuscripts the editor has invited you to review</div></div>
+    <div class="ems-empty"><i class="ti ti-clipboard-off"></i><p>You have no review assignments at the moment.</p></div>`;
+  const done=mine.filter(x=>x.rev.status==='submitted').length;
+  return `<div class="ems-ph"><div class="ems-pt">My assignments</div><div class="ems-pd">Manuscripts the editor has invited you to review</div></div>
+  <div class="ems-stat-row">
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Awaiting your reply</div><div class="ems-stat-val">${pend}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">In progress</div><div class="ems-stat-val">${act}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Submitted</div><div class="ems-stat-val" style="color:#065F46">${done}</div></div>
+  </div>
+  <div class="ems-rv-list">${mine.map(({ms,rev})=>{
+    const open=['invited','accepted'].includes(rev.status);
+    return `<div class="ems-rv-card">
+      <div class="ems-rv-head">
+        <div>
+          <div class="ems-rv-name">${emsEsc(ms.title||'(Untitled)')}</div>
+          <div class="ems-rv-meta">${ms.msNumber?`ID ${emsEsc(emsFullMsId(ms))} · `:''}${emsEsc(ms.type||'—')}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span class="etag ${RVC[rev.status]||'etag-draft'}">${RVL[rev.status]||rev.status}</span>
+          ${open?emsDueChip(rev.dueIso):''}
+        </div>
+      </div>
+      <div class="ems-rv-meta">
+        Invited ${emsEsc(rev.invitedDate||'—')}${rev.dueIso?` · Due ${emsFmtIso(rev.dueIso)} (${rev.days} days)`:''}
+        ${rev.status==='submitted'?` · Submitted ${emsEsc(rev.submittedDate||'—')}`:''}
+        ${rev.status==='declined'?` · Declined ${emsEsc(rev.respondedDate||'—')}`:''}
+      </div>
+      <div class="ems-rv-acts">
+        ${rev.status==='invited'?`<button class="ems-btn-sm blue" onclick="emsRvOpen('${ms.id}','${rev.id}')"><i class="ti ti-mail-opened"></i> View invitation</button>`:''}
+        ${rev.status==='accepted'?`<button class="ems-btn-sm" onclick="emsRvOpen('${ms.id}','${rev.id}')"><i class="ti ti-eye"></i> Manuscript &amp; files</button>
+          <button class="ems-btn-sm blue" onclick="emsRvOpenForm('${ms.id}','${rev.id}')"><i class="ti ti-writing"></i> ${rev.draft?'Continue review':'Write review'}</button>`:''}
+        ${rev.status==='submitted'?`<button class="ems-btn-sm" onclick="emsRvOpen('${ms.id}','${rev.id}')"><i class="ti ti-file-check"></i> View my review</button>`:''}
+      </div>
+    </div>`;}).join('')}</div>`;
+}
+
+function emsRvRenderProfile(){
+  const r=EMS.reviewers[EMS.currentUser]||{};
+  return `<div class="ems-ph"><div class="ems-pt">Profile</div><div class="ems-pd">Your reviewer account</div></div>
+  <div class="ems-fw" style="max-width:460px">
+    <div class="ef"><label class="el">Full name</label><input class="ei" id="rpN" value="${emsEsc(r.name||'')}"/></div>
+    <div class="ef"><label class="el">Email</label><input class="ei" value="${emsEsc(r.email||'')}" disabled/></div>
+    <div class="ef"><label class="el">Institution</label><input class="ei" id="rpI" value="${emsEsc(r.inst||'')}"/></div>
+    <div class="ef"><label class="el">Areas of expertise</label><input class="ei" id="rpX" placeholder="e.g. turbulence, thermal structure, remote sensing" value="${emsEsc(r.expertise||'')}"/></div>
+    <div class="ef"><label class="el">New password (leave blank to keep current)</label><input class="ei" id="rpP" type="password" placeholder="New password"/></div>
+    <button class="ems-btn-new" onclick="emsRvSaveProfile()" style="margin-top:6px"><i class="ti ti-device-floppy"></i> Save</button>
+  </div>`;
+}
+async function emsRvSaveProfile(){
+  const r=EMS.reviewers[EMS.currentUser];
+  if(!r) return;
+  r.name=document.getElementById('rpN')?.value||r.name;
+  r.inst=document.getElementById('rpI')?.value||r.inst;
+  r.expertise=document.getElementById('rpX')?.value||r.expertise;
+  const np=document.getElementById('rpP')?.value||'';
+  if(np.trim()) r.pass=np.trim();
+  try{ await emsSaveReviewer(EMS.currentUser); alert('Profile saved!'); emsRender(); }catch(e){}
+}
+
+/* ── REVIEWER: INVITATION / MANUSCRIPT VIEW ──────────── */
+function emsRvOpen(msId, revId){ EMS.rvMsId=msId; EMS.rvId=revId; EMS.view='rvms'; emsRender(); }
+function emsRvBack(){ EMS.view='rvdash'; EMS.activeTab='assignments'; EMS.rvMsId=null; EMS.rvId=null; emsRender(); }
+
+function emsRvRenderMs(){
+  const {ms,rev}=emsRvFind(EMS.rvMsId, EMS.rvId);
+  if(!ms||!rev){ emsRvBack(); return ''; }
+  const invited = rev.status==='invited';
+  const back=`<button class="ems-btn-back" onclick="emsRvBack()"><i class="ti ti-arrow-left"></i> My assignments</button>`;
+
+  /* Before accepting, a reviewer sees only what they need to judge whether they
+     can take the assignment — title, type, abstract, keywords. Files unlock on
+     acceptance, which is also when the confidentiality undertaking begins. */
+  const filesBlock = invited
+    ? `<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div>
+       <p style="font-size:12px;color:#718096;line-height:1.6">The full manuscript and any supplementary files become available for download as soon as you accept this invitation.</p></div>`
+    : ((ms.files||[]).length?`<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Files (${(ms.files||[]).length})</div><div class="ems-flist">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${emsEsc(f.category)}</span><span class="fs">${emsEsc(f.size)}</span></div>`).join('')}</div>
+       <p style="font-size:11px;color:#718096;margin-top:10px;line-height:1.6"><i class="ti ti-lock"></i> These files are confidential. Do not share, distribute, or upload them to any external service, including AI or large-language-model tools.</p></div>`:'');
+
+  const actions = invited
+    ? `<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Respond to this invitation</div>
+        <p style="font-size:12px;color:#4A5568;line-height:1.7;margin-bottom:12px">If you accept, your review is due by <strong>${emsFmtIso(rev.dueIso)}</strong> (${rev.days} days). If you are unable to review, please decline so the editor can invite someone else — suggestions for alternative reviewers are welcome.</p>
+        <div class="ef"><label class="el">Message to the editor (optional; required if declining)</label><textarea class="eta" id="rv_resp" placeholder="e.g. a conflict of interest, current workload, or suggested alternative reviewers…" style="min-height:70px"></textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="ems-btn-new" onclick="emsRvAccept()"><i class="ti ti-check"></i> Accept invitation</button>
+          <button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" onclick="emsRvDecline()"><i class="ti ti-x"></i> Decline</button>
+        </div></div>`
+    : rev.status==='accepted'
+      ? `<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Your review</div>
+         <p style="font-size:12px;color:#4A5568;line-height:1.7;margin-bottom:12px">Due by <strong>${emsFmtIso(rev.dueIso)}</strong>. ${emsDueChip(rev.dueIso)}</p>
+         <button class="ems-btn-new" onclick="emsRvOpenForm('${ms.id}','${rev.id}')"><i class="ti ti-writing"></i> ${rev.draft?'Continue review':'Write review'}</button></div>`
+      : rev.status==='submitted'
+        ? `<div class="ems-fw" style="margin-bottom:12px"><div class="ems-fst">Your submitted review</div>${emsRpBlock(rev,{showConf:true,label:'Your report'})}</div>`
+        : '';
+
+  return `<div class="ems-main">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">${back}<div class="ems-pt">${emsEsc(ms.title||'(Untitled)')}</div><span class="etag ${RVC[rev.status]||'etag-draft'}">${RVL[rev.status]||rev.status}</span></div>
+  ${invited?`<div class="ems-rev-alert"><div class="ems-rev-alert-t"><i class="ti ti-mail"></i> Review invitation</div><div class="ems-rev-alert-b">You have been invited to review this manuscript for <em>Physical Limnology: Monitoring &amp; Methods</em>. Please accept or decline below.</div></div>`:''}
+  <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
+    <div>
+      <div class="ems-fw" style="margin-bottom:12px">
+        <div class="ems-fst">Manuscript</div>
+        <table style="font-size:12px;width:100%;border-collapse:collapse">
+          ${ms.msNumber?`<tr><td style="color:#718096;padding:4px 0;width:120px;vertical-align:top">Manuscript ID</td><td style="font-weight:600">${emsEsc(emsFullMsId(ms))}</td></tr>`:''}
+          <tr><td style="color:#718096;padding:4px 0;width:120px;vertical-align:top">Type</td><td>${emsEsc(ms.type||'—')}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Authors</td><td>${(ms.authors||[]).map(a=>emsEsc(a.name)).join('<br/>')||'—'}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Keywords</td><td>${emsEsc(ms.keywords||'—')}</td></tr>
+          <tr><td style="color:#718096;padding:4px 0;vertical-align:top">Abstract</td><td style="line-height:1.5">${emsEsc(ms.abstract||'—')}</td></tr>
+          ${ms.highlights?`<tr><td style="color:#718096;padding:4px 0;vertical-align:top">Highlights</td><td style="white-space:pre-line">${emsEsc(ms.highlights)}</td></tr>`:''}
+        </table>
+      </div>
+      ${filesBlock}
+      ${actions}
+    </div>
+    <div class="ems-fw"><div class="ems-fst">Assignment</div>
+      <table style="font-size:12px;width:100%">
+        <tr><td style="color:#718096;padding:4px 0">Invited</td><td>${emsEsc(rev.invitedDate||'—')}</td></tr>
+        <tr><td style="color:#718096;padding:4px 0">Due</td><td style="font-weight:600">${emsFmtIso(rev.dueIso)}</td></tr>
+        <tr><td style="color:#718096;padding:4px 0">Window</td><td>${emsEsc(String(rev.days||'—'))} days</td></tr>
+      </table>
+      ${rev.message?`<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #D0DAEB"><div class="el">Note from the editor</div><div style="font-size:12px;color:#4A5568;line-height:1.6;white-space:pre-line">${emsEsc(rev.message)}</div></div>`:''}
+    </div>
+  </div></div>`;
+}
+
+async function emsRvRespond(accept){
+  const {ms,rev}=emsRvFind(EMS.rvMsId, EMS.rvId);
+  if(!ms||!rev) return;
+  if(rev.status!=='invited'){ alert('This invitation has already been answered.'); emsRender(); return; }
+  const note=(document.getElementById('rv_resp')?.value||'').trim();
+  if(!accept && !note){ alert('Please tell the editor briefly why you are declining, so they can invite an alternative reviewer.'); return; }
+
+  rev.status = accept ? 'accepted' : 'declined';
+  rev.respondedDate = dateStr();
+  if(note) rev.responseNote = note;
+  /* The clock starts when the reviewer accepts, not when the invitation was
+     sent, so a reviewer who replies late still gets their full window. */
+  if(accept) rev.dueIso = emsIsoPlusDays(rev.days);
+
+  ms.updated=dateStr();
+  if(!ms.timeline) ms.timeline=[];
+  ms.timeline.push({event:`Reviewer ${accept?'accepted':'declined'}: ${rev.reviewerName||rev.reviewerEmail}`,date:dateStr(),done:true});
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
+
+  const fullId=emsFullMsId(ms);
+  emsSendEmail(EDITOR.email, `Manuscript ${fullId}: Reviewer ${accept?'accepted':'declined'}`, `
+    <p>Dear ${EDITOR.name},</p>
+    <p><strong>${emsEsc(rev.reviewerName||rev.reviewerEmail)}</strong> has <strong>${accept?'accepted':'declined'}</strong> the invitation to review manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;.</p>
+    ${accept?`<p>The review is due by <strong>${emsFmtIso(rev.dueIso)}</strong> (${rev.days} days from acceptance).</p>`:'<p>You may wish to invite an alternative reviewer.</p>'}
+    ${note?`<p><strong>Message from the reviewer:</strong></p><p style="white-space:pre-line">${emsEsc(note)}</p>`:''}
+    <p>Sincerely,<br>PLMM Editorial System</p>`);
+
+  if(accept){
+    emsSendEmail(rev.reviewerEmail, `Manuscript ${fullId}: Review assignment confirmed`, `
+      <p>Dear ${emsEsc(rev.reviewerName||'Reviewer')},</p>
+      <p>Thank you for agreeing to review manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;, for <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
+      <p>Your review is due by <strong>${emsFmtIso(rev.dueIso)}</strong>.</p>
+      <p>The manuscript and its files are now available in your reviewer panel: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a></p>
+      <p>Please remember that the manuscript is a confidential document. It must not be shared, distributed, or entered into any external service, including generative-AI or large-language-model tools.</p>
+      <p>Sincerely,<br>PLMM Editorial Office</p>`);
+    alert('Invitation accepted. The manuscript files are now available in your panel.');
+  } else {
+    alert('Invitation declined. Thank you for letting the editor know.');
+  }
+  emsRvBack();
+}
+function emsRvAccept(){ emsRvRespond(true); }
+function emsRvDecline(){ emsRvRespond(false); }
+
+/* ── REVIEWER: REVIEW FORM ───────────────────────────
+   Reviewers submit their report as text. There is deliberately no file upload
+   on this screen: reports stay in the system as searchable, forwardable text
+   rather than as attachments the editor has to open and re-type. */
+function emsRvOpenForm(msId, revId){ EMS.rvMsId=msId; EMS.rvId=revId; EMS.view='rvform'; emsRender(); }
+
+const RV_ATTESTATIONS = [
+  ['conf','I have treated this manuscript as a confidential document. I have not shared it, distributed it, or shown it to anyone not involved in this review.'],
+  ['ai','I have <strong>not</strong> uploaded or entered the manuscript, its data, figures, or any part of it into any generative-AI or large-language-model tool, and I have not used such a tool to write this review.'],
+  ['coi','I have no conflict of interest with the authors, their institutions, or the subject of this manuscript that would compromise my assessment.'],
+  ['own','This review is my own independent assessment, and I have not delegated it to anyone else.']
+];
+const RV_CHECKLIST = ['Within scope of PLMM','Methods are reproducible','Results clearly presented','Conclusions supported by data','References current and appropriate','Statistical analysis is correct','Data availability addressed'];
+
+function emsRvRenderForm(){
+  const {ms,rev}=emsRvFind(EMS.rvMsId, EMS.rvId);
+  if(!ms||!rev){ emsRvBack(); return ''; }
+  if(rev.status==='submitted'){ EMS.view='rvms'; emsRender(); return ''; }
+  if(rev.status!=='accepted'){ alert('You need to accept this invitation before you can submit a review.'); emsRvBack(); return ''; }
+  const d=rev.draft||{};
+
+  const crit=RV_CRITERIA.map(([k,l,desc])=>`<div style="margin-bottom:14px">
+    <label class="el">${l}</label>
+    <div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">${desc}</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">${['Poor','Fair','Good','Excellent'].map((r,i)=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;color:#4A5568"><input type="radio" name="rvs_${k}" value="${i+1}" ${String(d[k]||'')===String(i+1)?'checked':''} style="accent-color:#2B3E6B"> ${r}</label>`).join('')}</div>
+  </div>`).join('');
+
+  return `<div class="ems-main">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="ems-btn-back" onclick="emsRvOpen('${ms.id}','${rev.id}')"><i class="ti ti-arrow-left"></i> Manuscript</button>
+    <div class="ems-pt">Review: ${emsEsc(ms.title||'(Untitled)')}</div>
+    ${emsDueChip(rev.dueIso)}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
+    <div class="ems-fw">
+      ${(ms.files||[]).length?`<div class="ems-fst">Manuscript files</div><div class="ems-flist" style="margin-bottom:16px">${(ms.files||[]).map(f=>`<div class="ems-fi"><i class="ti ti-file" style="font-size:15px;color:#A0AEC0"></i>${emsFileLink(f)}<span class="fc">${emsEsc(f.category)}</span><span class="fs">${emsEsc(f.size)}</span></div>`).join('')}</div>`:''}
+
+      <div class="ems-fst">Evaluation criteria</div>
+      ${crit}
+
+      <div class="ems-ff" style="margin-bottom:14px">
+        <label class="el">Comments to the authors *</label>
+        <div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">Shared with the authors if the editor forwards your report. Be specific and constructive; refer to sections, figures, and line numbers where you can. There is no length limit.</div>
+        <textarea class="eta" id="rv_c" placeholder="Summary of the manuscript, major points, minor points…" style="min-height:300px">${emsEsc(d.comments||'')}</textarea>
+      </div>
+      <div class="ems-ff" style="margin-bottom:14px">
+        <label class="el">Confidential comments to the editor</label>
+        <div style="font-size:11px;color:#A0AEC0;margin-bottom:5px">Never shared with the authors.</div>
+        <textarea class="eta" id="rv_p" placeholder="Private notes for the editor only…" style="min-height:110px">${emsEsc(d.conf||'')}</textarea>
+      </div>
+      <div class="ems-ff" style="margin-bottom:14px"><label class="el">Recommendation *</label>
+        <select class="es" id="rv_d"><option value="">Select a recommendation…</option>${RV_RECS.map(r=>`<option ${d.rec===r?'selected':''}>${r}</option>`).join('')}</select>
+      </div>
+
+      <div class="ems-att">
+        <div class="ems-att-t"><i class="ti ti-shield-check"></i> Reviewer declaration — all four are required</div>
+        <div class="ems-att-d">PLMM cannot accept a review without these confirmations. They form part of the editorial record.</div>
+        ${RV_ATTESTATIONS.map(([k,txt])=>`<label class="ems-att-item"><input type="checkbox" id="rva_${k}"> <span>${txt}</span></label>`).join('')}
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="ems-btn-new" onclick="emsRvSubmit()"><i class="ti ti-send"></i> Submit review</button>
+        <button class="ems-btn-sm" onclick="emsRvSaveDraft(true)"><i class="ti ti-device-floppy"></i> Save draft &amp; finish later</button>
+      </div>
+      <p style="font-size:11px;color:#A0AEC0;margin-top:10px;line-height:1.6">Once submitted, your review is sent to the editor and can no longer be edited. Reviewers do not upload files — please put your full report in the box above.</p>
+    </div>
+    <div class="ems-fw"><div class="ems-fst">Review checklist</div>
+      <div style="font-size:11px;color:#A0AEC0;margin-bottom:8px">For your own use — not submitted.</div>
+      ${RV_CHECKLIST.map(it=>`<label class="ems-cl-item"><input type="checkbox"> ${it}</label>`).join('')}
+    </div>
+  </div></div>`;
+}
+
+/* Reads the form into the assignment's draft. Reviews run long, so progress is
+   kept on the manuscript record rather than in the page, and survives a reload
+   or a switch to another device. */
+function emsRvCollect(rev){
+  const d={comments:document.getElementById('rv_c')?.value||'', conf:document.getElementById('rv_p')?.value||'', rec:document.getElementById('rv_d')?.value||''};
+  RV_CRITERIA.forEach(([k])=>{ const sel=document.querySelector(`input[name="rvs_${k}"]:checked`); d[k]=sel?sel.value:''; });
+  rev.draft=d;
+  return d;
+}
+async function emsRvSaveDraft(announce){
+  const {ms,rev}=emsRvFind(EMS.rvMsId, EMS.rvId);
+  if(!ms||!rev) return;
+  emsRvCollect(rev);
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
+  if(announce){ alert('Draft saved. You can come back to it any time before the deadline.'); emsRvBack(); }
+}
+
+async function emsRvSubmit(){
+  const {ms,rev}=emsRvFind(EMS.rvMsId, EMS.rvId);
+  if(!ms||!rev) return;
+  const d=emsRvCollect(rev);
+  if(!d.rec){ alert('Please select a recommendation.'); return; }
+  if(!d.comments.trim()){ alert('Please write your comments to the authors.'); return; }
+  const missing=RV_ATTESTATIONS.filter(([k])=>!document.getElementById('rva_'+k)?.checked);
+  if(missing.length){ alert('Please confirm all four items in the reviewer declaration before submitting.\n\nThese cover confidentiality, use of AI tools, conflicts of interest, and authorship of the review.'); return; }
+
+  rev.status='submitted';
+  rev.submittedDate=dateStr();
+  rev.submittedIso=emsIsoToday();
+  rev.recommendation=d.rec;
+  rev.commentsToAuthor=d.comments.trim();
+  rev.confidentialNotes=d.conf.trim();
+  rev.scores={}; RV_CRITERIA.forEach(([k])=>{ if(d[k]) rev.scores[k]=Number(d[k]); });
+  rev.attestations={confidentiality:true, noAiTools:true, noConflict:true, ownWork:true, signedDate:dateStr()};
+  delete rev.draft;
+
+  ms.updated=dateStr();
+  if(!ms.timeline) ms.timeline=[];
+  ms.timeline.push({event:`Review received: ${rev.reviewerName||rev.reviewerEmail}`,date:dateStr(),done:true});
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
+
+  const fullId=emsFullMsId(ms);
+  const outstanding=(ms.reviews||[]).filter(r=>['invited','accepted'].includes(r.status)).length;
+  emsSendEmail(EDITOR.email, `Manuscript ${fullId}: Review submitted`, `
+    <p>Dear ${EDITOR.name},</p>
+    <p><strong>${emsEsc(rev.reviewerName||rev.reviewerEmail)}</strong> has submitted their review of manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;.</p>
+    <p><strong>Recommendation:</strong> ${emsEsc(rev.recommendation)}</p>
+    <p>${outstanding?`${outstanding} review(s) are still outstanding.`:'All invited reviewers have now responded.'}</p>
+    <p>The full report is available in the editorial panel: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a></p>
+    <p>Sincerely,<br>PLMM Editorial System</p>`);
+
+  emsSendEmail(rev.reviewerEmail, `Manuscript ${fullId}: Review received — thank you`, `
+    <p>Dear ${emsEsc(rev.reviewerName||'Reviewer')},</p>
+    <p>Thank you for completing your review of manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;, for <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
+    <p>Your report has been passed to the editor. We are grateful for the time and expertise you have given to the journal.</p>
+    <p>Sincerely,<br>PLMM Editorial Office</p>`);
+
+  alert('Thank you — your review has been submitted and the editor has been notified.');
+  emsRvBack();
+}
+
+/* Renders one submitted report. `showConf` gates the confidential notes so the
+   same block can be reused wherever the audience differs. */
+function emsRpBlock(rev, opt){
+  const o=opt||{};
+  const sc=rev.scores||{};
+  const names={1:'Poor',2:'Fair',3:'Good',4:'Excellent'};
+  const scoreLine=RV_CRITERIA.filter(([k])=>sc[k]).map(([k,l])=>`<span>${l}: <b>${names[sc[k]]||sc[k]}</b></span>`).join('');
+  return `<div class="ems-rp">
+    <div class="ems-rp-h">
+      <div class="ems-rp-t">${emsEsc(o.label||rev.reviewerName||rev.reviewerEmail)}</div>
+      <div class="ems-rp-rec">${emsEsc(rev.recommendation||'—')}</div>
+    </div>
+    <div class="ems-rv-meta" style="margin-bottom:8px">Submitted ${emsEsc(rev.submittedDate||'—')}${rev.attestations?' · <i class="ti ti-shield-check"></i> Declaration signed (confidentiality, no AI tools, no conflict of interest, own work)':''}</div>
+    ${scoreLine?`<div class="ems-rp-sc">${scoreLine}</div>`:''}
+    <div class="el" style="margin-bottom:4px">Comments to the authors</div>
+    <div class="ems-rp-body">${emsEsc(rev.commentsToAuthor||'—')}</div>
+    ${o.showConf&&rev.confidentialNotes?`<div class="ems-rp-conf"><strong>Confidential to the editor:</strong>\n${emsEsc(rev.confidentialNotes)}</div>`:''}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   EDITOR: MANAGING REVIEWERS AND ASSIGNMENTS
+══════════════════════════════════════════════════════ */
+
+/* The peer-review panel shown on a manuscript in the editor's detail view.
+   Inviting reviewers is optional — the editor can still write the decision
+   directly, exactly as before. */
+function emsEdReviewPanel(ms){
+  const revs=ms.reviews||[];
+  const rows=revs.map(rev=>{
+    const open=['invited','accepted'].includes(rev.status);
+    return `<div class="ems-rv-card">
+      <div class="ems-rv-head">
+        <div>
+          <div class="ems-rv-name">${emsEsc(rev.reviewerName||rev.reviewerEmail)}</div>
+          <div class="ems-rv-meta">${emsEsc(rev.reviewerEmail)}${rev.reviewerInst?` · ${emsEsc(rev.reviewerInst)}`:''}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span class="etag ${RVC[rev.status]||'etag-draft'}">${RVL[rev.status]||rev.status}</span>
+          ${open?emsDueChip(rev.dueIso):''}
+        </div>
+      </div>
+      <div class="ems-rv-meta">
+        Invited ${emsEsc(rev.invitedDate||'—')}${rev.dueIso?` · Due ${emsFmtIso(rev.dueIso)} (${emsEsc(String(rev.days||'—'))} days)`:''}
+        ${rev.respondedDate?` · Responded ${emsEsc(rev.respondedDate)}`:''}
+        ${rev.status==='accepted'&&rev.draft?' · <em style="font-style:normal;color:#92400E">draft in progress</em>':''}
+      </div>
+      ${rev.responseNote?`<div class="ems-rv-meta" style="margin-top:6px;padding:6px 8px;background:#F7F9FC;border-radius:4px;white-space:pre-line">“${emsEsc(rev.responseNote)}”</div>`:''}
+      ${rev.status==='submitted'?emsRpBlock(rev,{showConf:true}):''}
+      ${open?`<div class="ems-rv-acts">
+        <button class="ems-btn-sm" onclick="emsEdRemind('${ms.id}','${rev.id}')"><i class="ti ti-bell"></i> Send reminder</button>
+        <button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" onclick="emsEdWithdraw('${ms.id}','${rev.id}')"><i class="ti ti-user-minus"></i> Withdraw invitation</button>
+      </div>`:''}
+    </div>`;}).join('');
+
+  const done=revs.filter(r=>r.status==='submitted').length;
+  const wait=revs.filter(r=>['invited','accepted'].includes(r.status)).length;
+  return `<div class="ems-fw" style="margin-top:12px">
+    <div class="ems-fst">Peer review${revs.length?` — ${done} submitted, ${wait} outstanding`:''}</div>
+    ${revs.length?`<div class="ems-rv-list" style="margin-bottom:12px">${rows}</div>`
+      :`<p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:12px">No reviewers assigned. Peer review is optional — you can write the decision yourself, or invite one or more reviewers to report first.</p>`}
+    <button class="ems-btn-sm blue" onclick="emsEdOpenInvite('${ms.id}')"><i class="ti ti-user-plus"></i> Invite a reviewer</button>
+  </div>`;
+}
+
+/* ── EDITOR: INVITE FORM ─────────────────────────────── */
+function emsEdOpenInvite(msId){
+  EMS.rvMsId=msId;
+  EMS.inviteDraft={sel:'',name:'',email:'',inst:'',expertise:'',days:EMS_DEFAULT_REVIEW_DAYS,message:''};
+  EMS.newReviewerCreds=null;
+  EMS.view='invite'; emsRender();
+}
+/* Reads the form into state so the view can re-render (when the editor switches
+   between an existing and a new reviewer) without losing what they typed. */
+function emsEdInviteCollect(){
+  const d=EMS.inviteDraft||{};
+  const g=id=>document.getElementById(id)?.value;
+  if(g('iv_sel')!==undefined) d.sel=g('iv_sel');
+  if(g('iv_n')!==undefined) d.name=g('iv_n');
+  if(g('iv_e')!==undefined) d.email=g('iv_e');
+  if(g('iv_i')!==undefined) d.inst=g('iv_i');
+  if(g('iv_x')!==undefined) d.expertise=g('iv_x');
+  if(g('iv_d')!==undefined) d.days=g('iv_d');
+  if(g('iv_m')!==undefined) d.message=g('iv_m');
+  EMS.inviteDraft=d;
+  return d;
+}
+function emsEdInviteSel(){ emsEdInviteCollect(); emsRender(); }
+
+function emsEdRenderInvite(){
+  const ms=EMS.manuscripts[EMS.rvMsId];
+  if(!ms){ EMS.view='admin'; emsRender(); return ''; }
+  const d=EMS.inviteDraft||{days:EMS_DEFAULT_REVIEW_DAYS};
+  const isNew = !d.sel;
+  /* Anyone already invited to this manuscript is filtered out of the pool, so
+     the same reviewer cannot be double-invited by accident. */
+  const taken=new Set((ms.reviews||[]).filter(r=>r.status!=='cancelled').map(r=>r.reviewerEmail));
+  const pool=Object.values(EMS.reviewers).filter(r=>!taken.has(r.email));
+  const due=emsIsoPlusDays(d.days||EMS_DEFAULT_REVIEW_DAYS);
+
+  return `<div class="ems-main">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="ems-btn-back" onclick="emsOpenDetail('${ms.id}')"><i class="ti ti-arrow-left"></i> Manuscript</button>
+    <div class="ems-pt">Invite a reviewer</div>
+  </div>
+  <div class="ems-fw" style="max-width:640px">
+    <div class="ems-fst">Manuscript</div>
+    <p style="font-size:12px;color:#4A5568;line-height:1.6;margin-bottom:16px">${ms.msNumber?`<strong>${emsEsc(emsFullMsId(ms))}</strong> — `:''}${emsEsc(ms.title||'(Untitled)')}</p>
+
+    <div class="ems-fst">Reviewer</div>
+    <div class="ef"><label class="el">Choose from the reviewer pool</label>
+      <select class="es" id="iv_sel" onchange="emsEdInviteSel()">
+        <option value="">＋ Add a new reviewer…</option>
+        ${pool.map(r=>`<option value="${emsEsc(r.email)}" ${d.sel===r.email?'selected':''}>${emsEsc(r.name||r.email)}${r.inst?` — ${emsEsc(r.inst)}`:''}</option>`).join('')}
+      </select>
+      ${taken.size?`<div style="font-size:11px;color:#A0AEC0;margin-top:5px">${taken.size} reviewer(s) already invited to this manuscript are hidden from the list.</div>`:''}
+    </div>
+
+    ${isNew?`
+    <div class="ems-fg">
+      <div class="ems-ff"><label class="el">Full name *</label><input class="ei" id="iv_n" placeholder="Dr. Jane Smith" value="${emsEsc(d.name||'')}"/></div>
+      <div class="ems-ff"><label class="el">Email *</label><input class="ei" id="iv_e" type="email" placeholder="jane@university.edu" value="${emsEsc(d.email||'')}"/></div>
+    </div>
+    <div class="ems-fg">
+      <div class="ems-ff"><label class="el">Institution</label><input class="ei" id="iv_i" placeholder="University or research center" value="${emsEsc(d.inst||'')}"/></div>
+      <div class="ems-ff"><label class="el">Areas of expertise</label><input class="ei" id="iv_x" placeholder="e.g. turbulence, thermal structure" value="${emsEsc(d.expertise||'')}"/></div>
+    </div>
+    <p style="font-size:11px;color:#718096;line-height:1.6;margin-bottom:14px"><i class="ti ti-key"></i> A login will be created automatically and sent to this address with the invitation. The reviewer is added to your pool and can be invited to future manuscripts without re-entering their details.</p>
+    `:`<p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:14px"><i class="ti ti-user-check"></i> ${emsEsc(EMS.reviewers[d.sel]?.name||d.sel)} already has a login. The invitation email will remind them of their sign-in address.</p>`}
+
+    <div class="ems-fst">Deadline</div>
+    <div class="ems-fg">
+      <div class="ems-ff"><label class="el">Days to review</label><input class="ei" id="iv_d" type="number" min="1" max="365" value="${emsEsc(String(d.days||EMS_DEFAULT_REVIEW_DAYS))}" onchange="emsEdInviteSel()"/></div>
+      <div class="ems-ff"><label class="el">Due date</label><input class="ei" value="${emsFmtIso(due)}" disabled/></div>
+    </div>
+    <p style="font-size:11px;color:#718096;line-height:1.6;margin-bottom:14px">The default is ${EMS_DEFAULT_REVIEW_DAYS} days. The countdown restarts from the day the reviewer accepts, so a late reply does not eat into their window.</p>
+
+    <div class="ef"><label class="el">Personal message to the reviewer (optional)</label>
+      <textarea class="eta" id="iv_m" placeholder="e.g. why you thought of them for this manuscript…" style="min-height:80px">${emsEsc(d.message||'')}</textarea></div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <button class="ems-btn-new" onclick="emsEdSendInvite()"><i class="ti ti-send"></i> Send invitation</button>
+      <button class="ems-btn-sm" onclick="emsOpenDetail('${ms.id}')">Cancel</button>
+    </div>
+  </div></div>`;
+}
+
+async function emsEdSendInvite(){
+  const ms=EMS.manuscripts[EMS.rvMsId];
+  if(!ms) return;
+  const d=emsEdInviteCollect();
+  const days=Math.max(1, Math.min(365, parseInt(d.days,10)||EMS_DEFAULT_REVIEW_DAYS));
+
+  let email, name, inst, freshPass=null;
+  if(d.sel){
+    const r=EMS.reviewers[d.sel];
+    if(!r){ alert('That reviewer is no longer in the pool.'); return; }
+    email=r.email; name=r.name; inst=r.inst;
+  } else {
+    name=(d.name||'').trim();
+    email=(d.email||'').trim().toLowerCase();
+    inst=(d.inst||'').trim();
+    if(!name){ alert('Please enter the reviewer\'s full name.'); return; }
+    if(!email||email.indexOf('@')<1){ alert('Please enter a valid email address for the reviewer.'); return; }
+    if(email===EDITOR.email){ alert('That address is the editor account and cannot be used as a reviewer login.'); return; }
+    if(EMS.reviewers[email]){
+      /* Already in the pool under a different spelling of the name — reuse the
+         existing account rather than resetting a working password. */
+      const ex=EMS.reviewers[email];
+      name=ex.name||name; inst=ex.inst||inst;
+    } else {
+      freshPass=emsRvGenPass();
+      EMS.reviewers[email]={email,name,inst,expertise:(d.expertise||'').trim(),pass:freshPass,role:'reviewer',created:dateStr()};
+      try{ await emsSaveReviewer(email); }
+      catch(e){ delete EMS.reviewers[email]; return; }
+    }
+  }
+
+  if((ms.reviews||[]).some(r=>r.reviewerEmail===email && r.status!=='cancelled')){
+    alert('That reviewer already has an open assignment on this manuscript.'); return;
+  }
+
+  const rev={
+    id:rvid(), reviewerEmail:email, reviewerName:name, reviewerInst:inst||'',
+    status:'invited', days, invitedDate:dateStr(), invitedIso:emsIsoToday(),
+    dueIso:emsIsoPlusDays(days), message:(d.message||'').trim()
+  };
+  if(!ms.reviews) ms.reviews=[];
+  ms.reviews.push(rev);
+
+  /* Sending a manuscript out for review moves it out of the submitted pile,
+     matching what the editor's own "write review" screen already does. */
+  if(ms.status==='submitted'){
+    ms.status='under_review';
+    if(!ms.timeline) ms.timeline=[];
+    ms.timeline.push({event:'Review started',date:dateStr(),done:true});
+  }
+  ms.updated=dateStr();
+  if(!ms.timeline) ms.timeline=[];
+  ms.timeline.push({event:`Reviewer invited: ${name}`,date:dateStr(),done:true});
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
+
+  const fullId=emsFullMsId(ms);
+  const url=emsSystemUrl();
+  const credBlock = freshPass ? `
+    <p><strong>Your reviewer login has been created:</strong></p>
+    <p>Sign in at: <a href="${url}">${url}</a><br>
+       Email: <strong>${emsEsc(email)}</strong><br>
+       Password: <strong>${emsEsc(freshPass)}</strong></p>
+    <p>Please change this password from the Profile tab after you first sign in.</p>`
+   : `<p>Sign in with your existing reviewer account at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>). If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`;
+
+  emsSendEmail(email, `Manuscript ${fullId}: Invitation to review for PLMM`, `
+    <p>Dear ${emsEsc(name)},</p>
+    <p>I am writing to ask whether you would be willing to review the manuscript below for <em>Physical Limnology: Monitoring &amp; Methods</em>. Your expertise would be of great value in assessing this work.</p>
+    <p><strong>Manuscript ID:</strong> ${fullId}<br>
+       <strong>Title:</strong> &quot;${emsEsc(ms.title)}&quot;<br>
+       <strong>Type:</strong> ${emsEsc(ms.type||'—')}</p>
+    ${ms.abstract?`<p><strong>Abstract:</strong></p><p style="white-space:pre-line">${emsEsc(ms.abstract)}</p>`:''}
+    ${rev.message?`<p><strong>A note from the editor:</strong></p><p style="white-space:pre-line">${emsEsc(rev.message)}</p>`:''}
+    <p>If you accept, we would ask for your report within <strong>${days} days</strong> of accepting.</p>
+    <p><strong>To accept or decline</strong>, please sign in to the editorial system and open "My assignments". You can decline directly in the system, and suggestions for alternative reviewers are always welcome.</p>
+    ${credBlock}
+    <p>Please note that the manuscript is a confidential document. If you accept, you will be asked to confirm that you have kept it confidential, that you have not entered it into any generative-AI or large-language-model tool, and that you have no conflict of interest.</p>
+    <p>Thank you for considering this request.</p>
+    <p>Sincerely,<br>${EDITOR.name}<br>PLMM Editorial Office</p>`);
+
+  emsOpenDetail(ms.id);
+  alert(freshPass
+    ? `Invitation sent to ${name} (${email}).\n\nA reviewer login was created and the credentials were included in the email.\n\nPassword: ${freshPass}\n\n(Note it down now if you want a copy — it is stored in the reviewer pool but not shown again in full.)`
+    : `Invitation sent to ${name} (${email}).`);
+}
+
+async function emsEdRemind(msId, revId){
+  const {ms,rev}=emsRvFind(msId, revId);
+  if(!ms||!rev) return;
+  const n=emsDaysLeft(rev.dueIso);
+  const state = rev.status==='invited' ? 'has not yet been answered' : 'is still outstanding';
+  if(!confirm(`Send a reminder to ${rev.reviewerName||rev.reviewerEmail}?`)) return;
+  rev.lastReminder=dateStr();
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
+  const fullId=emsFullMsId(ms);
+  emsSendEmail(rev.reviewerEmail, `Manuscript ${fullId}: Reminder — review ${n<0?'overdue':'due soon'}`, `
+    <p>Dear ${emsEsc(rev.reviewerName||'Reviewer')},</p>
+    <p>This is a gentle reminder that your ${rev.status==='invited'?'invitation to review':'review of'} manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;, ${state}.</p>
+    <p>The deadline is <strong>${emsFmtIso(rev.dueIso)}</strong>${n<0?` — this was ${Math.abs(n)} day(s) ago`:n===0?' — that is today':` — ${n} day(s) from now`}.</p>
+    <p>You can ${rev.status==='invited'?'accept or decline':'submit your report'} in the editorial system: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a></p>
+    <p>If you need more time or are no longer able to review, please let us know so we can make other arrangements.</p>
+    <p>Sincerely,<br>PLMM Editorial Office</p>`);
+  alert('Reminder sent.');
+  emsRender();
+}
+
+async function emsEdWithdraw(msId, revId){
+  const {ms,rev}=emsRvFind(msId, revId);
+  if(!ms||!rev) return;
+  if(!confirm(`Withdraw the review invitation to ${rev.reviewerName||rev.reviewerEmail}?\n\nThe assignment disappears from their panel and any draft they had is discarded. Their reviewer account is not affected.`)) return;
+  rev.status='cancelled';
+  rev.cancelledDate=dateStr();
+  delete rev.draft;
+  ms.updated=dateStr();
+  if(!ms.timeline) ms.timeline=[];
+  ms.timeline.push({event:`Reviewer withdrawn: ${rev.reviewerName||rev.reviewerEmail}`,date:dateStr(),done:true});
+  EMS.manuscripts[ms.id]=ms;
+  await emsSaveMs(ms);
+  emsSendEmail(rev.reviewerEmail, `Manuscript ${emsFullMsId(ms)}: Review invitation withdrawn`, `
+    <p>Dear ${emsEsc(rev.reviewerName||'Reviewer')},</p>
+    <p>The invitation to review manuscript <strong>${emsFullMsId(ms)}</strong>, &quot;${emsEsc(ms.title)}&quot;, has been withdrawn, and no action is needed from you.</p>
+    <p>Thank you nonetheless for your willingness to support the journal. We hope to call on you again.</p>
+    <p>Sincerely,<br>PLMM Editorial Office</p>`);
+  emsRender();
+}
+
 /* ── ADMIN VIEW ────────────────────────────────────── */
 function emsRenderAdmin(){
   const all=emsAllMss();
   const filt=EMS.filterStatus==='all'?all:all.filter(m=>m.status===EMS.filterStatus);
   const cnt={all:all.length,submitted:all.filter(m=>m.status==='submitted').length,under_review:all.filter(m=>m.status==='under_review').length,revision_required:all.filter(m=>m.status==='revision_required').length,accepted:all.filter(m=>m.status==='accepted').length,rejected:all.filter(m=>m.status==='rejected').length};
+  const overdue=emsAllAssignments().filter(x=>['invited','accepted'].includes(x.rev.status)&&emsDaysLeft(x.rev.dueIso)<0).length;
   const t=EMS.activeTab||'db';
   return `<div class="ems-dash">
   <nav class="ems-sb">
     <div class="ems-sb-sec">Editorial</div>
-    <div class="ems-sb-it ${t==='db'?'active':''}" onclick="EMS.activeTab='db';emsRender()"><i class="ti ti-database"></i> All manuscripts <span class="ems-bdc">${cnt.all}</span></div>
-    <div class="ems-sb-it ${t==='users'?'active':''}" onclick="EMS.activeTab='users';emsRender()"><i class="ti ti-users"></i> Registered authors</div>
+    <div class="ems-sb-it ${t==='db'?'active':''}" onclick="EMS.activeTab='db';EMS.newReviewerCreds=null;emsRender()"><i class="ti ti-database"></i> All manuscripts <span class="ems-bdc">${cnt.all}</span></div>
+    <div class="ems-sb-it ${t==='users'?'active':''}" onclick="EMS.activeTab='users';EMS.newReviewerCreds=null;emsRender()"><i class="ti ti-users"></i> Registered authors</div>
+    <div class="ems-sb-it ${t==='reviewers'?'active':''}" onclick="EMS.activeTab='reviewers';emsRender()"><i class="ti ti-user-check"></i> Reviewer pool ${overdue?`<span class="ems-bdc">${overdue}</span>`:''}</div>
     <div class="ems-sb-sec">Filter by status</div>
     ${[['submitted','Submitted',cnt.submitted],['under_review','Under review',cnt.under_review],['revision_required','Revision due',cnt.revision_required],['accepted','Accepted',cnt.accepted],['rejected','Rejected',cnt.rejected]].map(([k,l,n])=>`<div class="ems-sb-it ${EMS.filterStatus===k&&t==='db'?'active':''}" onclick="EMS.activeTab='db';EMS.filterStatus='${k}';emsRender()"><i class="ti ti-filter"></i> ${l} ${n>0?`<span class="ems-bdc">${n}</span>`:''}</div>`).join('')}
   </nav>
-  <div class="ems-main">${t==='db'?emsRenderAdminDb(filt,cnt):emsRenderAdminUsers()}</div>
+  <div class="ems-main">${t==='db'?emsRenderAdminDb(filt,cnt):t==='reviewers'?emsRenderAdminReviewers():emsRenderAdminUsers()}</div>
   </div>`;
+}
+
+/* Every assignment in the system, paired with its manuscript. */
+function emsAllAssignments(){
+  const out=[];
+  Object.values(EMS.manuscripts).forEach(ms=>{ (ms.reviews||[]).forEach(rev=>out.push({ms,rev})); });
+  return out;
+}
+
+/* ── ADMIN: REVIEWER POOL ────────────────────────────
+   The editor's roster of people who may be invited to review, plus a live view
+   of every outstanding assignment across all manuscripts. */
+function emsRenderAdminReviewers(){
+  const revs=Object.values(EMS.reviewers);
+  const all=emsAllAssignments();
+  const open=all.filter(x=>['invited','accepted'].includes(x.rev.status))
+                .sort((a,b)=>(a.rev.dueIso||'').localeCompare(b.rev.dueIso||''));
+  const overdue=open.filter(x=>emsDaysLeft(x.rev.dueIso)<0).length;
+
+  const stats=email=>{
+    const mine=all.filter(x=>x.rev.reviewerEmail===email);
+    return {
+      open: mine.filter(x=>['invited','accepted'].includes(x.rev.status)).length,
+      done: mine.filter(x=>x.rev.status==='submitted').length,
+      dec:  mine.filter(x=>x.rev.status==='declined').length
+    };
+  };
+
+  const openList = open.length ? `
+    <div class="ems-fw" style="margin-bottom:14px">
+      <div class="ems-fst">Outstanding assignments (${open.length})</div>
+      <div class="ems-rv-list">${open.map(({ms,rev})=>`<div class="ems-rv-card">
+        <div class="ems-rv-head">
+          <div>
+            <div class="ems-rv-name">${emsEsc(rev.reviewerName||rev.reviewerEmail)}</div>
+            <div class="ems-rv-meta">${ms.msNumber?`${emsEsc(emsFullMsId(ms))} — `:''}${emsEsc(ms.title||'(Untitled)')}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <span class="etag ${RVC[rev.status]}">${RVL[rev.status]}</span>${emsDueChip(rev.dueIso)}
+          </div>
+        </div>
+        <div class="ems-rv-acts">
+          <button class="ems-btn-sm" onclick="emsOpenDetail('${ms.id}')"><i class="ti ti-eye"></i> Manuscript</button>
+          <button class="ems-btn-sm" onclick="emsEdRemind('${ms.id}','${rev.id}')"><i class="ti ti-bell"></i> Remind</button>
+        </div>
+      </div>`).join('')}</div>
+    </div>` : '';
+
+  return `<div class="ems-ph"><div class="ems-pt">Reviewer pool</div><div class="ems-pd">${revs.length} reviewer(s) · ${open.length} outstanding assignment(s)${overdue?` · ${overdue} overdue`:''}</div></div>
+
+  <div class="ems-stat-row">
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Reviewers</div><div class="ems-stat-val">${revs.length}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Outstanding</div><div class="ems-stat-val">${open.length}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Overdue</div><div class="ems-stat-val" style="color:${overdue?'#7F1D1D':'#1A2744'}">${overdue}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Reviews received</div><div class="ems-stat-val" style="color:#065F46">${all.filter(x=>x.rev.status==='submitted').length}</div></div>
+  </div>
+
+  ${openList}
+
+  <div class="ems-fw" style="margin-bottom:14px">
+    <div class="ems-fst">Add a reviewer</div>
+    <p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:12px">Creates a login and emails the credentials. You can also add someone on the fly while inviting them to a manuscript.</p>
+    <div class="ems-fg">
+      <div class="ems-ff"><label class="el">Full name *</label><input class="ei" id="ar_n" placeholder="Dr. Jane Smith"/></div>
+      <div class="ems-ff"><label class="el">Email *</label><input class="ei" id="ar_e" type="email" placeholder="jane@university.edu"/></div>
+    </div>
+    <div class="ems-fg">
+      <div class="ems-ff"><label class="el">Institution</label><input class="ei" id="ar_i" placeholder="University or research center"/></div>
+      <div class="ems-ff"><label class="el">Areas of expertise</label><input class="ei" id="ar_x" placeholder="e.g. turbulence, remote sensing"/></div>
+    </div>
+    <label class="ems-cl-item" style="margin-bottom:10px"><input type="checkbox" id="ar_mail" checked> Email the login details to this reviewer now</label>
+    <button class="ems-btn-new" onclick="emsAddReviewer()"><i class="ti ti-user-plus"></i> Create reviewer account</button>
+    ${EMS.newReviewerCreds?`<div class="ems-cred"><i class="ti ti-key"></i> <strong>Login created for ${emsEsc(EMS.newReviewerCreds.name)}</strong><br>
+      Email: <code>${emsEsc(EMS.newReviewerCreds.email)}</code><br>
+      Password: <code>${emsEsc(EMS.newReviewerCreds.pass)}</code><br>
+      <span style="font-size:11px;color:#718096">${EMS.newReviewerCreds.mailed?'These details have been emailed to the reviewer.':'Not emailed — pass these on yourself.'} This box disappears when you leave the page.</span></div>`:''}
+  </div>
+
+  ${revs.length===0?`<div class="ems-empty"><i class="ti ti-user-search"></i><p>No reviewers yet. Add one above, or add one while inviting a reviewer to a manuscript.</p></div>`:
+  `<div class="ems-fw" style="padding:0;overflow:hidden"><table class="ems-db-table" style="table-layout:fixed">
+    <colgroup><col style="width:20%"><col style="width:23%"><col style="width:19%"><col style="width:16%"><col style="width:10%"><col style="width:12%"></colgroup>
+    <thead><tr><th>Name</th><th>Email</th><th>Institution</th><th>Expertise</th><th>Assignments</th><th>Actions</th></tr></thead>
+    <tbody>${revs.map(r=>{const s=stats(r.email);return `<tr>
+      <td style="font-weight:500">${emsEsc(r.name||'—')}</td>
+      <td style="color:#4A5568">${emsEsc(r.email)}</td>
+      <td style="color:#4A5568">${emsEsc(r.inst||'—')}</td>
+      <td style="color:#718096">${emsEsc(r.expertise||'—')}</td>
+      <td style="color:#718096">${s.done} done${s.open?` · ${s.open} open`:''}${s.dec?` · ${s.dec} declined`:''}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="ems-btn-sm" title="Issue a new password and email it" onclick="emsResetReviewerPass('${emsEsc(r.email)}')"><i class="ti ti-key"></i></button>
+        <button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" title="Delete reviewer" onclick="emsDeleteReviewer('${emsEsc(r.email)}')"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`;}).join('')}</tbody>
+  </table></div>`}`;
+}
+
+async function emsAddReviewer(){
+  const name=(document.getElementById('ar_n')?.value||'').trim();
+  const email=(document.getElementById('ar_e')?.value||'').trim().toLowerCase();
+  const inst=(document.getElementById('ar_i')?.value||'').trim();
+  const expertise=(document.getElementById('ar_x')?.value||'').trim();
+  const mail=!!document.getElementById('ar_mail')?.checked;
+  if(!name){ alert('Please enter the reviewer\'s full name.'); return; }
+  if(!email||email.indexOf('@')<1){ alert('Please enter a valid email address.'); return; }
+  if(email===EDITOR.email){ alert('That address is the editor account and cannot be used as a reviewer login.'); return; }
+  if(EMS.reviewers[email]){ alert('A reviewer with that email is already in the pool.'); return; }
+
+  const pass=emsRvGenPass();
+  EMS.reviewers[email]={email,name,inst,expertise,pass,role:'reviewer',created:dateStr()};
+  try{ await emsSaveReviewer(email); }
+  catch(e){ delete EMS.reviewers[email]; return; }
+
+  EMS.newReviewerCreds={name,email,pass,mailed:mail};
+  if(mail) emsSendEmail(email, 'Your PLMM reviewer account', `
+    <p>Dear ${emsEsc(name)},</p>
+    <p>You have been added to the reviewer panel of <em>Physical Limnology: Monitoring &amp; Methods</em>. An account has been created for you so that you can receive and respond to review invitations.</p>
+    <p>Sign in at: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a><br>
+       Email: <strong>${emsEsc(email)}</strong><br>
+       Password: <strong>${emsEsc(pass)}</strong></p>
+    <p>Please change this password from the Profile tab after you first sign in. You will receive a separate message whenever a manuscript is assigned to you, and you are free to decline any invitation.</p>
+    <p>Thank you for supporting the journal.</p>
+    <p>Sincerely,<br>${EDITOR.name}<br>PLMM Editorial Office</p>`);
+  emsRender();
+}
+
+async function emsResetReviewerPass(email){
+  const r=EMS.reviewers[email];
+  if(!r) return;
+  if(!confirm(`Issue a new password for ${r.name||email}?\n\nTheir current password stops working immediately, and the new one is emailed to them.`)) return;
+  const pass=emsRvGenPass();
+  const old=r.pass;
+  r.pass=pass;
+  try{ await emsSaveReviewer(email); }
+  catch(e){ r.pass=old; return; }
+  EMS.newReviewerCreds={name:r.name||email,email,pass,mailed:true};
+  emsSendEmail(email, 'Your PLMM reviewer password has been reset', `
+    <p>Dear ${emsEsc(r.name||'Reviewer')},</p>
+    <p>A new password has been issued for your reviewer account on <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
+    <p>Sign in at: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a><br>
+       Email: <strong>${emsEsc(email)}</strong><br>
+       Password: <strong>${emsEsc(pass)}</strong></p>
+    <p>Please change it from the Profile tab once you are signed in.</p>
+    <p>Sincerely,<br>PLMM Editorial Office</p>`);
+  emsRender();
+}
+
+/* One-line peer-review status under a manuscript's status pill in the table,
+   so the editor can see at a glance which submissions are waiting on reviewers. */
+function emsRvSummaryCell(m){
+  const revs=(m.reviews||[]).filter(r=>r.status!=='cancelled');
+  if(!revs.length) return '';
+  const done=revs.filter(r=>r.status==='submitted').length;
+  const open=revs.filter(r=>['invited','accepted'].includes(r.status));
+  const late=open.filter(r=>emsDaysLeft(r.dueIso)<0).length;
+  const bits=[`${done}/${revs.length} reviews`];
+  if(late) bits.push(`${late} overdue`);
+  return `<div style="font-size:10px;margin-top:3px;color:${late?'#9B1C1C':'#A0AEC0'}"><i class="ti ti-users"></i> ${bits.join(' · ')}</div>`;
 }
 
 function emsRenderAdminDb(filt,cnt){
@@ -1875,7 +2921,7 @@ function emsRenderAdminDb(filt,cnt){
       <td style="font-weight:500">${m.msNumber?`<div style="font-weight:400;font-size:10px;color:#A0AEC0">${emsFullMsId(m)}</div>`:''}${m.title||'(Untitled)'}</td>
       <td style="color:#4A5568">${(m.type||'—').split(' ').slice(0,2).join(' ')}</td>
       <td style="color:#4A5568">${m.ownerName||m.owner||'—'}</td>
-      <td><span class="etag ${SC[m.status]||'etag-draft'}">${SL[m.status]||m.status}</span></td>
+      <td><span class="etag ${SC[m.status]||'etag-draft'}">${SL[m.status]||m.status}</span>${emsRvSummaryCell(m)}</td>
       <td style="color:#A0AEC0">${m.updated||'—'}</td>
       <td><div style="display:flex;gap:5px">
         <button class="ems-btn-sm" onclick="emsOpenDetail('${m.id}')"><i class="ti ti-eye"></i></button>
