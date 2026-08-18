@@ -1077,6 +1077,14 @@ const FS_CHUNKS_COLL = "plmm_filechunks";
    they live on the manuscript document (ms.reviews[]), which already syncs in
    realtime to everyone who has it open. */
 const FS_REVIEWERS_COLL = "plmm_reviewers";
+
+/* Reviews used to live on the manuscript document (ms.reviews[]). They now have
+   their own collection so the security rules can keep reviewer identities away
+   from the author, who can read the manuscript itself. Document id is
+   `${msId}_${reviewerUid}`, which lets a rule verify "is this person assigned to
+   this manuscript" with a single exists() lookup. In memory they are still
+   reattached as ms.reviews[], so every view keeps working unchanged. */
+const FS_REVIEWS_COLL = "plmm_reviews";
 /* Base64 chars per chunk. Firestore's hard limit is 1 MiB per document; 700 000
    leaves comfortable room for field names and document overhead. */
 const EMS_CHUNK_SIZE = 700000;
@@ -1125,9 +1133,10 @@ function emsConfigLooksPlaceholder(){
 
 async function emsInitDb(){
   try {
-    if(typeof window.firebase === 'undefined' || !window.firebase.firestore){
+    if(typeof window.firebase === 'undefined' || !window.firebase.firestore || !window.firebase.auth){
       await emsLoadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-app-compat.js`);
       await emsLoadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-firestore-compat.js`);
+      await emsLoadScript(`https://www.gstatic.com/firebasejs/${FIREBASE_VER}/firebase-auth-compat.js`);
     }
     if(typeof window.firebase === 'undefined'){
       throw new Error('Firebase script loaded but the "firebase" global is still undefined.');
@@ -1166,7 +1175,16 @@ async function emsInitEmail(){
 }
 
 /* ── STATE ─────────────────────────────────────────── */
-const EDITOR = { email:'editor@plmm.org', pass:'plmm2024', name:'Prof. de Carvalho Bueno', inst:'Federal University of Paraná', role:'editor' };
+/* The editor's Firebase Auth UID. Not a secret — it is useless without the
+   account password — but the security rules match on it to grant editor
+   privileges, so it must agree with the Authentication console. */
+const EDITOR_UID = 'x1kgb92m3dVRgja5ahiGoPeDNeg1';
+const EDITOR = { email:'editor@plmm.org', name:'Prof. de Carvalho Bueno', inst:'Federal University of Paraná', role:'editor' };
+
+/* Where editor notifications are actually delivered. Kept separate from
+   EDITOR.email because that address is the editor *login*, not a real
+   mailbox: plmm.org has no MX record, so mail sent to it bounces. */
+const EDITOR_NOTIFY_EMAIL = 'decarvalhobueno@gmail.com';
 const MS_TYPES = ['Original article','Review article','Short communication','Technical note','Letter to the editor','Revision'];
 const SL = {draft:'Draft',submitted:'Submitted',under_review:'Under review',revision_required:'Revision required',accepted:'Accepted',rejected:'Rejected'};
 const SC = {draft:'etag-draft',submitted:'etag-sub',under_review:'etag-rev',revision_required:'etag-reqrev',accepted:'etag-acc',rejected:'etag-rej'};
@@ -1247,7 +1265,7 @@ const RVC = {invited:'etag-inv',accepted:'etag-prog',declined:'etag-dec',submitt
 
 const EMS = {
   view:'login', authMode:'login', authErr:null, authOk:null,
-  currentUser:null, currentRole:null,
+  currentUser:null, currentRole:null, uid:null,
   activeTab:'manuscripts', formStep:0, editingId:null, viewingId:null,
   draftMs:null, filterStatus:'all',
   users:{}, manuscripts:{}, reviewers:{}, ready:false,
@@ -1330,61 +1348,131 @@ function emsDescribeErr(err, label){
   return `Error reading "${label}": ${msg}`;
 }
 
-async function emsFetchAll(){
-  let uSnap, mSnap, rSnap;
-  try{ uSnap = await db.collection(FS_USERS_COLL).get(); }
-  catch(err){ const msg = emsDescribeErr(err, FS_USERS_COLL); console.error(msg, err); throw new Error(msg); }
-  const u={}; uSnap.forEach(doc=>{ u[doc.id]=doc.data(); }); EMS.users=u;
+/* ── ROLE-SCOPED LOADING ───────────────────────────────
+   Firestore security rules do not trim a result set: a query asking for more
+   than the rules allow fails outright rather than quietly returning the subset.
+   Every read below is therefore already narrowed to what the signed-in account
+   is entitled to. The editor reads whole collections; an author reads only
+   their own records; a reviewer reads only what they were assigned. Nothing is
+   read at all before sign-in. */
 
-  try{ mSnap = await db.collection(FS_MS_COLL).get(); }
-  catch(err){ const msg = emsDescribeErr(err, FS_MS_COLL); console.error(msg, err); throw new Error(msg); }
-  const m={}; mSnap.forEach(doc=>{ m[doc.id]=doc.data(); }); EMS.manuscripts=m;
-
-  /* The reviewer pool is optional: a project that has never invited a reviewer
-     simply has no plmm_reviewers collection yet, which must not block sign-in. */
-  try{ rSnap = await db.collection(FS_REVIEWERS_COLL).get(); }
-  catch(err){ console.warn('Could not read the reviewer pool (continuing without it):', err); EMS.reviewers={}; return; }
-  const r={}; rSnap.forEach(doc=>{ r[doc.id]=doc.data(); }); EMS.reviewers=r;
+/* Reviews are stored one document per assignment. In memory they are put back
+   onto the manuscript as ms.reviews[] — the shape every existing view and
+   handler expects — so the split is invisible above the data layer. */
+function emsAttachReviews(revs){
+  Object.values(EMS.manuscripts).forEach(ms=>{ ms.reviews=[]; });
+  revs.forEach(rev=>{
+    const ms=EMS.manuscripts[rev.msId];
+    if(ms) ms.reviews.push(rev);
+  });
 }
 
-async function emsLoad(){
-  emsRender(); // shows "connecting..." until data arrives
-  if(emsUnsub) return; // already connected
+function emsDocMap(snap){ const o={}; snap.forEach(d=>{ o[d.id]=d.data(); }); return o; }
 
+async function emsFetchEditor(){
+  const [uSnap,mSnap] = await Promise.all([
+    db.collection(FS_USERS_COLL).get(),
+    db.collection(FS_MS_COLL).get()
+  ]);
+  EMS.users=emsDocMap(uSnap);
+  EMS.manuscripts=emsDocMap(mSnap);
+
+  /* The reviewer pool is optional: a project that has never invited a reviewer
+     simply has no collection yet, which must not block sign-in. */
+  try{ EMS.reviewers=emsDocMap(await db.collection(FS_REVIEWERS_COLL).get()); }
+  catch(err){ console.warn('Could not read the reviewer pool (continuing without it):', err); EMS.reviewers={}; }
+
+  try{ emsAttachReviews((await db.collection(FS_REVIEWS_COLL).get()).docs.map(d=>d.data())); }
+  catch(err){ console.warn('Could not read reviews (continuing without them):', err); emsAttachReviews([]); }
+}
+
+/* An author reads no reviewer records and no review documents whatsoever — the
+   rules refuse them outright, which is what keeps peer review blind. */
+async function emsFetchAuthor(uid){
+  EMS.manuscripts=emsDocMap(await db.collection(FS_MS_COLL).where('authorUid','==',uid).get());
+  Object.values(EMS.manuscripts).forEach(ms=>{ ms.reviews=[]; });
+  EMS.reviewers={};
+  EMS.users=emsDocMap(await db.collection(FS_USERS_COLL).where('uid','==',uid).get());
+}
+
+async function emsFetchReviewer(uid){
+  EMS.reviewers=emsDocMap(await db.collection(FS_REVIEWERS_COLL).where('uid','==',uid).get());
+  EMS.users={};
+
+  const revs=(await db.collection(FS_REVIEWS_COLL).where('reviewerUid','==',uid).get()).docs.map(d=>d.data());
+
+  /* Fetch exactly the manuscripts this reviewer holds an assignment on, one at
+     a time: the rules authorise each individually via its assignment document,
+     so a whole-collection query would simply be rejected. */
+  const mss={};
+  for(const rev of revs){
+    if(mss[rev.msId]) continue;
+    try{ const d=await db.collection(FS_MS_COLL).doc(rev.msId).get(); if(d.exists) mss[d.id]=d.data(); }
+    catch(err){ console.warn('Could not read assigned manuscript', rev.msId, err); }
+  }
+  EMS.manuscripts=mss;
+  emsAttachReviews(revs);
+}
+
+async function emsFetchForRole(){
+  if(EMS.currentRole==='editor')        return emsFetchEditor();
+  if(EMS.currentRole==='reviewer')      return emsFetchReviewer(EMS.uid);
+  return emsFetchAuthor(EMS.uid);
+}
+
+/* Loads whatever the signed-in account may see, then keeps it live. Called on
+   sign-in rather than on page load, because before sign-in nothing is readable. */
+async function emsSyncData(){
+  if(!EMS.uid) return;
+  await emsFetchForRole();
+
+  /* Views holding unsaved keystrokes must not be torn down by an incoming
+     snapshot, or the user loses whatever they were part-way through typing. */
+  const typing = ()=> ['form','rvform','invite','review'].includes(EMS.view);
+  const refresh = async ()=>{
+    try{ await emsFetchForRole(); if(!typing()) emsRender(); }
+    catch(err){ console.error('Live refresh failed:', err); }
+  };
+
+  /* One listener per scoped query. Each fires on any change this account is
+     allowed to see, and we then re-read the account's whole slice instead of
+     merging deltas — the per-user data set is small enough that this is simpler
+     and cannot drift out of sync. */
+  const subs=[];
+  const watch=(q,label)=>{
+    try{ subs.push(q.onSnapshot(()=>refresh(), err=>console.warn(label+' snapshot error:',err))); }
+    catch(err){ console.warn('Could not watch '+label+':',err); }
+  };
+  if(EMS.currentRole==='editor'){
+    watch(db.collection(FS_USERS_COLL),'users');
+    watch(db.collection(FS_MS_COLL),'manuscripts');
+    watch(db.collection(FS_REVIEWERS_COLL),'reviewers');
+    watch(db.collection(FS_REVIEWS_COLL),'reviews');
+  } else if(EMS.currentRole==='reviewer'){
+    watch(db.collection(FS_REVIEWS_COLL).where('reviewerUid','==',EMS.uid),'reviews');
+  } else {
+    watch(db.collection(FS_MS_COLL).where('authorUid','==',EMS.uid),'manuscripts');
+  }
+  emsUnsub = ()=>{ subs.forEach(u=>{ try{ u(); }catch(e){} }); };
+}
+
+/* Drops every live listener and clears the local cache, so signing out leaves
+   no readable data behind in the page. */
+function emsStopSync(){
+  if(emsUnsub){ try{ emsUnsub(); }catch(e){} emsUnsub=null; }
+  EMS.users={}; EMS.reviewers={}; EMS.manuscripts={};
+}
+
+/* Page-load path: connect to Firebase and show the sign-in screen. No data is
+   fetched here — that waits for authentication, in emsSyncData(). */
+async function emsLoad(){
+  emsRender(); // shows "connecting..." until Firebase is ready
   if(!db){
     await emsInitDb();
     if(emsDbErr){ EMS.ready = true; emsRender(); return; }
   }
-
-  try {
-    await emsFetchAll();
-    emsDbErr = null;
-  } catch(e){
-    emsDbErr = e.message || String(e);
-    EMS.ready = true; emsRender(); return;
-  }
   EMS.ready = true;
   emsRender();
-
-  // Realtime: a collection snapshot delivers the full set each time, so we
-  // simply rebuild the local map — same semantics as emsFetchAll().
-  /* Views holding unsaved keystrokes must not be torn down by an incoming
-     snapshot, or the user loses whatever they were part-way through typing. */
-  const typing = ()=> ['form','rvform','invite','review'].includes(EMS.view);
-
-  const unsubU = db.collection(FS_USERS_COLL).onSnapshot(snap=>{
-    const u={}; snap.forEach(doc=>{ u[doc.id]=doc.data(); }); EMS.users=u;
-    if(!typing()) emsRender();
-  }, err=>console.error('Users snapshot error:', err));
-  const unsubM = db.collection(FS_MS_COLL).onSnapshot(snap=>{
-    const m={}; snap.forEach(doc=>{ m[doc.id]=doc.data(); }); EMS.manuscripts=m;
-    if(!typing()) emsRender();
-  }, err=>console.error('Manuscripts snapshot error:', err));
-  const unsubR = db.collection(FS_REVIEWERS_COLL).onSnapshot(snap=>{
-    const r={}; snap.forEach(doc=>{ r[doc.id]=doc.data(); }); EMS.reviewers=r;
-    if(!typing()) emsRender();
-  }, err=>console.warn('Reviewers snapshot error:', err));
-  emsUnsub = ()=>{ try{ unsubU(); }catch(e){} try{ unsubM(); }catch(e){} try{ unsubR(); }catch(e){} };
 }
 
 /* Firestore rejects any `undefined` field value (unlike the old Postgres jsonb).
@@ -1399,10 +1487,77 @@ async function emsSaveUser(email){
   } catch(e){ console.error('Failed to save user:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
 }
 
+/* Writes the manuscript document, with the reviews stripped out — they belong
+   to their own collection so the rules can keep reviewer identities away from
+   the author, who may read everything else on this record.
+
+   The review documents this account is permitted to write are saved alongside,
+   which is what lets every existing caller keep saying `emsSaveMs(ms)` after
+   mutating a review in memory. The editor may write any review on the
+   manuscript; a reviewer may write only their own; an author writes none. */
 async function emsSaveMs(ms){
+  const reviews = ms.reviews || [];
+  const doc = emsClean(ms);
+  delete doc.reviews;
   try {
-    await db.collection(FS_MS_COLL).doc(ms.id).set(emsClean(ms));
-  } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); }
+    await db.collection(FS_MS_COLL).doc(ms.id).set(doc);
+  } catch(e){ console.error('Failed to save manuscript:', e); alert('Could not save to the database. Check your connection and Firebase configuration.'); return; }
+
+  const mine = EMS.currentRole==='editor'
+    ? reviews
+    : (EMS.currentRole==='reviewer' ? reviews.filter(r=>r.reviewerUid===EMS.uid) : []);
+  for(const rev of mine){
+    try{ await emsSaveReview(ms, rev); }
+    catch(e){ console.error('Failed to save review:', e); }
+  }
+}
+
+/* One document per assignment, keyed `${msId}_${reviewerUid}` so a rule can
+   answer "is this person assigned to that manuscript" with a single exists(). */
+function emsReviewDocId(msId, reviewerUid){ return `${msId}_${reviewerUid}`; }
+
+async function emsSaveReview(ms, rev){
+  if(!rev.reviewerUid) return; // pre-Auth record; nothing the rules could authorise
+  rev.msId = ms.id;
+  await db.collection(FS_REVIEWS_COLL)
+          .doc(emsReviewDocId(ms.id, rev.reviewerUid))
+          .set(emsClean(rev));
+}
+
+async function emsDeleteReview(msId, reviewerUid){
+  if(!reviewerUid) return;
+  try{ await db.collection(FS_REVIEWS_COLL).doc(emsReviewDocId(msId, reviewerUid)).delete(); }
+  catch(e){ console.error('Failed to delete review:', e); }
+}
+
+/* Creates a Firebase Auth login for somebody else without disturbing the
+   editor's own session. createUserWithEmailAndPassword signs in as the newly
+   created account on whichever app instance it is called on, so it is called
+   on a throwaway secondary instance that is signed out immediately after.
+   This keeps the editor's existing "generate a password and email it" flow
+   working with no Cloud Functions and no paid plan. */
+let emsSecondaryApp = null;
+async function emsCreateAuthAccount(email, password){
+  if(!emsSecondaryApp){
+    emsSecondaryApp = firebase.apps.find(a=>a.name==='reviewerCreator')
+      || firebase.initializeApp(firebaseConfig, 'reviewerCreator');
+  }
+  const cred = await emsSecondaryApp.auth().createUserWithEmailAndPassword(email, password);
+  const newUid = cred.user.uid;
+  try{ await emsSecondaryApp.auth().signOut(); }catch(e){}
+  return newUid;
+}
+
+/* The UID of an existing login, for someone who already registered as an
+   author and is now being added to the reviewer pool. The client SDK cannot
+   look up another account in Firebase Auth, so this reads it from the author
+   profile document, which stores the UID alongside the address. */
+async function emsExistingUidFor(email){
+  try{
+    const d = await db.collection(FS_USERS_COLL).doc(email).get();
+    if(d.exists && d.data().uid) return d.data().uid;
+  }catch(e){ console.warn('Could not look up an existing account for', email, e); }
+  return null;
 }
 
 async function emsSaveReviewer(email){
@@ -1464,6 +1619,10 @@ async function emsDeleteMsFiles(ms){
   for(const f of (ms.files||[])){ await emsDeleteFileChunks(f); }
 }
 async function emsDeleteMsRecord(id){
+  /* Reviews are their own documents now, so they have to be removed explicitly
+     or they would outlive the manuscript they belong to. */
+  const ms=EMS.manuscripts[id];
+  for(const rev of (ms&&ms.reviews)||[]){ await emsDeleteReview(id, rev.reviewerUid); }
   try{
     await db.collection(FS_MS_COLL).doc(id).delete();
   }catch(e){ console.error('Failed to delete manuscript row:', e); alert('Could not delete the manuscript from the database. Check your connection.'); throw e; }
@@ -1592,36 +1751,87 @@ function emsRenderAuth(){
 
 function emsSwAuth(m){ EMS.authMode=m; EMS.authErr=null; EMS.authOk=null; emsRender(); }
 
+/* Readable text for the Firebase Auth error codes a user can actually hit. */
+function emsAuthMsg(err){
+  const c = err && err.code;
+  if(c==='auth/wrong-password' || c==='auth/user-not-found' || c==='auth/invalid-credential' || c==='auth/invalid-login-credentials')
+    return 'Incorrect email or password.';
+  if(c==='auth/invalid-email')          return 'That is not a valid email address.';
+  if(c==='auth/too-many-requests')      return 'Too many attempts. Please wait a few minutes and try again.';
+  if(c==='auth/network-request-failed') return 'Could not reach the authentication service. Check your connection.';
+  if(c==='auth/email-already-in-use')   return 'An account with this email already exists.';
+  if(c==='auth/weak-password')          return 'Please choose a password of at least six characters.';
+  if(c==='auth/operation-not-allowed')  return 'Email/password sign-in is not enabled for this project.';
+  return (err && err.message) || 'Sign-in failed.';
+}
+
 async function emsDoAuth(){
   const email=(document.getElementById('eaE')?.value||'').trim().toLowerCase();
   const pass=document.getElementById('eaP')?.value||'';
   if(!email||!pass){ EMS.authErr='Please fill in all fields.'; emsRender(); return; }
+
   if(EMS.authMode==='login'){
-    if(email===EDITOR.email){
-      if(pass!==EDITOR.pass){ EMS.authErr='Incorrect editor password.'; emsRender(); return; }
-      EMS.currentUser=EDITOR.email; EMS.currentRole='editor'; EMS.view='admin'; EMS.authErr=null; emsRender(); return;
+    /* Every role authenticates against Firebase Authentication. The token it
+       returns is what the Firestore rules inspect, so a role forged in the
+       browser console buys nothing: the panel may appear, but every read and
+       write behind it is refused by the server. */
+    let cred;
+    try{ cred = await firebase.auth().signInWithEmailAndPassword(email, pass); }
+    catch(err){ EMS.authErr = emsAuthMsg(err); emsRender(); return; }
+    EMS.uid = cred.user.uid;
+
+    if(EMS.uid===EDITOR_UID){
+      EMS.currentUser=EDITOR.email; EMS.currentRole='editor'; EMS.view='admin'; EMS.authErr=null;
+      emsRender();
+      try{ await emsSyncData(); }catch(err){ console.error('Could not load editorial data:', err); }
+      emsRender(); return;
     }
-    const asAuthor   = !!EMS.users[email]     && EMS.users[email].pass===pass;
-    const asReviewer = !!EMS.reviewers[email] && EMS.reviewers[email].pass===pass;
-    if(!asAuthor && !asReviewer){ EMS.authErr='Incorrect email or password.'; emsRender(); return; }
-    if(asAuthor && asReviewer){ EMS.roleChoice=email; EMS.authErr=null; emsRender(); return; }
+
+    /* Which panel opens is decided by which profile record exists for this
+       account, read directly — nothing is preloaded before sign-in. */
+    let isAuthor=false, isReviewer=false;
+    try{ isAuthor   = !(await db.collection(FS_USERS_COLL).where('uid','==',EMS.uid).limit(1).get()).empty; }catch(e){ console.warn('Author lookup failed:', e); }
+    try{ isReviewer = !(await db.collection(FS_REVIEWERS_COLL).where('uid','==',EMS.uid).limit(1).get()).empty; }catch(e){ console.warn('Reviewer lookup failed:', e); }
+
+    if(!isAuthor && !isReviewer){
+      try{ await firebase.auth().signOut(); }catch(e){}
+      EMS.uid=null;
+      EMS.authErr='This account has no author or reviewer profile in the system.';
+      emsRender(); return;
+    }
     EMS.authErr=null;
-    if(asReviewer){ emsPickRole('reviewer', email); return; }
-    emsPickRole('author', email); return;
+    if(isAuthor && isReviewer){ EMS.roleChoice=email; emsRender(); return; }
+    await emsPickRole(isReviewer?'reviewer':'author', email);
+    return;
   }
+
+  /* Registration creates an author account. Reviewer accounts are never
+     self-registered — the editor issues those from the invitation screen. */
   const name=(document.getElementById('eaN')?.value||'').trim();
   const inst=(document.getElementById('eaI')?.value||'').trim();
   if(!name){ EMS.authErr='Please enter your name.'; emsRender(); return; }
   if(email===EDITOR.email){ EMS.authErr='This email is reserved.'; emsRender(); return; }
-  if(EMS.users[email]){ EMS.authErr='An account with this email already exists.'; emsRender(); return; }
-  EMS.users[email]={name,pass,inst,email,role:'author'};
-  await emsSaveUser(email);
+
+  let cred;
+  try{ cred = await firebase.auth().createUserWithEmailAndPassword(email, pass); }
+  catch(err){ EMS.authErr = emsAuthMsg(err); emsRender(); return; }
+
+  /* The profile document carries the UID so the rules can tie it to this
+     account. No password is stored here — Firebase Auth holds it, hashed, and
+     it never travels to anyone else's browser. */
+  EMS.uid = cred.user.uid;
+  EMS.users[email]={name,inst,email,uid:cred.user.uid,role:'author',created:dateStr()};
+  try{ await emsSaveUser(email); }catch(e){ /* emsSaveUser reports its own failure */ }
+
+  /* Sign back out so the flow ends where it always did — at the sign-in form. */
+  try{ await firebase.auth().signOut(); }catch(e){}
+  EMS.uid=null; delete EMS.users[email];
   EMS.authOk='Account created! You can now sign in.'; EMS.authMode='login'; EMS.authErr=null; emsRender();
 }
 
 /* Signs the user into the panel for `role`. Called straight from the login
    handler, or from the picker when one address holds both account types. */
-function emsPickRole(role, email){
+async function emsPickRole(role, email){
   const addr = email || EMS.roleChoice;
   if(!addr) return;
   EMS.currentUser=addr; EMS.currentRole=role;
@@ -1629,9 +1839,18 @@ function emsPickRole(role, email){
   if(role==='reviewer'){ EMS.view='rvdash'; EMS.activeTab='assignments'; }
   else { EMS.view='dash'; EMS.activeTab='manuscripts'; }
   emsRender();
+  try{ await emsSyncData(); }catch(err){ console.error('Could not load your data:', err); }
+  emsRender();
 }
 
-function emsLogout(){ EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; EMS.roleChoice=null; EMS.rvMsId=null; EMS.rvId=null; emsRender(); }
+function emsLogout(){
+  /* End the Firebase Auth session and drop every live listener, so neither the
+     token nor any cached record outlives the logout in this browser. */
+  try{ if(window.firebase && firebase.auth) firebase.auth().signOut(); }catch(e){}
+  emsStopSync();
+  EMS.uid=null;
+  EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; EMS.roleChoice=null; EMS.rvMsId=null; EMS.rvId=null; emsRender();
+}
 
 /* ── DASHBOARD ─────────────────────────────────────── */
 function emsMyMss(){ return Object.values(EMS.manuscripts).filter(m=>m.owner===EMS.currentUser); }
@@ -1691,7 +1910,7 @@ function emsOpenReview(id){ EMS.viewingId=id; EMS.view='review'; emsRender(); }
 
 function emsInitDraft(){
   const u=EMS.users[EMS.currentUser]||{};
-  return {id:uid(),title:'',type:'',shortTitle:'',abstract:'',keywords:'',highlights:'',sugReviewers:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',title:'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
+  return {id:uid(),title:'',type:'',shortTitle:'',abstract:'',keywords:'',highlights:'',sugReviewers:'',authors:[{name:u.name||'',email:EMS.currentUser,inst:u.inst||'',title:'',corresponding:true}],files:[],status:'draft',owner:EMS.currentUser,authorUid:EMS.uid,ownerName:u.name||EMS.currentUser,created:dateStr(),updated:dateStr(),timeline:[{event:'Manuscript created',date:dateStr(),done:true}]};
 }
 
 /* ── FORM ──────────────────────────────────────────── */
@@ -1905,7 +2124,9 @@ async function emsHandleFiles(fl){
       const total=Math.max(1, Math.ceil(b64.length/EMS_CHUNK_SIZE));
       for(let i=0;i<total;i++){
         const piece=b64.slice(i*EMS_CHUNK_SIZE,(i+1)*EMS_CHUNK_SIZE);
-        await db.collection(FS_CHUNKS_COLL).doc(`${fileId}_${i}`).set({ fileId, i, data: piece });
+        /* msId and authorUid travel with every chunk so the rules can decide who
+           may read or replace it without loading the manuscript document. */
+        await db.collection(FS_CHUNKS_COLL).doc(`${fileId}_${i}`).set({ fileId, i, data: piece, msId: ms.id, authorUid: ms.authorUid||EMS.uid });
         entry.progress=Math.round(((i+1)/total)*100);
         emsRender();
       }
@@ -2198,8 +2419,19 @@ async function emsRvSaveProfile(){
   r.name=document.getElementById('rpN')?.value||r.name;
   r.inst=document.getElementById('rpI')?.value||r.inst;
   r.expertise=document.getElementById('rpX')?.value||r.expertise;
+  /* A password change now goes to Firebase Auth rather than onto this record.
+     updatePassword acts on the currently signed-in account, which is exactly
+     this reviewer, so the Profile tab keeps behaving as it always did. */
   const np=document.getElementById('rpP')?.value||'';
-  if(np.trim()) r.pass=np.trim();
+  if(np.trim()){
+    try{ await firebase.auth().currentUser.updatePassword(np.trim()); }
+    catch(err){
+      alert(err && err.code==='auth/requires-recent-login'
+        ? 'For security, please sign out and sign in again before changing your password.'
+        : 'Could not change the password: '+emsAuthMsg(err));
+      return;
+    }
+  }
   try{ await emsSaveReviewer(EMS.currentUser); alert('Profile saved!'); emsRender(); }catch(e){}
 }
 
@@ -2289,7 +2521,7 @@ async function emsRvRespond(accept){
   await emsSaveMs(ms);
 
   const fullId=emsFullMsId(ms);
-  emsSendEmail(EDITOR.email, `Manuscript ${fullId}: Reviewer ${accept?'accepted':'declined'}`, `
+  emsSendEmail(EDITOR_NOTIFY_EMAIL, `Manuscript ${fullId}: Reviewer ${accept?'accepted':'declined'}`, `
     <p>Dear ${EDITOR.name},</p>
     <p><strong>${emsEsc(rev.reviewerName||rev.reviewerEmail)}</strong> has <strong>${accept?'accepted':'declined'}</strong> the invitation to review manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;.</p>
     ${accept?`<p>The review is due by <strong>${emsFmtIso(rev.dueIso)}</strong> (${rev.days} days from acceptance).</p>`:'<p>You may wish to invite an alternative reviewer.</p>'}
@@ -2431,7 +2663,7 @@ async function emsRvSubmit(){
 
   const fullId=emsFullMsId(ms);
   const outstanding=(ms.reviews||[]).filter(r=>['invited','accepted'].includes(r.status)).length;
-  emsSendEmail(EDITOR.email, `Manuscript ${fullId}: Review submitted`, `
+  emsSendEmail(EDITOR_NOTIFY_EMAIL, `Manuscript ${fullId}: Review submitted`, `
     <p>Dear ${EDITOR.name},</p>
     <p><strong>${emsEsc(rev.reviewerName||rev.reviewerEmail)}</strong> has submitted their review of manuscript <strong>${fullId}</strong>, &quot;${emsEsc(ms.title)}&quot;.</p>
     <p><strong>Recommendation:</strong> ${emsEsc(rev.recommendation)}</p>
@@ -2620,8 +2852,26 @@ async function emsEdSendInvite(){
       const ex=EMS.reviewers[email];
       name=ex.name||name; inst=ex.inst||inst;
     } else {
+      /* Issue a real Firebase Auth login. If the address already has one —
+         usually because this person is also a registered author — reuse it
+         rather than failing, and tell them to sign in with the password they
+         already have (freshPass stays null, which the invitation email below
+         already words correctly). */
       freshPass=emsRvGenPass();
-      EMS.reviewers[email]={email,name,inst,expertise:(d.expertise||'').trim(),pass:freshPass,role:'reviewer',created:dateStr()};
+      let ruid=null;
+      try{
+        ruid = await emsCreateAuthAccount(email, freshPass);
+      }catch(err){
+        if(err && err.code==='auth/email-already-in-use'){
+          freshPass=null;
+          ruid = await emsExistingUidFor(email);
+          if(!ruid){ alert('That address already has a login, but no profile could be found for it. Ask them to sign in once as an author first, then invite them again.'); return; }
+        } else {
+          alert('Could not create the reviewer login: '+emsAuthMsg(err)); return;
+        }
+      }
+      /* No password is kept on this record — Firebase Auth holds it, hashed. */
+      EMS.reviewers[email]={email,name,inst,expertise:(d.expertise||'').trim(),uid:ruid,role:'reviewer',created:dateStr()};
       try{ await emsSaveReviewer(email); }
       catch(e){ delete EMS.reviewers[email]; return; }
     }
@@ -2632,7 +2882,8 @@ async function emsEdSendInvite(){
   }
 
   const rev={
-    id:rvid(), reviewerEmail:email, reviewerName:name, reviewerInst:inst||'',
+    id:rvid(), msId:ms.id, reviewerUid:(EMS.reviewers[email]&&EMS.reviewers[email].uid)||null,
+    reviewerEmail:email, reviewerName:name, reviewerInst:inst||'',
     status:'invited', days, invitedDate:dateStr(), invitedIso:emsIsoToday(),
     dueIso:emsIsoPlusDays(days), message:(d.message||'').trim()
   };
@@ -2816,7 +3067,7 @@ function emsRenderAdminReviewers(){
     <button class="ems-btn-new" onclick="emsAddReviewer()"><i class="ti ti-user-plus"></i> Create reviewer account</button>
     ${EMS.newReviewerCreds?`<div class="ems-cred"><i class="ti ti-key"></i> <strong>Login created for ${emsEsc(EMS.newReviewerCreds.name)}</strong><br>
       Email: <code>${emsEsc(EMS.newReviewerCreds.email)}</code><br>
-      Password: <code>${emsEsc(EMS.newReviewerCreds.pass)}</code><br>
+      ${EMS.newReviewerCreds.pass?`Password: <code>${emsEsc(EMS.newReviewerCreds.pass)}</code>`:`<em>Existing login reused — their current password still applies.</em>`}<br>
       <span style="font-size:11px;color:#718096">${EMS.newReviewerCreds.mailed?'These details have been emailed to the reviewer.':'Not emailed — pass these on yourself.'} This box disappears when you leave the page.</span></div>`:''}
   </div>
 
@@ -2849,8 +3100,23 @@ async function emsAddReviewer(){
   if(email===EDITOR.email){ alert('That address is the editor account and cannot be used as a reviewer login.'); return; }
   if(EMS.reviewers[email]){ alert('A reviewer with that email is already in the pool.'); return; }
 
-  const pass=emsRvGenPass();
-  EMS.reviewers[email]={email,name,inst,expertise,pass,role:'reviewer',created:dateStr()};
+  /* Same as the invitation screen: a real Firebase Auth login, created on the
+     secondary app instance so the editor stays signed in. An address that
+     already has a login (typically a registered author) reuses it. */
+  let pass=emsRvGenPass();
+  let ruid=null;
+  try{
+    ruid = await emsCreateAuthAccount(email, pass);
+  }catch(err){
+    if(err && err.code==='auth/email-already-in-use'){
+      pass=null;
+      ruid = await emsExistingUidFor(email);
+      if(!ruid){ alert('That address already has a login, but no profile could be found for it. Ask them to sign in once as an author first, then add them again.'); return; }
+    } else {
+      alert('Could not create the reviewer login: '+emsAuthMsg(err)); return;
+    }
+  }
+  EMS.reviewers[email]={email,name,inst,expertise,uid:ruid,role:'reviewer',created:dateStr()};
   try{ await emsSaveReviewer(email); }
   catch(e){ delete EMS.reviewers[email]; return; }
 
@@ -2860,31 +3126,30 @@ async function emsAddReviewer(){
     <p>You have been added to the reviewer panel of <em>Physical Limnology: Monitoring &amp; Methods</em>. An account has been created for you so that you can receive and respond to review invitations.</p>
     <p>Sign in at: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a><br>
        Email: <strong>${emsEsc(email)}</strong><br>
-       Password: <strong>${emsEsc(pass)}</strong></p>
-    <p>Please change this password from the Profile tab after you first sign in. You will receive a separate message whenever a manuscript is assigned to you, and you are free to decline any invitation.</p>
+       ${pass?`Password: <strong>${emsEsc(pass)}</strong>`:`Use the password you already have for this address. If you have forgotten it, ask the editorial office to send you a reset link.`}</p>
+    <p>${pass?"Please change this password from the Profile tab after you first sign in.":""} You will receive a separate message whenever a manuscript is assigned to you, and you are free to decline any invitation.</p>
     <p>Thank you for supporting the journal.</p>
     <p>Sincerely,<br>${EDITOR.name}<br>PLMM Editorial Office</p>`);
   emsRender();
 }
 
+/* Passwords now live in Firebase Auth, and the browser SDK deliberately cannot
+   set another account's password — only the account holder or a privileged
+   server may do that. So the editor triggers Firebase's own reset link instead
+   of minting a password and emailing it. The button and the confirmation step
+   are unchanged; what the reviewer receives is a secure one-time link rather
+   than a password in plain text. */
 async function emsResetReviewerPass(email){
   const r=EMS.reviewers[email];
   if(!r) return;
-  if(!confirm(`Issue a new password for ${r.name||email}?\n\nTheir current password stops working immediately, and the new one is emailed to them.`)) return;
-  const pass=emsRvGenPass();
-  const old=r.pass;
-  r.pass=pass;
-  try{ await emsSaveReviewer(email); }
-  catch(e){ r.pass=old; return; }
-  EMS.newReviewerCreds={name:r.name||email,email,pass,mailed:true};
-  emsSendEmail(email, 'Your PLMM reviewer password has been reset', `
-    <p>Dear ${emsEsc(r.name||'Reviewer')},</p>
-    <p>A new password has been issued for your reviewer account on <em>Physical Limnology: Monitoring &amp; Methods</em>.</p>
-    <p>Sign in at: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a><br>
-       Email: <strong>${emsEsc(email)}</strong><br>
-       Password: <strong>${emsEsc(pass)}</strong></p>
-    <p>Please change it from the Profile tab once you are signed in.</p>
-    <p>Sincerely,<br>PLMM Editorial Office</p>`);
+  if(!confirm(`Send a password-reset link to ${r.name||email}?\n\nThey will receive an email from Firebase with a link to choose a new password. Their current password keeps working until they do.`)) return;
+  try{
+    await firebase.auth().sendPasswordResetEmail(email);
+  }catch(err){
+    alert('Could not send the reset link: '+emsAuthMsg(err));
+    return;
+  }
+  alert(`A password-reset link has been sent to ${email}.`);
   emsRender();
 }
 

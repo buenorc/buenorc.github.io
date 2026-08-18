@@ -1,0 +1,112 @@
+rules_version = '2';
+
+/*  PLMM editorial system — Firestore security rules
+    ------------------------------------------------
+    These are the real access controls. Everything in journal.html runs on the
+    reader's own machine and can be edited by them, so nothing enforced there
+    counts; only what is written below is enforced by Google's servers.
+
+    Three roles:
+      editor    — one account, matched by UID (see EDITOR_UID in journal.html)
+      author    — anyone who registers; owns the manuscripts they submit
+      reviewer  — created by the editor; sees only assigned manuscripts
+
+    The central rule of blind review is expressed here: an author can read
+    their own manuscript but has no read access at all to plmm_reviews or
+    plmm_reviewers, so reviewer identities never reach their browser.
+*/
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn()  { return request.auth != null; }
+    function uid()       { return request.auth.uid; }
+    function isEditor()  { return signedIn() && uid() == 'x1kgb92m3dVRgja5ahiGoPeDNeg1'; }
+
+    /* Is this account assigned to review that manuscript? Review documents are
+       keyed `${msId}_${reviewerUid}`, so this is a single existence check. */
+    function isAssigned(msId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/plmm_reviews/$(msId + '_' + uid()));
+    }
+
+    function ownsMs(msId) {
+      return signedIn()
+        && get(/databases/$(database)/documents/plmm_manuscripts/$(msId)).data.authorUid == uid();
+    }
+
+    /* ── Author profiles ──────────────────────────────
+       Readable only by their owner and the editor. Creation is self-service,
+       but the uid on the document must be the caller's own, so nobody can
+       manufacture a profile pointing at someone else's account. */
+    match /plmm_users/{email} {
+      allow read:   if isEditor() || (signedIn() && resource.data.uid == uid());
+      allow create: if signedIn() && request.resource.data.uid == uid();
+      allow update: if isEditor() || (signedIn() && resource.data.uid == uid()
+                                      && request.resource.data.uid == resource.data.uid);
+      allow delete: if isEditor();
+    }
+
+    /* ── Reviewer profiles ────────────────────────────
+       Authors have no access whatsoever: being able to list this collection
+       would reveal who sits on the reviewer panel. Only the editor creates
+       them; a reviewer may edit their own record but never reassign its uid. */
+    match /plmm_reviewers/{email} {
+      allow read:   if isEditor() || (signedIn() && resource.data.uid == uid());
+      allow create: if isEditor();
+      allow update: if isEditor() || (signedIn() && resource.data.uid == uid()
+                                      && request.resource.data.uid == resource.data.uid);
+      allow delete: if isEditor();
+    }
+
+    /* ── Manuscripts ──────────────────────────────────
+       The author owns theirs, assigned reviewers may read, the editor sees all.
+       An author cannot hand their manuscript to another account, and cannot
+       delete it — withdrawal is an editorial decision. */
+    match /plmm_manuscripts/{msId} {
+      allow read:   if isEditor()
+                    || (signedIn() && resource.data.authorUid == uid())
+                    || isAssigned(msId);
+      allow create: if signedIn() && request.resource.data.authorUid == uid();
+      allow update: if isEditor()
+                    || (signedIn() && resource.data.authorUid == uid()
+                        && request.resource.data.authorUid == resource.data.authorUid)
+                    || isAssigned(msId);
+      allow delete: if isEditor();
+    }
+
+    /* ── Reviews ──────────────────────────────────────
+       The heart of it. Only the editor may create a review document, which is
+       what makes an assignment an assignment: a student cannot invent one for
+       a manuscript they were never given. A reviewer may read and write only
+       their own, and may not reassign it to somebody else. Authors are absent
+       from this rule entirely, so every read they attempt is refused. */
+    match /plmm_reviews/{reviewId} {
+      allow read:   if isEditor() || (signedIn() && resource.data.reviewerUid == uid());
+      allow create: if isEditor();
+      allow update: if isEditor()
+                    || (signedIn() && resource.data.reviewerUid == uid()
+                        && request.resource.data.reviewerUid == resource.data.reviewerUid
+                        && request.resource.data.msId == resource.data.msId);
+      allow delete: if isEditor();
+    }
+
+    /* ── Uploaded file chunks ─────────────────────────
+       Each chunk carries msId and authorUid so access can be decided without
+       reading the manuscript document on every one of what may be dozens of
+       chunks per file. */
+    match /plmm_filechunks/{chunkId} {
+      allow read:   if isEditor()
+                    || (signedIn() && resource.data.authorUid == uid())
+                    || (signedIn() && isAssigned(resource.data.msId));
+      allow create: if signedIn() && request.resource.data.authorUid == uid();
+      allow update: if isEditor() || (signedIn() && resource.data.authorUid == uid());
+      allow delete: if isEditor() || (signedIn() && resource.data.authorUid == uid());
+    }
+
+    /* Anything not named above is denied outright. */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
