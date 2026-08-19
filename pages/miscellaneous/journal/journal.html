@@ -637,6 +637,14 @@ hr.section-divider {
 .ems-rp-body { font-size: 12px; color: #2D3748; line-height: 1.6; white-space: pre-line; }
 .ems-rp-conf { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #D0DAEB; font-size: 12px; color: #7F1D1D; line-height: 1.6; white-space: pre-line; }
 
+/* Marks a row in the reviewer pool that is there because the person registered
+   as an author, not because the editor enrolled them. */
+.ems-src-tag {
+  font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  padding: 1px 5px; border-radius: 3px; background: #EDE9FE; color: #5B21B6;
+  vertical-align: middle; white-space: nowrap;
+}
+
 /* Credentials handed to a newly-created reviewer. */
 .ems-cred { background: #F0F5FF; border: 1px solid #A8B8D8; border-radius: 6px; padding: 12px 14px; margin: 10px 0; font-size: 12px; color: #2B3E6B; line-height: 1.7; }
 .ems-cred code { background: #fff; border: 1px solid #D0DAEB; border-radius: 3px; padding: 1px 6px; font-size: 12px; color: #1A2744; }
@@ -1247,6 +1255,27 @@ function emsFullMsId(ms){
   return (ms.msNumber||ms.id) + (ms.revisionRound>0?`.R${ms.revisionRound}`:'');
 }
 
+/* ── REVIEW ROUNDS ─────────────────────────────────────
+   Peer review is not a one-shot event: the editor may send a revised
+   manuscript back out, to the same reviewers or to fresh ones. A round is
+   simply the revision the manuscript was in when the invitation went out, so
+   it needs no state of its own — revisionRound already counts revisions, and
+   an assignment records the value it was created under.
+
+   Round 0 is the original submission; revision R1 is round 1, and so on.
+   Assignments written before rounds existed carry no `round` field and belong,
+   correctly, to round 0. */
+function emsMsRound(ms){ return Number(ms&&ms.revisionRound)||0; }
+function emsRvRound(rev){ return Number(rev&&rev.round)||0; }
+/* Human label. Round 0 reads as "first round" rather than "round 0", and later
+   rounds name the revision they went out on so it matches the manuscript ID. */
+function emsRoundLabel(n){ return n>0?`Round ${n+1} (revision R${n})`:'Round 1 (original submission)'; }
+/* The assignments belonging to one round — the unit almost every editor-facing
+   count, list and decision is really about. */
+function emsRvInRound(ms, n){ return (ms.reviews||[]).filter(r=>emsRvRound(r)===n); }
+/* The assignments for the round the manuscript is in right now. */
+function emsRvCurrentRound(ms){ return emsRvInRound(ms, emsMsRound(ms)); }
+
 /* Default review window, in days, offered when the editor invites a reviewer. */
 const EMS_DEFAULT_REVIEW_DAYS = 15;
 /* Recommendation vocabulary shared by the reviewer form and the editor's
@@ -1601,6 +1630,46 @@ function emsRvAssignmentsFor(email){
     (ms.reviews||[]).forEach(rev=>{ if(rev.reviewerEmail===email) out.push({ms,rev}); });
   });
   return out;
+}
+
+/* ── WHO THE EDITOR CAN INVITE ─────────────────────────
+   Two sources feed one list. The first is the pool the editor curates by hand,
+   where creating the account is part of adding the person. The second is
+   everyone who has registered as an author: they already hold a working login,
+   so inviting one costs no account creation, no generated password, and
+   nothing for the editor to pass on — the invitation simply tells them to sign
+   in with the credentials they already chose.
+
+   Authors are *listed*, not enrolled. Their plmm_reviewers record is written
+   the first time they are actually invited, and written by the editor, because
+   the rules allow nobody else to create one (see firestore.rules) — which is
+   what stops a self-registering account from manufacturing a reviewer profile
+   to reach manuscripts. Listing them here costs no writes at all.
+
+   `source` tells the two apart: 'pool' for a curated reviewer, 'author' for
+   someone who is only in the list by virtue of having registered. */
+function emsInvitablePeople(){
+  const out=Object.values(EMS.reviewers).map(r=>Object.assign({}, r, {source:'pool'}));
+  const enrolled=new Set(out.map(r=>r.email));
+  Object.values(EMS.users).forEach(u=>{
+    if(!u.email || enrolled.has(u.email) || u.email===EDITOR.email) return;
+    /* A profile with no uid predates Firebase Auth: there is no login to
+       reuse, so the editor still has to create one the ordinary way. */
+    if(!u.uid) return;
+    out.push({email:u.email, name:u.name||'', inst:u.inst||'', expertise:'',
+              uid:u.uid, created:u.created, source:'author'});
+  });
+  return out.sort((a,b)=>String(a.name||a.email).localeCompare(String(b.name||b.email)));
+}
+
+/* The addresses that must never be offered as reviewers of a given manuscript:
+   its own authors. Co-authors count — they are not the owning account, so
+   nothing else in the system would catch them. */
+function emsMsAuthorEmails(ms){
+  const s=new Set();
+  (ms.authors||[]).forEach(a=>{ const e=(a.email||'').trim().toLowerCase(); if(e) s.add(e); });
+  if(ms.owner) s.add(String(ms.owner).trim().toLowerCase());
+  return s;
 }
 
 /* ── DELETION (editor only) ───────────────────────────
@@ -2776,10 +2845,18 @@ function emsEdRenderInvite(){
   const d=EMS.inviteDraft||{days:EMS_DEFAULT_REVIEW_DAYS};
   const isNew = !d.sel;
   /* Anyone already invited to this manuscript is filtered out of the pool, so
-     the same reviewer cannot be double-invited by accident. */
+     the same reviewer cannot be double-invited by accident. The manuscript's
+     own authors are filtered out too — a co-author offered one click away from
+     reviewing their own paper is a mistake waiting to be made. */
   const taken=new Set((ms.reviews||[]).filter(r=>r.status!=='cancelled').map(r=>r.reviewerEmail));
-  const pool=Object.values(EMS.reviewers).filter(r=>!taken.has(r.email));
+  const own=emsMsAuthorEmails(ms);
+  const people=emsInvitablePeople().filter(p=>!taken.has(p.email) && !own.has(p.email));
+  const pool=people.filter(p=>p.source==='pool');
+  const authors=people.filter(p=>p.source==='author');
+  const hiddenOwn=emsInvitablePeople().filter(p=>own.has(p.email)).length;
+  const chosen=people.find(p=>p.email===d.sel) || EMS.reviewers[d.sel];
   const due=emsIsoPlusDays(d.days||EMS_DEFAULT_REVIEW_DAYS);
+  const opt=p=>`<option value="${emsEsc(p.email)}" ${d.sel===p.email?'selected':''}>${emsEsc(p.name||p.email)}${p.inst?` — ${emsEsc(p.inst)}`:''}</option>`;
 
   return `<div class="ems-main">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
@@ -2791,12 +2868,15 @@ function emsEdRenderInvite(){
     <p style="font-size:12px;color:#4A5568;line-height:1.6;margin-bottom:16px">${ms.msNumber?`<strong>${emsEsc(emsFullMsId(ms))}</strong> — `:''}${emsEsc(ms.title||'(Untitled)')}</p>
 
     <div class="ems-fst">Reviewer</div>
-    <div class="ef"><label class="el">Choose from the reviewer pool</label>
+    <div class="ef"><label class="el">Choose someone, or add a new reviewer</label>
       <select class="es" id="iv_sel" onchange="emsEdInviteSel()">
         <option value="">＋ Add a new reviewer…</option>
-        ${pool.map(r=>`<option value="${emsEsc(r.email)}" ${d.sel===r.email?'selected':''}>${emsEsc(r.name||r.email)}${r.inst?` — ${emsEsc(r.inst)}`:''}</option>`).join('')}
+        ${pool.length?`<optgroup label="Reviewer pool">${pool.map(opt).join('')}</optgroup>`:''}
+        ${authors.length?`<optgroup label="Registered authors — already have a login">${authors.map(opt).join('')}</optgroup>`:''}
       </select>
-      ${taken.size?`<div style="font-size:11px;color:#A0AEC0;margin-top:5px">${taken.size} reviewer(s) already invited to this manuscript are hidden from the list.</div>`:''}
+      ${authors.length?`<div style="font-size:11px;color:#718096;margin-top:5px"><i class="ti ti-user-check"></i> Registered authors appear here automatically. Inviting one creates no new login — they sign in with the password they chose when they registered, and they join your pool at that point.</div>`:''}
+      ${taken.size?`<div style="font-size:11px;color:#A0AEC0;margin-top:5px">${taken.size} person(s) already invited to this manuscript are hidden from the list.</div>`:''}
+      ${hiddenOwn?`<div style="font-size:11px;color:#A0AEC0;margin-top:5px">${hiddenOwn} author(s) of this manuscript are hidden — nobody can be invited to review their own paper.</div>`:''}
     </div>
 
     ${isNew?`
@@ -2809,7 +2889,7 @@ function emsEdRenderInvite(){
       <div class="ems-ff"><label class="el">Areas of expertise</label><input class="ei" id="iv_x" placeholder="e.g. turbulence, thermal structure" value="${emsEsc(d.expertise||'')}"/></div>
     </div>
     <p style="font-size:11px;color:#718096;line-height:1.6;margin-bottom:14px"><i class="ti ti-key"></i> A login will be created automatically and sent to this address with the invitation. The reviewer is added to your pool and can be invited to future manuscripts without re-entering their details.</p>
-    `:`<p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:14px"><i class="ti ti-user-check"></i> ${emsEsc(EMS.reviewers[d.sel]?.name||d.sel)} already has a login. The invitation email will remind them of their sign-in address.</p>`}
+    `:`<p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:14px"><i class="ti ti-user-check"></i> ${emsEsc((chosen&&chosen.name)||d.sel)} already has a login${chosen&&chosen.source==='author'?' — the one they created when they registered as an author':''}. The invitation email will remind them of their sign-in address.</p>`}
 
     <div class="ems-fst">Deadline</div>
     <div class="ems-fg">
@@ -2834,10 +2914,25 @@ async function emsEdSendInvite(){
   const d=emsEdInviteCollect();
   const days=Math.max(1, Math.min(365, parseInt(d.days,10)||EMS_DEFAULT_REVIEW_DAYS));
 
+  const own=emsMsAuthorEmails(ms);
+
   let email, name, inst, freshPass=null;
   if(d.sel){
-    const r=EMS.reviewers[d.sel];
-    if(!r){ alert('That reviewer is no longer in the pool.'); return; }
+    let r=EMS.reviewers[d.sel];
+    if(!r){
+      /* A registered author picked straight from the list. They already hold a
+         login, so there is no account to create and no password to send — only
+         the pool record, written here, by the editor, as the rules require. */
+      const u=EMS.users[d.sel];
+      if(!u || !u.uid){ alert('That person is no longer available to invite.'); return; }
+      if(own.has(u.email)){ alert('That person is an author of this manuscript and cannot review it.'); return; }
+      r={email:u.email, name:u.name||u.email, inst:u.inst||'', expertise:'',
+         uid:u.uid, role:'reviewer', fromAuthor:true, created:dateStr()};
+      EMS.reviewers[u.email]=r;
+      try{ await emsSaveReviewer(u.email); }
+      catch(e){ delete EMS.reviewers[u.email]; return; }
+    }
+    if(own.has(r.email)){ alert('That person is an author of this manuscript and cannot review it.'); return; }
     email=r.email; name=r.name; inst=r.inst;
   } else {
     name=(d.name||'').trim();
@@ -2846,6 +2941,7 @@ async function emsEdSendInvite(){
     if(!name){ alert('Please enter the reviewer\'s full name.'); return; }
     if(!email||email.indexOf('@')<1){ alert('Please enter a valid email address for the reviewer.'); return; }
     if(email===EDITOR.email){ alert('That address is the editor account and cannot be used as a reviewer login.'); return; }
+    if(own.has(email)){ alert('That address belongs to an author of this manuscript, who cannot review it.'); return; }
     if(EMS.reviewers[email]){
       /* Already in the pool under a different spelling of the name — reuse the
          existing account rather than resetting a working password. */
@@ -2911,6 +3007,8 @@ async function emsEdSendInvite(){
        Email: <strong>${emsEsc(email)}</strong><br>
        Password: <strong>${emsEsc(freshPass)}</strong></p>
     <p>Please change this password from the Profile tab after you first sign in.</p>`
+   : (EMS.reviewers[email]&&EMS.reviewers[email].fromAuthor)
+   ? `<p>You already have an account with us from registering as an author, and it is the same one you use here — there is no second login to keep track of. Sign in as usual at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>) and choose <strong>Continue as reviewer</strong> when asked. If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`
    : `<p>Sign in with your existing reviewer account at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>). If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`;
 
   emsSendEmail(email, `Manuscript ${fullId}: Invitation to review for PLMM`, `
@@ -3003,10 +3101,14 @@ function emsAllAssignments(){
 }
 
 /* ── ADMIN: REVIEWER POOL ────────────────────────────
-   The editor's roster of people who may be invited to review, plus a live view
-   of every outstanding assignment across all manuscripts. */
+   Everyone the editor may invite, plus a live view of every outstanding
+   assignment across all manuscripts. The table holds both the reviewers the
+   editor created accounts for and every registered author, who is invitable
+   on the strength of the login they already have. */
 function emsRenderAdminReviewers(){
-  const revs=Object.values(EMS.reviewers);
+  const people=emsInvitablePeople();
+  const revs=people.filter(p=>p.source==='pool');
+  const fromAuthors=people.filter(p=>p.source==='author');
   const all=emsAllAssignments();
   const open=all.filter(x=>['invited','accepted'].includes(x.rev.status))
                 .sort((a,b)=>(a.rev.dueIso||'').localeCompare(b.rev.dueIso||''));
@@ -3041,10 +3143,11 @@ function emsRenderAdminReviewers(){
       </div>`).join('')}</div>
     </div>` : '';
 
-  return `<div class="ems-ph"><div class="ems-pt">Reviewer pool</div><div class="ems-pd">${revs.length} reviewer(s) · ${open.length} outstanding assignment(s)${overdue?` · ${overdue} overdue`:''}</div></div>
+  return `<div class="ems-ph"><div class="ems-pt">Reviewer pool</div><div class="ems-pd">${revs.length} reviewer(s)${fromAuthors.length?` · ${fromAuthors.length} registered author(s) available`:''} · ${open.length} outstanding assignment(s)${overdue?` · ${overdue} overdue`:''}</div></div>
 
   <div class="ems-stat-row">
     <div class="ems-stat-card"><div class="ems-stat-lbl">Reviewers</div><div class="ems-stat-val">${revs.length}</div></div>
+    <div class="ems-stat-card"><div class="ems-stat-lbl">Authors available</div><div class="ems-stat-val">${fromAuthors.length}</div></div>
     <div class="ems-stat-card"><div class="ems-stat-lbl">Outstanding</div><div class="ems-stat-val">${open.length}</div></div>
     <div class="ems-stat-card"><div class="ems-stat-lbl">Overdue</div><div class="ems-stat-val" style="color:${overdue?'#7F1D1D':'#1A2744'}">${overdue}</div></div>
     <div class="ems-stat-card"><div class="ems-stat-lbl">Reviews received</div><div class="ems-stat-val" style="color:#065F46">${all.filter(x=>x.rev.status==='submitted').length}</div></div>
@@ -3071,22 +3174,22 @@ function emsRenderAdminReviewers(){
       <span style="font-size:11px;color:#718096">${EMS.newReviewerCreds.mailed?'These details have been emailed to the reviewer.':'Not emailed — pass these on yourself.'} This box disappears when you leave the page.</span></div>`:''}
   </div>
 
-  ${revs.length===0?`<div class="ems-empty"><i class="ti ti-user-search"></i><p>No reviewers yet. Add one above, or add one while inviting a reviewer to a manuscript.</p></div>`:
+  ${people.length===0?`<div class="ems-empty"><i class="ti ti-user-search"></i><p>Nobody to invite yet. Add a reviewer above, or wait for an author to register — anyone who registers is listed here automatically.</p></div>`:
   `<div class="ems-fw" style="padding:0;overflow:hidden"><table class="ems-db-table" style="table-layout:fixed">
     <colgroup><col style="width:20%"><col style="width:23%"><col style="width:19%"><col style="width:16%"><col style="width:10%"><col style="width:12%"></colgroup>
     <thead><tr><th>Name</th><th>Email</th><th>Institution</th><th>Expertise</th><th>Assignments</th><th>Actions</th></tr></thead>
-    <tbody>${revs.map(r=>{const s=stats(r.email);return `<tr>
-      <td style="font-weight:500">${emsEsc(r.name||'—')}</td>
+    <tbody>${people.map(r=>{const s=stats(r.email);const fromAuthor=r.source==='author';return `<tr>
+      <td style="font-weight:500">${emsEsc(r.name||'—')}${fromAuthor?` <span class="ems-src-tag" title="Registered as an author. Invite them and they join the pool, reusing the login they already have.">author</span>`:''}</td>
       <td style="color:#4A5568">${emsEsc(r.email)}</td>
       <td style="color:#4A5568">${emsEsc(r.inst||'—')}</td>
       <td style="color:#718096">${emsEsc(r.expertise||'—')}</td>
-      <td style="color:#718096">${s.done} done${s.open?` · ${s.open} open`:''}${s.dec?` · ${s.dec} declined`:''}</td>
-      <td><div style="display:flex;gap:5px">
+      <td style="color:#718096">${fromAuthor?'—':`${s.done} done${s.open?` · ${s.open} open`:''}${s.dec?` · ${s.dec} declined`:''}`}</td>
+      <td>${fromAuthor?`<span style="font-size:11px;color:#A0AEC0">manage on Registered authors</span>`:`<div style="display:flex;gap:5px">
         <button class="ems-btn-sm" title="Issue a new password and email it" onclick="emsResetReviewerPass('${emsEsc(r.email)}')"><i class="ti ti-key"></i></button>
         <button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" title="Delete reviewer" onclick="emsDeleteReviewer('${emsEsc(r.email)}')"><i class="ti ti-trash"></i></button>
-      </div></td>
+      </div>`}</td>
     </tr>`;}).join('')}</tbody>
-  </table></div>`}`;
+  </table>${fromAuthors.length?`<div style="padding:10px 14px;border-top:1px solid #D0DAEB;font-size:11px;color:#718096;line-height:1.6"><i class="ti ti-info-circle"></i> Rows tagged <span class="ems-src-tag">author</span> are people who registered to submit. They are not in the pool yet and hold no reviewer record — inviting one enrols them, reusing their existing login rather than creating a second one. Nobody is ever offered as a reviewer of their own manuscript.</div>`:''}</div>`}`;
 }
 
 async function emsAddReviewer(){
