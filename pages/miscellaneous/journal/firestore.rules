@@ -113,6 +113,29 @@ service cloud.firestore {
       allow delete: if isEditor() || (signedIn() && resource.data.authorUid == uid());
     }
 
+    /* ── Manuscript number sequence ───────────────────
+       One document per year, holding the last number issued. Every author has
+       to be able to advance it, or submissions could not be numbered — but the
+       only move a non-editor is allowed is a single step forward. It cannot be
+       rewound, jumped, or set to a value that would hand out a number some
+       other manuscript already carries, and the document holds no data worth
+       reading beyond the count itself.
+
+       The seed value on creation is unconstrained beyond being a positive
+       integer, because whoever writes it first may only be able to see part of
+       the collection; the editor reconciles it against every manuscript on
+       sign-in, and can renumber any collision from the admin panel. */
+    match /plmm_counters/{counterId} {
+      allow read:   if signedIn();
+      allow write:  if isEditor();
+      allow create: if signedIn()
+                    && request.resource.data.next is int
+                    && request.resource.data.next >= 1;
+      allow update: if signedIn()
+                    && request.resource.data.next is int
+                    && request.resource.data.next == resource.data.next + 1;
+    }
+
     /* Anything not named above is denied outright. */
     match /{document=**} {
       allow read, write: if false;

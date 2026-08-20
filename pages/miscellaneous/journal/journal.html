@@ -1109,6 +1109,16 @@ const FS_REVIEWERS_COLL = "plmm_reviewers";
    this manuscript" with a single exists() lookup. In memory they are still
    reattached as ms.reviews[], so every view keeps working unchanged. */
 const FS_REVIEWS_COLL = "plmm_reviews";
+
+/* Sequence counters, one document per year (`ms-2026`), holding the last
+   manuscript number issued that year. The count has to live in the database
+   rather than be derived from what is loaded, because an author may only read
+   their OWN manuscripts: counting locally restarted the sequence at 0001 for
+   every author, so the second person to submit was handed a number the first
+   already held. It is incremented inside a transaction, which also settles two
+   submissions landing at the same instant. */
+const FS_COUNTERS_COLL = "plmm_counters";
+
 /* Base64 chars per chunk. Firestore's hard limit is 1 MiB per document; 700 000
    leaves comfortable room for field names and document overhead. */
 const EMS_CHUNK_SIZE = 700000;
@@ -1249,26 +1259,89 @@ function emsGreetingLine(author){
   const sur = emsSurname(author.name);
   return author.title ? `Dear ${author.title} ${sur}:` : `Dear ${author.name},`;
 }
-/* Assigns the next sequential manuscript number for the current year,
-   e.g. PLMM-26-0001. Only called once per manuscript, on first submission;
-   revisions reuse the same number with a .R1 / .R2 / ... suffix.
-   Note: derived from locally-synced data, so two submissions landing in
-   the exact same instant could in principle collide — an acceptable
-   limitation for a low-volume teaching journal, not something to rely on
-   for a high-traffic production system. */
-function emsNextMsNumber(){
-  const year = new Date().getFullYear().toString().slice(-2);
-  const prefix = `PLMM-${year}-`;
+/* ── MANUSCRIPT NUMBERING ──────────────────────────────
+   Numbers run PLMM-26-0001, PLMM-26-0002, … restarting each calendar year.
+   Only issued once per manuscript, on first submission; revisions reuse the
+   same number with a .R1 / .R2 / ... suffix.
+
+   The sequence is reserved from a shared counter document rather than counted
+   from memory, because memory is not the whole journal: the Firestore rules
+   let an author read only their own manuscripts, so a locally-derived count
+   saw nothing and started every author at 0001. */
+function emsMsPrefix(year){ return `PLMM-${String(year||new Date().getFullYear()).slice(-2)}-`; }
+function emsCounterId(year){ return 'ms-'+(year||new Date().getFullYear()); }
+
+/* Highest number issued among the manuscripts this account can actually see.
+   Complete for the editor, partial for anyone else — used to seed the counter
+   the first time it is needed, and as a last-resort fallback. */
+function emsLocalMsMax(prefix){
   const nums = Object.values(EMS.manuscripts)
     .map(m=>m.msNumber)
     .filter(n=>n && n.startsWith(prefix))
     .map(n=>parseInt(n.slice(prefix.length),10))
     .filter(n=>!isNaN(n));
-  const next = (nums.length?Math.max(...nums):0)+1;
-  return prefix + String(next).padStart(4,'0');
+  return nums.length?Math.max(...nums):0;
+}
+
+async function emsNextMsNumber(forYear){
+  const year = forYear || new Date().getFullYear();
+  const prefix = emsMsPrefix(year);
+  try{
+    const ref = db.collection(FS_COUNTERS_COLL).doc(emsCounterId(year));
+    const next = await db.runTransaction(async tx=>{
+      const snap = await tx.get(ref);
+      const last = snap.exists ? (Number(snap.data().next)||0) : emsLocalMsMax(prefix);
+      const n = last + 1;
+      tx.set(ref, {year:year, next:n}, {merge:true});
+      return n;
+    });
+    return prefix + String(next).padStart(4,'0');
+  }catch(err){
+    /* A submission must never be lost to a counter problem. Fall back to the
+       old local count; the editor sees any collision this causes in the
+       manuscript database and can renumber from there. */
+    console.warn('Could not reserve a manuscript number from the counter:', err);
+    return prefix + String(emsLocalMsMax(prefix)+1).padStart(4,'0');
+  }
 }
 function emsFullMsId(ms){
   return (ms.msNumber||ms.id) + (ms.revisionRound>0?`.R${ms.revisionRound}`:'');
+}
+
+/* ── CLEARING UP NUMBERS ISSUED BEFORE THE COUNTER ─────
+   Anything submitted under the old local count carries a number that was
+   correct only within its own author's view, so several first submissions all
+   read PLMM-26-0001. These helpers let the editor find and clear those
+   collisions from the manuscript database. */
+function emsMsYear(m){
+  const mm=/^PLMM-(\d{2})-/.exec((m&&m.msNumber)||'');
+  return mm ? 2000+Number(mm[1]) : new Date().getFullYear();
+}
+
+/* Submission order, oldest first. submittedIso is exact but only exists on
+   manuscripts submitted since it was added, so fall back to the human `created`
+   label and finally to the timestamp uid() appends to every manuscript id. */
+function emsMsOrderKey(m){
+  const parsed = Date.parse((m&&m.created)||'');
+  const day = (m&&m.submittedIso) || (isNaN(parsed)?'9999-12-31':emsIso(new Date(parsed)));
+  const stamp = (String((m&&m.id)||'').match(/(\d{13})$/)||[])[1] || '0';
+  return day+'#'+stamp.padStart(16,'0');
+}
+
+/* Every manuscript that shares its number with an earlier submission. The
+   earliest holder of each number is left out: it is the one already quoted in
+   correspondence, so it keeps what it was given. */
+function emsDuplicateMsNumbers(){
+  const byNum={};
+  Object.values(EMS.manuscripts).forEach(m=>{ if(m.msNumber){ (byNum[m.msNumber]=byNum[m.msNumber]||[]).push(m); } });
+  const out=[];
+  Object.keys(byNum).forEach(num=>{
+    const g=byNum[num];
+    if(g.length<2) return;
+    g.sort((a,b)=>emsMsOrderKey(a).localeCompare(emsMsOrderKey(b)));
+    out.push(...g.slice(1));
+  });
+  return out;
 }
 
 /* ── REVIEW ROUNDS ─────────────────────────────────────
@@ -1316,7 +1389,7 @@ const EMS = {
   users:{}, manuscripts:{}, reviewers:{}, ready:false,
   /* Peer review: which assignment a reviewer is looking at, and the pending
      account-type choice when one email holds both an author and a reviewer login. */
-  rvMsId:null, rvId:null, roleChoice:null, newReviewerCreds:null
+  rvMsId:null, rvId:null, roleChoice:null, roleChoiceHasAuthor:false, newReviewerCreds:null
 };
 
 let emsUnsub = null;
@@ -1429,6 +1502,26 @@ async function emsFetchEditor(){
 
   try{ emsAttachReviews((await db.collection(FS_REVIEWS_COLL).get()).docs.map(d=>d.data())); }
   catch(err){ console.warn('Could not read reviews (continuing without them):', err); emsAttachReviews([]); }
+
+  if(!emsCounterChecked){ emsCounterChecked = true; await emsEdSyncCounter(); }
+}
+
+/* The editor holds the only view of every manuscript, so it is the only
+   account that can tell whether the counter has fallen behind the numbers
+   actually in use — which it has for anything submitted before the counter
+   existed. Run once per sign-in, so the next submission cannot reuse a number
+   that is already printed on someone's confirmation email. */
+let emsCounterChecked = false;
+async function emsEdSyncCounter(){
+  const year = new Date().getFullYear();
+  const max = emsLocalMsMax(emsMsPrefix(year));
+  if(!max) return;
+  try{
+    const ref = db.collection(FS_COUNTERS_COLL).doc(emsCounterId(year));
+    const snap = await ref.get();
+    if(snap.exists && (Number(snap.data().next)||0) >= max) return;
+    await ref.set({year:year, next:max}, {merge:true});
+  }catch(err){ console.warn('Could not reconcile the manuscript counter:', err); }
 }
 
 /* An author reads no reviewer records and no review documents whatsoever — the
@@ -1505,7 +1598,7 @@ async function emsSyncData(){
    no readable data behind in the page. */
 function emsStopSync(){
   if(emsUnsub){ try{ emsUnsub(); }catch(e){} emsUnsub=null; }
-  EMS.users={}; EMS.reviewers={}; EMS.manuscripts={};
+  EMS.users={}; EMS.reviewers={}; EMS.manuscripts={}; emsCounterChecked=false;
 }
 
 /* Page-load path: connect to Firebase and show the sign-in screen. No data is
@@ -1829,16 +1922,20 @@ function emsRender(){
 /* ── AUTH ──────────────────────────────────────────── */
 function emsRenderAuth(){
   const r=EMS.authMode==='register';
-  /* One email can hold both an author account (self-registered) and a reviewer
-     account (issued by the editor). When both passwords match, ask which panel
-     they want rather than silently picking one. */
+  /* One login covers both sides of the journal. Reviewing for PLMM never means
+     giving up submitting to it, so anyone holding a reviewer account is asked
+     which panel they want — including a reviewer who has never submitted, whose
+     author profile is created the moment they choose it. Someone with only an
+     author profile is not asked: there is nothing to choose between. */
   if(EMS.roleChoice){
     return `<div class="ems-auth-wrap"><div class="ems-auth-card">
       <div class="ems-auth-title">Choose your panel</div>
-      <div class="ems-auth-sub">${emsEsc(EMS.roleChoice)} is registered both as an author and as a reviewer.</div>
+      <div class="ems-auth-sub">${EMS.roleChoiceHasAuthor
+        ? `${emsEsc(EMS.roleChoice)} is registered both as an author and as a reviewer.`
+        : `${emsEsc(EMS.roleChoice)} is on the reviewer panel. You can also use this same login to submit your own manuscripts.`}</div>
       <button class="ems-btn-p" onclick="emsPickRole('author')"><i class="ti ti-file-text"></i> Continue as author</button>
       <button class="ems-btn-p" style="margin-top:8px;background:#4A5568" onclick="emsPickRole('reviewer')"><i class="ti ti-clipboard-check"></i> Continue as reviewer</button>
-      <div class="ems-sw"><span onclick="EMS.roleChoice=null;emsRender()">Back to sign in</span></div>
+      <div class="ems-sw"><span onclick="EMS.roleChoice=null;EMS.roleChoiceHasAuthor=false;emsRender()">Back to sign in</span></div>
     </div></div>`;
   }
   return `<div class="ems-auth-wrap"><div class="ems-auth-card">
@@ -1906,8 +2003,12 @@ async function emsDoAuth(){
       emsRender(); return;
     }
     EMS.authErr=null;
-    if(isAuthor && isReviewer){ EMS.roleChoice=email; emsRender(); return; }
-    await emsPickRole(isReviewer?'reviewer':'author', email);
+    /* Every reviewer is offered both panels, not only those who happen to have
+       registered as an author first. A reviewer who has never submitted still
+       gets the author option — emsPickRole creates the missing profile — so the
+       two ways into the system behave the same way round. */
+    if(isReviewer){ EMS.roleChoice=email; EMS.roleChoiceHasAuthor=isAuthor; emsRender(); return; }
+    await emsPickRole('author', email);
     return;
   }
 
@@ -1920,7 +2021,15 @@ async function emsDoAuth(){
 
   let cred;
   try{ cred = await firebase.auth().createUserWithEmailAndPassword(email, pass); }
-  catch(err){ EMS.authErr = emsAuthMsg(err); emsRender(); return; }
+  catch(err){
+    /* The commonest way to land here is a reviewer whose login the editorial
+       office already created, trying to register so they can submit. There is
+       nothing for them to register — that login already submits. */
+    EMS.authErr = (err && err.code==='auth/email-already-in-use')
+      ? 'An account with this email already exists — including reviewer logins issued by the editorial office. Sign in with it instead; the same login lets you submit manuscripts.'
+      : emsAuthMsg(err);
+    emsRender(); return;
+  }
 
   /* The profile document carries the UID so the rules can tie it to this
      account. No password is stored here — Firebase Auth holds it, hashed, and
@@ -1935,13 +2044,44 @@ async function emsDoAuth(){
   EMS.authOk='Account created! You can now sign in.'; EMS.authMode='login'; EMS.authErr=null; emsRender();
 }
 
+/* Gives a reviewer the author profile they never had. Reviewer logins are
+   created by the editor, so a reviewer who now wants to submit has no
+   plmm_users record and, without one, no name or institution to prefill and no
+   entry in the registered-authors list. Rather than make them register a second
+   time — which Firebase Auth would refuse, the address already being taken —
+   the profile is written the first time they open the author panel, seeded from
+   what the editorial office already knows about them.
+
+   The rules permit this: a signed-in account may create its own profile as long
+   as the uid on the document is its own. */
+async function emsEnsureAuthorProfile(email){
+  if(!email || !EMS.uid) return;
+  try{
+    const d = await db.collection(FS_USERS_COLL).doc(email).get();
+    if(d.exists && d.data().uid===EMS.uid){ EMS.users[email]=d.data(); return; }
+  }catch(err){ /* refused means no profile of ours is there; fall through */ }
+
+  let seed={};
+  try{
+    const rd = await db.collection(FS_REVIEWERS_COLL).doc(email).get();
+    if(rd.exists) seed=rd.data();
+  }catch(err){ console.warn('Could not read the reviewer record to seed an author profile:', err); }
+
+  EMS.users[email]={
+    name:seed.name||'', inst:seed.inst||'', email, uid:EMS.uid,
+    role:'author', created:dateStr(), fromReviewer:true
+  };
+  await emsSaveUser(email);
+}
+
 /* Signs the user into the panel for `role`. Called straight from the login
    handler, or from the picker when one address holds both account types. */
 async function emsPickRole(role, email){
   const addr = email || EMS.roleChoice;
   if(!addr) return;
+  if(role==='author') await emsEnsureAuthorProfile(addr);
   EMS.currentUser=addr; EMS.currentRole=role;
-  EMS.roleChoice=null; EMS.authErr=null; EMS.authOk=null;
+  EMS.roleChoice=null; EMS.roleChoiceHasAuthor=false; EMS.authErr=null; EMS.authOk=null;
   if(role==='reviewer'){ EMS.view='rvdash'; EMS.activeTab='assignments'; }
   else { EMS.view='dash'; EMS.activeTab='manuscripts'; }
   emsRender();
@@ -1955,7 +2095,7 @@ function emsLogout(){
   try{ if(window.firebase && firebase.auth) firebase.auth().signOut(); }catch(e){}
   emsStopSync();
   EMS.uid=null;
-  EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; EMS.roleChoice=null; EMS.rvMsId=null; EMS.rvId=null; emsRender();
+  EMS.currentUser=null; EMS.currentRole=null; EMS.view='login'; EMS.authErr=null; EMS.authOk=null; EMS.roleChoice=null; EMS.roleChoiceHasAuthor=false; EMS.rvMsId=null; EMS.rvId=null; emsRender();
 }
 
 /* ── DASHBOARD ─────────────────────────────────────── */
@@ -2161,7 +2301,7 @@ async function emsSubmitMs(){
   if(!ms.title){ alert('Please add a title.'); return; }
   const isRev=ms.status==='revision_required';
 
-  if(!ms.msNumber){ ms.msNumber = emsNextMsNumber(); ms.revisionRound = 0; }
+  if(!ms.msNumber){ ms.msNumber = await emsNextMsNumber(); ms.revisionRound = 0; ms.submittedIso = emsIsoToday(); }
   let prevFullId = null;
   if(isRev){
     prevFullId = emsFullMsId(ms);
@@ -3108,10 +3248,11 @@ async function emsEdSendInvite(){
     <p>Sign in at: <a href="${url}">${url}</a><br>
        Email: <strong>${emsEsc(email)}</strong><br>
        Password: <strong>${emsEsc(freshPass)}</strong></p>
-    <p>Please change this password from the Profile tab after you first sign in.</p>`
+    <p>Please change this password from the Profile tab after you first sign in.</p>
+    <p>This login is also your author account: should you wish to submit your own work to PLMM, sign in with it and choose <strong>Continue as author</strong> — there is no separate registration.</p>`
    : (EMS.reviewers[email]&&EMS.reviewers[email].fromAuthor)
    ? `<p>You already have an account with us from registering as an author, and it is the same one you use here — there is no second login to keep track of. Sign in as usual at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>) and choose <strong>Continue as reviewer</strong> when asked. If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`
-   : `<p>Sign in with your existing reviewer account at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>). If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`;
+   : `<p>Sign in with your existing reviewer account at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>) and choose <strong>Continue as reviewer</strong> when asked. If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`;
 
   emsSendEmail(email, `Manuscript ${fullId}: Invitation to review for PLMM`, `
     <p>Dear ${emsEsc(name)},</p>
@@ -3374,11 +3515,48 @@ function emsRvSummaryCell(m){
   return `<div style="font-size:10px;margin-top:3px;color:${late?'#9B1C1C':'#A0AEC0'}"><i class="ti ti-users"></i> ${bits.join(' · ')}</div>`;
 }
 
+/* Reissues a number to every manuscript that duplicates an earlier one. Kept
+   as a deliberate editorial action rather than something that happens quietly
+   at sign-in: a manuscript ID has already been posted to its authors, so
+   changing it is the editor's call to make and to communicate. */
+async function emsEdFixMsNumbers(){
+  const dups=emsDuplicateMsNumbers();
+  if(!dups.length){ alert('Every manuscript already carries a unique number.'); return; }
+  const list=dups.map(m=>`  • ${m.msNumber} — "${m.title||'(Untitled)'}" (${m.ownerName||m.owner||'—'})`).join('\n');
+  if(!confirm(
+    `${dups.length} manuscript(s) share a number with an earlier submission:\n\n${list}\n\n`+
+    `Each will be reissued the next free number for its year; the earliest holder of each number keeps it.\n\n`+
+    `No email is sent — if the old ID has already been quoted to these authors, tell them yourself.\n\nProceed?`
+  )) return;
+
+  let done=0;
+  for(const m of dups){
+    try{
+      m.msNumber = await emsNextMsNumber(emsMsYear(m));
+      m.updated = dateStr();
+      EMS.manuscripts[m.id]=m;
+      await emsSaveMs(m);
+      done++;
+    }catch(err){
+      console.error('Could not renumber', m.id, err);
+      alert(`Could not renumber "${m.title||m.id}". Stopping here — the ${done} already changed are saved.`);
+      break;
+    }
+  }
+  emsRender();
+  if(done===dups.length) alert(`${done} manuscript(s) renumbered.`);
+}
+
 function emsRenderAdminDb(filt,cnt){
+  const dups=emsDuplicateMsNumbers();
   return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="ems-ph" style="margin:0"><div class="ems-pt">Manuscript database</div><div class="ems-pd">${filt.length} record(s) shown</div></div>
     <button class="ems-btn-sm" onclick="EMS.filterStatus='all';emsRender()"><i class="ti ti-refresh"></i> Show all</button>
   </div>
+  ${dups.length?`<div style="font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:4px;padding:8px 10px;line-height:1.6;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <span><i class="ti ti-alert-triangle"></i> ${dups.length} manuscript(s) carry a number that an earlier submission already holds — numbers issued before the shared counter existed.</span>
+    <button class="ems-btn-sm" style="flex:none" onclick="emsEdFixMsNumbers()"><i class="ti ti-wand"></i> Renumber</button>
+  </div>`:''}
   <div class="ems-stat-row">
     <div class="ems-stat-card"><div class="ems-stat-lbl">Total</div><div class="ems-stat-val">${cnt.all}</div></div>
     <div class="ems-stat-card"><div class="ems-stat-lbl">Awaiting review</div><div class="ems-stat-val">${cnt.submitted+cnt.under_review}</div></div>
