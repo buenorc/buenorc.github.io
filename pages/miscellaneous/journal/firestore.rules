@@ -24,7 +24,16 @@ service cloud.firestore {
     function isEditor()  { return signedIn() && uid() == 'x1kgb92m3dVRgja5ahiGoPeDNeg1'; }
 
     /* Is this account assigned to review that manuscript? Review documents are
-       keyed `${msId}_${reviewerUid}`, so this is a single existence check. */
+       keyed `${msId}_${reviewerUid}`, so this is a single existence check.
+
+       A reviewer asked back for a later round holds more than one assignment
+       on the same manuscript. Only the first keeps the plain key; the rest are
+       suffixed (see emsNewReviewKey in journal.html). That is deliberate and
+       costs this check nothing: a reviewer's *first* assignment always carries
+       the plain key, whichever round it was created in, so the document probed
+       here exists for anyone with any assignment at all. Withdrawing an
+       invitation sets status 'cancelled' rather than deleting the document, so
+       it does not punch a hole in that guarantee either. */
     function isAssigned(msId) {
       return signedIn()
         && exists(/databases/$(database)/documents/plmm_reviews/$(msId + '_' + uid()));

@@ -637,6 +637,22 @@ hr.section-divider {
 .ems-rp-body { font-size: 12px; color: #2D3748; line-height: 1.6; white-space: pre-line; }
 .ems-rp-conf { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #D0DAEB; font-size: 12px; color: #7F1D1D; line-height: 1.6; white-space: pre-line; }
 
+/* One round of peer review in the editor's panel. The heading carries the
+   round so repeat assignments from the same reviewer never read as duplicates. */
+.ems-rv-round { margin-bottom: 14px; }
+.ems-rv-round:last-child { margin-bottom: 0; }
+.ems-rv-round-h {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  flex-wrap: wrap; font-size: 11px; font-weight: 600; color: #2B3E6B;
+  text-transform: uppercase; letter-spacing: .4px;
+  padding-bottom: 5px; margin-bottom: 9px; border-bottom: 1px solid #D0DAEB;
+}
+.ems-rv-round-c { font-weight: 400; text-transform: none; letter-spacing: 0; color: #718096; }
+.ems-rv-round-now {
+  font-size: 9px; padding: 1px 5px; border-radius: 3px;
+  background: #DBEAFE; color: #1E40AF; letter-spacing: .05em;
+}
+
 /* Marks a row in the reviewer pool that is there because the person registered
    as an author, not because the editor enrolled them. */
 .ems-src-tag {
@@ -1545,17 +1561,38 @@ async function emsSaveMs(ms){
    answer "is this person assigned to that manuscript" with a single exists(). */
 function emsReviewDocId(msId, reviewerUid){ return `${msId}_${reviewerUid}`; }
 
+/* The same reviewer can be invited again when a revision opens a new round, so
+   one (manuscript, reviewer) pair may hold several assignments and the plain
+   key above is no longer unique. The *first* assignment keeps it — that is the
+   key isAssigned() probes in firestore.rules, and every reviewer has exactly
+   one first assignment — while later ones get a suffix. Without this,
+   re-inviting somebody would silently overwrite the report they filed in the
+   round before.
+
+   The key is decided once, at invitation, and stored as `docKey`; assignments
+   written before rounds existed have none and fall back to the plain form. */
+function emsReviewKey(msId, rev){ return rev.docKey || emsReviewDocId(msId, rev.reviewerUid); }
+
+/* Chooses the key for a new assignment: plain if this is the reviewer's first
+   on the manuscript, suffixed otherwise. Uniqueness is by count rather than by
+   round, so even two invitations inside one round cannot collide. */
+function emsNewReviewKey(ms, reviewerUid, reviewerEmail){
+  const prior=(ms.reviews||[]).filter(r=>r.reviewerEmail===reviewerEmail).length;
+  const base=emsReviewDocId(ms.id, reviewerUid);
+  return prior===0 ? base : `${base}_a${prior+1}`;
+}
+
 async function emsSaveReview(ms, rev){
   if(!rev.reviewerUid) return; // pre-Auth record; nothing the rules could authorise
   rev.msId = ms.id;
   await db.collection(FS_REVIEWS_COLL)
-          .doc(emsReviewDocId(ms.id, rev.reviewerUid))
+          .doc(emsReviewKey(ms.id, rev))
           .set(emsClean(rev));
 }
 
-async function emsDeleteReview(msId, reviewerUid){
-  if(!reviewerUid) return;
-  try{ await db.collection(FS_REVIEWS_COLL).doc(emsReviewDocId(msId, reviewerUid)).delete(); }
+async function emsDeleteReview(msId, rev){
+  if(!rev || !rev.reviewerUid) return;
+  try{ await db.collection(FS_REVIEWS_COLL).doc(emsReviewKey(msId, rev)).delete(); }
   catch(e){ console.error('Failed to delete review:', e); }
 }
 
@@ -1691,7 +1728,7 @@ async function emsDeleteMsRecord(id){
   /* Reviews are their own documents now, so they have to be removed explicitly
      or they would outlive the manuscript they belong to. */
   const ms=EMS.manuscripts[id];
-  for(const rev of (ms&&ms.reviews)||[]){ await emsDeleteReview(id, rev.reviewerUid); }
+  for(const rev of (ms&&ms.reviews)||[]){ await emsDeleteReview(id, rev); }
   try{
     await db.collection(FS_MS_COLL).doc(id).delete();
   }catch(e){ console.error('Failed to delete manuscript row:', e); alert('Could not delete the manuscript from the database. Check your connection.'); throw e; }
@@ -2271,16 +2308,29 @@ function emsRenderReview(){
 
   /* Reports from invited reviewers, each with a switch to forward its
      author-facing comments verbatim in the decision letter. Confidential notes
-     are shown here but can never be forwarded. */
-  const submitted=(ms.reviews||[]).filter(r=>r.status==='submitted');
-  const pending=(ms.reviews||[]).filter(r=>['invited','accepted'].includes(r.status));
-  const rvSec = (submitted.length||pending.length) ? `
-    <div class="ems-fst">Reviewer reports</div>
+     are shown here but can never be forwarded.
+
+     Only this round's reports are offered: last round's went to the authors
+     with the previous decision, and re-sending them would read as though the
+     reviewer had repeated themselves. Earlier rounds are still shown, below
+     and read-only, because the decision usually turns on whether the new
+     version answers what was asked the first time. */
+  const round=emsMsRound(ms);
+  const cur=emsRvCurrentRound(ms);
+  const submitted=cur.filter(r=>r.status==='submitted');
+  const pending=cur.filter(r=>['invited','accepted'].includes(r.status));
+  const earlier=(ms.reviews||[]).filter(r=>emsRvRound(r)<round && r.status==='submitted');
+  const rvSec = (submitted.length||pending.length||earlier.length) ? `
+    <div class="ems-fst">Reviewer reports — ${emsRoundLabel(round)}</div>
     ${pending.length?`<p style="font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:4px;padding:8px 10px;line-height:1.6;margin-bottom:10px"><i class="ti ti-clock"></i> ${pending.length} invited reviewer(s) have not yet reported. You can still issue a decision now.</p>`:''}
-    ${submitted.map((rev,i)=>`
+    ${submitted.length?submitted.map((rev,i)=>`
       ${emsRpBlock(rev,{showConf:true,label:`Reviewer ${i+1} — ${rev.reviewerName||rev.reviewerEmail}`})}
       <label class="ems-cl-item" style="margin:-4px 0 14px 0"><input type="checkbox" id="rvfwd_${rev.id}" checked> Include this reviewer's comments to the authors in the decision letter</label>
-    `).join('')}
+    `).join(''):(pending.length?'':`<p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:10px">No reports for this round.</p>`)}
+    ${earlier.length?`
+      <div class="ems-fst" style="margin-top:6px">Earlier rounds — for reference</div>
+      <p style="font-size:11px;color:#718096;line-height:1.6;margin-bottom:10px">Already sent to the authors with the previous decision, so these are not offered for forwarding again.</p>
+      ${earlier.map(rev=>emsRpBlock(rev,{showConf:true,label:`${emsRoundLabel(emsRvRound(rev))} — ${rev.reviewerName||rev.reviewerEmail}`})).join('')}`:''}
     <div style="height:6px"></div>` : '';
 
   return `<div class="ems-main">
@@ -2327,7 +2377,9 @@ async function emsSubmitReview(){
   if(!ms.reviewerComments) ms.reviewerComments=[];
   if(comm.trim()) ms.reviewerComments.push(comm.trim());
   const fwd=[];
-  (ms.reviews||[]).filter(r=>r.status==='submitted').forEach((rev,i)=>{
+  /* The same set, in the same order, as the checkboxes the decision screen
+     drew — this round's reports only. */
+  emsRvCurrentRound(ms).filter(r=>r.status==='submitted').forEach((rev,i)=>{
     if(!document.getElementById('rvfwd_'+rev.id)?.checked) return;
     if(rev.forwardedOn) return; // already sent to the authors in an earlier round
     const txt=(rev.commentsToAuthor||'').trim();
@@ -2449,7 +2501,7 @@ function emsRvRenderList(mine,pend,act){
       <div class="ems-rv-head">
         <div>
           <div class="ems-rv-name">${emsEsc(ms.title||'(Untitled)')}</div>
-          <div class="ems-rv-meta">${ms.msNumber?`ID ${emsEsc(emsFullMsId(ms))} · `:''}${emsEsc(ms.type||'—')}</div>
+          <div class="ems-rv-meta">${ms.msNumber?`ID ${emsEsc(emsFullMsId(ms))} · `:''}${emsEsc(ms.type||'—')}${emsRvRound(rev)>0?` · <strong>revised version, ${emsEsc(emsRoundLabel(emsRvRound(rev)).toLowerCase())}</strong>`:''}</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           <span class="etag ${RVC[rev.status]||'etag-draft'}">${RVL[rev.status]||rev.status}</span>
@@ -2541,7 +2593,7 @@ function emsRvRenderMs(){
 
   return `<div class="ems-main">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">${back}<div class="ems-pt">${emsEsc(ms.title||'(Untitled)')}</div><span class="etag ${RVC[rev.status]||'etag-draft'}">${RVL[rev.status]||rev.status}</span></div>
-  ${invited?`<div class="ems-rev-alert"><div class="ems-rev-alert-t"><i class="ti ti-mail"></i> Review invitation</div><div class="ems-rev-alert-b">You have been invited to review this manuscript for <em>Physical Limnology: Monitoring &amp; Methods</em>. Please accept or decline below.</div></div>`:''}
+  ${invited?`<div class="ems-rev-alert"><div class="ems-rev-alert-t"><i class="ti ti-mail"></i> Review invitation</div><div class="ems-rev-alert-b">You have been invited to review this manuscript for <em>Physical Limnology: Monitoring &amp; Methods</em>. Please accept or decline below.${emsRvRound(rev)>0?' This is a <strong>revised version</strong> of a manuscript that has been through review before — you are being asked to assess the revision. Any report you filed earlier is unaffected.':''}</div></div>`:''}
   <div style="display:grid;grid-template-columns:1fr 240px;gap:14px">
     <div>
       <div class="ems-fw" style="margin-bottom:12px">
@@ -2779,7 +2831,8 @@ function emsRpBlock(rev, opt){
    directly, exactly as before. */
 function emsEdReviewPanel(ms){
   const revs=ms.reviews||[];
-  const rows=revs.map(rev=>{
+  const round=emsMsRound(ms);
+  const card=rev=>{
     const open=['invited','accepted'].includes(rev.status);
     return `<div class="ems-rv-card">
       <div class="ems-rv-head">
@@ -2803,15 +2856,34 @@ function emsEdReviewPanel(ms){
         <button class="ems-btn-sm" onclick="emsEdRemind('${ms.id}','${rev.id}')"><i class="ti ti-bell"></i> Send reminder</button>
         <button class="ems-btn-sm" style="border-color:#FCA5A5;color:#9B1C1C" onclick="emsEdWithdraw('${ms.id}','${rev.id}')"><i class="ti ti-user-minus"></i> Withdraw invitation</button>
       </div>`:''}
-    </div>`;}).join('');
+    </div>`;};
 
-  const done=revs.filter(r=>r.status==='submitted').length;
-  const wait=revs.filter(r=>['invited','accepted'].includes(r.status)).length;
+  /* Grouped by round, newest first. Once a reviewer can be asked back, a flat
+     list would show the same name several times with nothing to say which
+     version of the manuscript each report was written against. */
+  const rounds=[...new Set(revs.map(emsRvRound).concat([round]))].sort((a,b)=>b-a);
+  const groups=rounds.map(n=>{
+    const inRound=emsRvInRound(ms, n);
+    const d=inRound.filter(r=>r.status==='submitted').length;
+    const w=inRound.filter(r=>['invited','accepted'].includes(r.status)).length;
+    return `<div class="ems-rv-round">
+      <div class="ems-rv-round-h">
+        <span>${emsRoundLabel(n)}${n===round?' <span class="ems-rv-round-now">current</span>':''}</span>
+        <span class="ems-rv-round-c">${inRound.length?`${d} submitted · ${w} outstanding`:'nobody invited'}</span>
+      </div>
+      ${inRound.length?`<div class="ems-rv-list">${inRound.map(card).join('')}</div>`
+        :`<p style="font-size:12px;color:#A0AEC0;line-height:1.6;margin:0">No reviewers invited for this round.</p>`}
+    </div>`;
+  }).join('');
+
+  const cur=emsRvCurrentRound(ms);
+  const done=cur.filter(r=>r.status==='submitted').length;
+  const wait=cur.filter(r=>['invited','accepted'].includes(r.status)).length;
   return `<div class="ems-fw" style="margin-top:12px">
-    <div class="ems-fst">Peer review${revs.length?` — ${done} submitted, ${wait} outstanding`:''}</div>
-    ${revs.length?`<div class="ems-rv-list" style="margin-bottom:12px">${rows}</div>`
+    <div class="ems-fst">Peer review — ${emsRoundLabel(round)}${cur.length?` · ${done} submitted, ${wait} outstanding`:''}</div>
+    ${revs.length?`<div style="margin-bottom:12px">${groups}</div>`
       :`<p style="font-size:12px;color:#718096;line-height:1.6;margin-bottom:12px">No reviewers assigned. Peer review is optional — you can write the decision yourself, or invite one or more reviewers to report first.</p>`}
-    <button class="ems-btn-sm blue" onclick="emsEdOpenInvite('${ms.id}')"><i class="ti ti-user-plus"></i> Invite a reviewer</button>
+    <button class="ems-btn-sm blue" onclick="emsEdOpenInvite('${ms.id}')"><i class="ti ti-user-plus"></i> Invite a reviewer${round>0?' for this round':''}</button>
   </div>`;
 }
 
@@ -2844,24 +2916,39 @@ function emsEdRenderInvite(){
   if(!ms){ EMS.view='admin'; emsRender(); return ''; }
   const d=EMS.inviteDraft||{days:EMS_DEFAULT_REVIEW_DAYS};
   const isNew = !d.sel;
-  /* Anyone already invited to this manuscript is filtered out of the pool, so
-     the same reviewer cannot be double-invited by accident. The manuscript's
-     own authors are filtered out too — a co-author offered one click away from
-     reviewing their own paper is a mistake waiting to be made. */
-  const taken=new Set((ms.reviews||[]).filter(r=>r.status!=='cancelled').map(r=>r.reviewerEmail));
+  /* The manuscript's own authors are the one hard exclusion — a co-author
+     offered one click away from reviewing their own paper is a mistake waiting
+     to be made. Everyone else stays selectable, including reviewers who
+     already reported: sending a revision back to the people who asked for it
+     is the normal way a second round works, not an accident to be prevented.
+     A same-round duplicate is caught at send time with a confirmation. */
+  const round=emsMsRound(ms);
   const own=emsMsAuthorEmails(ms);
-  const people=emsInvitablePeople().filter(p=>!taken.has(p.email) && !own.has(p.email));
+  const people=emsInvitablePeople().filter(p=>!own.has(p.email));
   const pool=people.filter(p=>p.source==='pool');
   const authors=people.filter(p=>p.source==='author');
   const hiddenOwn=emsInvitablePeople().filter(p=>own.has(p.email)).length;
   const chosen=people.find(p=>p.email===d.sel) || EMS.reviewers[d.sel];
   const due=emsIsoPlusDays(d.days||EMS_DEFAULT_REVIEW_DAYS);
-  const opt=p=>`<option value="${emsEsc(p.email)}" ${d.sel===p.email?'selected':''}>${emsEsc(p.name||p.email)}${p.inst?` — ${emsEsc(p.inst)}`:''}</option>`;
+
+  /* What this person has already done on this manuscript, so the editor can
+     see at a glance who reported last round and who is already busy on this
+     one, without leaving the form. */
+  const history=email=>{
+    const h=(ms.reviews||[]).filter(r=>r.reviewerEmail===email && r.status!=='cancelled');
+    if(!h.length) return '';
+    const cur=h.filter(r=>emsRvRound(r)===round);
+    if(cur.length) return ` · already invited this round (${RVL[cur[cur.length-1].status]||cur[cur.length-1].status})`;
+    const last=h[h.length-1];
+    return ` · round ${emsRvRound(last)+1}: ${RVL[last.status]||last.status}`;
+  };
+  const opt=p=>`<option value="${emsEsc(p.email)}" ${d.sel===p.email?'selected':''}>${emsEsc(p.name||p.email)}${p.inst?` — ${emsEsc(p.inst)}`:''}${emsEsc(history(p.email))}</option>`;
 
   return `<div class="ems-main">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
     <button class="ems-btn-back" onclick="emsOpenDetail('${ms.id}')"><i class="ti ti-arrow-left"></i> Manuscript</button>
     <div class="ems-pt">Invite a reviewer</div>
+    <span class="etag etag-sub">${emsRoundLabel(round)}</span>
   </div>
   <div class="ems-fw" style="max-width:640px">
     <div class="ems-fst">Manuscript</div>
@@ -2875,7 +2962,7 @@ function emsEdRenderInvite(){
         ${authors.length?`<optgroup label="Registered authors — already have a login">${authors.map(opt).join('')}</optgroup>`:''}
       </select>
       ${authors.length?`<div style="font-size:11px;color:#718096;margin-top:5px"><i class="ti ti-user-check"></i> Registered authors appear here automatically. Inviting one creates no new login — they sign in with the password they chose when they registered, and they join your pool at that point.</div>`:''}
-      ${taken.size?`<div style="font-size:11px;color:#A0AEC0;margin-top:5px">${taken.size} person(s) already invited to this manuscript are hidden from the list.</div>`:''}
+      ${round>0?`<div style="font-size:11px;color:#718096;margin-top:5px"><i class="ti ti-rotate"></i> Reviewers who reported in an earlier round stay selectable, and the note beside each name says what they did. Inviting one again opens a fresh assignment for this round — their earlier report is kept.</div>`:''}
       ${hiddenOwn?`<div style="font-size:11px;color:#A0AEC0;margin-top:5px">${hiddenOwn} author(s) of this manuscript are hidden — nobody can be invited to review their own paper.</div>`:''}
     </div>
 
@@ -2973,16 +3060,26 @@ async function emsEdSendInvite(){
     }
   }
 
-  if((ms.reviews||[]).some(r=>r.reviewerEmail===email && r.status!=='cancelled')){
-    alert('That reviewer already has an open assignment on this manuscript.'); return;
+  /* Re-inviting somebody who reported in an earlier round is deliberate and
+     needs no warning. A second assignment inside the *same* round almost never
+     is, so it asks rather than refuses — the editor stays able to do it. */
+  const round=emsMsRound(ms);
+  const sameRound=(ms.reviews||[]).filter(r=>r.reviewerEmail===email && r.status!=='cancelled'
+                                             && emsRvRound(r)===round);
+  if(sameRound.length){
+    const st=RVL[sameRound[sameRound.length-1].status]||sameRound[sameRound.length-1].status;
+    if(!confirm(`${name} already has an assignment on this manuscript for ${emsRoundLabel(round)} (${st}).\n\nInvite them a second time for the same round?`)) return;
   }
 
+  const ruid=(EMS.reviewers[email]&&EMS.reviewers[email].uid)||null;
   const rev={
-    id:rvid(), msId:ms.id, reviewerUid:(EMS.reviewers[email]&&EMS.reviewers[email].uid)||null,
+    id:rvid(), msId:ms.id, reviewerUid:ruid,
     reviewerEmail:email, reviewerName:name, reviewerInst:inst||'',
-    status:'invited', days, invitedDate:dateStr(), invitedIso:emsIsoToday(),
+    status:'invited', round, days, invitedDate:dateStr(), invitedIso:emsIsoToday(),
     dueIso:emsIsoPlusDays(days), message:(d.message||'').trim()
   };
+  /* Fixed now, while the earlier assignments are still visible to count. */
+  if(ruid) rev.docKey=emsNewReviewKey(ms, ruid, email);
   if(!ms.reviews) ms.reviews=[];
   ms.reviews.push(rev);
 
@@ -2995,12 +3092,17 @@ async function emsEdSendInvite(){
   }
   ms.updated=dateStr();
   if(!ms.timeline) ms.timeline=[];
-  ms.timeline.push({event:`Reviewer invited: ${name}`,date:dateStr(),done:true});
+  ms.timeline.push({event:`Reviewer invited (${emsRoundLabel(round)}): ${name}`,date:dateStr(),done:true});
   EMS.manuscripts[ms.id]=ms;
   await emsSaveMs(ms);
 
   const fullId=emsFullMsId(ms);
   const url=emsSystemUrl();
+  /* Somebody who reported on an earlier version is being asked back, not
+     approached cold, and the letter should not read as though they had never
+     seen the paper. */
+  const returning=(ms.reviews||[]).some(r=>r.reviewerEmail===email && r.id!==rev.id
+                                           && r.status==='submitted' && emsRvRound(r)<round);
   const credBlock = freshPass ? `
     <p><strong>Your reviewer login has been created:</strong></p>
     <p>Sign in at: <a href="${url}">${url}</a><br>
@@ -3013,7 +3115,10 @@ async function emsEdSendInvite(){
 
   emsSendEmail(email, `Manuscript ${fullId}: Invitation to review for PLMM`, `
     <p>Dear ${emsEsc(name)},</p>
-    <p>I am writing to ask whether you would be willing to review the manuscript below for <em>Physical Limnology: Monitoring &amp; Methods</em>. Your expertise would be of great value in assessing this work.</p>
+    ${returning
+      ? `<p>I am writing to ask whether you would be willing to look again at a manuscript you reviewed for <em>Physical Limnology: Monitoring &amp; Methods</em>. The authors have submitted a revised version, and I would be grateful for your view on whether it answers the points you raised.</p>
+         <p>Your earlier report remains on file — this is a fresh assignment for the revised version, not a replacement for it.</p>`
+      : `<p>I am writing to ask whether you would be willing to review the manuscript below for <em>Physical Limnology: Monitoring &amp; Methods</em>. Your expertise would be of great value in assessing this work.</p>`}
     <p><strong>Manuscript ID:</strong> ${fullId}<br>
        <strong>Title:</strong> &quot;${emsEsc(ms.title)}&quot;<br>
        <strong>Type:</strong> ${emsEsc(ms.type||'—')}</p>
