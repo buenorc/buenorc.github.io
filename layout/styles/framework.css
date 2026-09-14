@@ -44,14 +44,19 @@ original template are preserved so existing markup keeps working.
   --font-script:'Freestyle Script','Segoe Script',cursive;
   --font-mono:ui-monospace,SFMono-Regular,"SF Mono",Consolas,"Liberation Mono",monospace;
 
-  /* Fluid type scale */
+  /* Fluid type scale.
+     Deliberately quiet at the top end: this is a text-heavy academic site, so
+     headings sit close to the body size and do their work with the serif face
+     and weight rather than with scale. --step-0 is body copy; every heading
+     rule in the site draws from --step-1 upward, so the ratios here are the
+     single place that sets how loud titles are anywhere on the site. */
   --step--1:clamp(.78rem,.75rem + .15vw,.86rem);
   --step-0 :clamp(.94rem,.9rem + .2vw,1.02rem);
-  --step-1 :clamp(1.06rem,1rem + .3vw,1.2rem);
-  --step-2 :clamp(1.25rem,1.15rem + .5vw,1.5rem);
-  --step-3 :clamp(1.5rem,1.3rem + .9vw,2rem);
-  --step-4 :clamp(1.85rem,1.5rem + 1.5vw,2.7rem);
-  --step-5 :clamp(2.2rem,1.7rem + 2.4vw,3.6rem);
+  --step-1 :clamp(1rem,.97rem + .15vw,1.1rem);
+  --step-2 :clamp(1.04rem,1rem + .18vw,1.15rem);
+  --step-3 :clamp(1.1rem,1.04rem + .22vw,1.22rem);
+  --step-4 :clamp(1.18rem,1.1rem + .32vw,1.35rem);
+  --step-5 :clamp(1.4rem,1.2rem + .7vw,1.8rem);
 
   /* Space */
   --sp-1:.25rem; --sp-2:.5rem;  --sp-3:.75rem; --sp-4:1rem;

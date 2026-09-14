@@ -143,11 +143,12 @@ Licence URI: http://www.os-templates.com/template-terms
           <p>Between 2000 and 2019, over one million people died due to approximately 7,000 disasters worldwide, resulting in economic losses estimated at around 3 trillion USD. Hydrological disasters caused more than 7 million deaths and affected about 3.8 billion people globally between 1900 and 2020. In recent years, extreme events have intensified and become more frequent, largely due to climate change, increasing risks to critical infrastructure such as dams. In Brazil alone, from 2000 to 2024, hydrological disasters caused nearly 4,000 deaths and impacted 12 million people. Continuous environmental monitoring is crucial to mitigate the effects of natural and anthropogenic disasters; however, commercial monitoring systems are often prohibitively expensive, limiting their deployment in vulnerable regions.</p>
           <p>Advances in low-cost sensors and IoT technologies—especially those based on LoRa and MQTT protocols—enable affordable, real-time data acquisition and transmission even in remote areas without electrical power or Wi-Fi connectivity. This study presents the development of a low-cost telemetry system using these technologies for remote environmental monitoring, equipped with sensors for river level, air, and water temperature, along with communication range testing, demonstrating a scalable solution for improving disaster risk management and environmental monitoring. </p>
         </div>
-        <div class="one_half"> </div>
-        <figure>
+        <div class="one_half">
+          <figure>
           <img class="imgr borderedbox inspace-5" src="img/figure2.png" alt="">
           <figcaption><b>Fig 1.</b>Measuring station with LoRa module.</figcaption>
-        </figure>
+          </figure>
+        </div>
       </div>
 
       <div class="group btmspace-50 demo" style="text-align:justify">
@@ -166,8 +167,7 @@ Licence URI: http://www.os-templates.com/template-terms
       <div class="group btmspace-50 demo" style="text-align:justify">
         <div class="one_half first">
           <p>Experiments were conducted to evaluate the signal range performance of the LoRa EBYTE E32 433T20D module using different antenna types, in two distinct scenarios: an indoor environment (inside a laboratory) and an open-field outdoor setting. In the indoor tests, the standard bidirectional SMA antenna achieved a maximum range of 129 meters. In contrast, replacing it with a fiberglass antenna under the same conditions extended the range to 250 meters — an increase of approximately 94%. Overall, the fiberglass antenna consistently demonstrated superior performance, with an average range improvement of 59% compared to the SMA antenna across all tested conditions. Additionally, two different LoRa modules were compared: the EBYTE E32 433T20D and the EBYTE E32 433T33D. The results did not show a consistent advantage of one module over the other, as their performance varied with the specific combination of antenna type and environment. For example, the 20D module performed better indoors when paired with the fiberglass antenna (16% improvement) and outdoors with the SMA antenna (15%). Meanwhile, the 33D module showed slightly better results indoors with the SMA (12%) and outdoors with the fiberglass antenna (19%). Despite the 33D's higher transmission power (30 dBm vs. 20 dBm), both modules use the same core chip, the Semtech SX1278, known for enabling long-range communication in LoRa systems.</p>
-          <p>The field tests were carried out in non-line-of-sight (NLoS) conditions, with the indoor environment experiencing greater interference due to physical structures. In these conditions, the maximum ranges recorded were 250 meters indoors and 502 meters in the open field, demonstrating an average improvement of 119% in range in outdoor settings. These findings align with prior studies that highlight how signal propagation is significantly affected by environmental obstructions. In ideal line-of-sight (LoS) conditions, such as elevated antenna placement and unobstructed terrain, LoRa communication can exceed distances of 15 km, but such scenarios are rarely applicable in real-world monitoring deployments. In urban environments with dense buildings, the effective range may be drastically reduced; for example, other studies reported a maximum of 700 meters in high-density areas, compared to 7 km in rural settings. To address range limitations, expanding the monitoring network with intermediate nodes is a viable strategy. These nodes can act both as local data collectors and signal relays, forming a multi-hop communication network that increases system coverage. However, while effective in localized deployments, the scalability of LoRa networks is limited. Research suggests that good performance is maintained with up to 120 nodes over areas of approximately 38,000 m², but further expansion may lead to increased interference and decreased data reliability due to lower packet delivery rates.<\p>
-
+          <p>The field tests were carried out in non-line-of-sight (NLoS) conditions, with the indoor environment experiencing greater interference due to physical structures. In these conditions, the maximum ranges recorded were 250 meters indoors and 502 meters in the open field, demonstrating an average improvement of 119% in range in outdoor settings. These findings align with prior studies that highlight how signal propagation is significantly affected by environmental obstructions. In ideal line-of-sight (LoS) conditions, such as elevated antenna placement and unobstructed terrain, LoRa communication can exceed distances of 15 km, but such scenarios are rarely applicable in real-world monitoring deployments. In urban environments with dense buildings, the effective range may be drastically reduced; for example, other studies reported a maximum of 700 meters in high-density areas, compared to 7 km in rural settings. </p>
         </div>
         <div class="one_half">
         <figure>
@@ -175,13 +175,14 @@ Licence URI: http://www.os-templates.com/template-terms
           <figcaption><b>Fig 3.</b>Distance analysis.</figcaption>
         </figure>
         </div>
+         <p>To address range limitations, expanding the monitoring network with intermediate nodes is a viable strategy. These nodes can act both as local data collectors and signal relays, forming a multi-hop communication network that increases system coverage. However, while effective in localized deployments, the scalability of LoRa networks is limited. Research suggests that good performance is maintained with up to 120 nodes over areas of approximately 38,000 m², but further expansion may lead to increased interference and decreased data reliability due to lower packet delivery rates.</p>
       </div>
 
 
       <hr>
 
       <header>
-        <figure class="avatar"><img src="../../colab/maria-eduarda-timos.png" alt=""></figure>
+        <figure class="avatar"><img src="../../colab/timos.jpg" alt=""></figure>
         <address>
         Research performed with the assistance of <a href="#">Maria Eduarda Timos</a>
         </address>
@@ -267,14 +268,14 @@ Licence URI: http://www.os-templates.com/template-terms
           optimization represents a key factor for improving the reliability and scalability of low-cost
           telemetry networks.
           </p>
-          <p>
-          For practical environmental monitoring applications, the results indicate that the deployment strategy
-          should consider both antenna configuration and network architecture. The use of higher-gain antennas,
-          elevated receiver positions, and intermediate relay nodes can further expand the monitoring coverage,
-          especially in areas with complex topography or dense vegetation.
-          </p>
-
         </div>
+
+        <p>
+        For practical environmental monitoring applications, the results indicate that the deployment strategy
+        should consider both antenna configuration and network architecture. The use of higher-gain antennas,
+        elevated receiver positions, and intermediate relay nodes can further expand the monitoring coverage,
+        especially in areas with complex topography or dense vegetation.
+        </p>
 
       </div>
 
@@ -322,7 +323,7 @@ Licence URI: http://www.os-templates.com/template-terms
       <hr>
 
       <header>
-        <figure class="avatar"><img src="../../colab/maria-eduarda-timos.png" alt=""></figure>
+        <figure class="avatar"><img src="../../colab/timos.jpg" alt=""></figure>
         <address>
         Research performed with the assistance of <a href="#">Maria Eduarda Timos</a>
         </address>

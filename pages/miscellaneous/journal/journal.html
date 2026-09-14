@@ -1118,6 +1118,11 @@ const FS_REVIEWS_COLL = "plmm_reviews";
    already held. It is incremented inside a transaction, which also settles two
    submissions landing at the same instant. */
 const FS_COUNTERS_COLL = "plmm_counters";
+/* Deleting a profile cannot delete the Firebase Authentication login behind it
+   (the browser SDK may not remove another user's account), so the login lives
+   on. This collection remembers only the address and the UID of each removed
+   profile, so the editor can attach a new profile to that same login later. */
+const FS_REMOVED_COLL = "plmm_removed";
 
 /* Base64 chars per chunk. Firestore's hard limit is 1 MiB per document; 700 000
    leaves comfortable room for field names and document overhead. */
@@ -1212,7 +1217,7 @@ async function emsInitEmail(){
 /* The editor's Firebase Auth UID. Not a secret — it is useless without the
    account password — but the security rules match on it to grant editor
    privileges, so it must agree with the Authentication console. */
-const EDITOR_UID = 'x1kgb92m3dVRgja5ahiGoPeDNeg1';
+const EDITOR_UID = 'WuoFvwlkSJXyvrT9pYJvQ7TLP8A3';
 const EDITOR = { email:'editor@plmm.org', name:'Prof. de Carvalho Bueno', inst:'Federal University of Paraná', role:'editor' };
 
 /* Where editor notifications are actually delivered. Kept separate from
@@ -1707,16 +1712,44 @@ async function emsCreateAuthAccount(email, password){
   return newUid;
 }
 
-/* The UID of an existing login, for someone who already registered as an
-   author and is now being added to the reviewer pool. The client SDK cannot
-   look up another account in Firebase Auth, so this reads it from the author
-   profile document, which stores the UID alongside the address. */
-async function emsExistingUidFor(email){
-  try{
-    const d = await db.collection(FS_USERS_COLL).doc(email).get();
-    if(d.exists && d.data().uid) return d.data().uid;
-  }catch(e){ console.warn('Could not look up an existing account for', email, e); }
-  return null;
+/* The UID of an existing login. The client SDK cannot look another account up
+   in Firebase Auth, so the UID is read from wherever the system last wrote it
+   down: the author profile, the reviewer profile, or — once both profiles have
+   been deleted — the removed-account record. `source` says which. */
+async function emsFindUidFor(email){
+  const places=[[FS_USERS_COLL,'author'],[FS_REVIEWERS_COLL,'reviewer'],[FS_REMOVED_COLL,'removed']];
+  for(const [coll, source] of places){
+    try{
+      const d = await db.collection(coll).doc(email).get();
+      if(d.exists && d.data().uid) return {uid:d.data().uid, source};
+    }catch(e){ console.warn('Could not look up an existing account for', email, 'in', coll, e); }
+  }
+  return {uid:null, source:null};
+}
+async function emsExistingUidFor(email){ return (await emsFindUidFor(email)).uid; }
+
+/* Shown when an address has a Firebase login that nothing in the database
+   points to — a profile deleted before removed accounts were being recorded. */
+const EMS_NO_UID_MSG = 'That address already has a sign-in login, but the system has no record of which account it is (its profile was deleted earlier).\n\nEither:\n• ask the person to sign in once on the journal page (they can use "Forgot password?" there), then try again; or\n• delete the login in the Firebase Console (Authentication → Users), then try again to create it as new.';
+
+/* Remembers the login behind a profile that is about to be deleted. Only the
+   address and UID are kept — nothing else about the person. A failure here is
+   logged, not fatal: the person can still recover by signing in themselves. */
+async function emsRecordRemoval(email, uid, role){
+  if(!email || !uid) return;
+  try{ await db.collection(FS_REMOVED_COLL).doc(email).set({email, uid, role, removedDate:dateStr()}); }
+  catch(e){ console.warn('Could not record the removed login for', email, e); }
+}
+/* Drops the removed-account record once a profile holds the UID again. */
+async function emsForgetRemoval(email){
+  try{ await db.collection(FS_REMOVED_COLL).doc(email).delete(); }
+  catch(e){ /* nothing recorded, or rules not yet published — harmless */ }
+}
+/* Firebase's own password-reset email. Someone brought back after removal
+   rarely still has a password they remember. */
+async function emsSendReset(email){
+  try{ await firebase.auth().sendPasswordResetEmail(email); return true; }
+  catch(err){ console.warn('Could not send a password-reset link to', email, err); return false; }
 }
 
 async function emsSaveReviewer(email){
@@ -1734,7 +1767,7 @@ async function emsDeleteReviewer(email){
   if(!r) return;
   const open=emsRvAssignmentsFor(email).filter(x=>['invited','accepted'].includes(x.rev.status));
   const done=emsRvAssignmentsFor(email).filter(x=>x.rev.status==='submitted').length;
-  let msg=`Permanently delete the reviewer account for ${r.name||email} (${email})?\n\nThis removes their login from the system and cannot be undone.`;
+  let msg=`Delete the reviewer ${r.name||email} (${email})?\n\nThis removes their reviewer profile and cannot be undone.\n\nTheir sign-in login itself stays in Firebase Authentication (a web page is not allowed to delete it), so you can add them back later. To erase the login completely, also delete it in the Firebase Console under Authentication → Users.`;
   if(open.length) msg+=`\n\n${open.length} pending assignment(s) will be withdrawn.`;
   if(done)        msg+=`\n\n${done} review(s) they already submitted will be KEPT on the manuscript record.`;
   if(!confirm(msg)) return;
@@ -1746,6 +1779,7 @@ async function emsDeleteReviewer(email){
     EMS.manuscripts[ms.id]=ms;
     await emsSaveMs(ms);
   }
+  await emsRecordRemoval(email, r.uid, 'reviewer');
   try{
     await db.collection(FS_REVIEWERS_COLL).doc(email).delete();
   }catch(e){ console.error('Failed to delete reviewer:', e); alert('Could not delete the reviewer from the database. Check your connection.'); return; }
@@ -1840,7 +1874,7 @@ async function emsDeleteUser(email){
   const u=EMS.users[email];
   if(!u) return;
   const userMss=Object.values(EMS.manuscripts).filter(m=>m.owner===email);
-  if(!confirm(`Permanently delete the account for ${u.name||email} (${email})?\n\nThis cannot be undone.`)) return;
+  if(!confirm(`Delete the author ${u.name||email} (${email})?\n\nThis removes their author profile and cannot be undone.\n\nTheir sign-in login itself stays in Firebase Authentication (a web page is not allowed to delete it). If they sign in again they get a fresh, empty author profile. To erase the login completely, also delete it in the Firebase Console under Authentication → Users.`)) return;
 
   let alsoDeleteMss=false;
   if(userMss.length){
@@ -1852,6 +1886,7 @@ async function emsDeleteUser(email){
       try{ await emsDeleteMsRecord(ms.id); }catch(e){ /* keep going with the rest */ }
     }
   }
+  await emsRecordRemoval(email, u.uid, 'author');
   try{
     await db.collection(FS_USERS_COLL).doc(email).delete();
   }catch(e){ console.error('Failed to delete user:', e); alert('Could not delete the user from the database. Check your connection.'); return; }
@@ -1949,10 +1984,28 @@ function emsRenderAuth(){
     ${r?`<div class="ef"><label class="el">Institution</label><input class="ei" id="eaI" placeholder="University or research center"/></div>`:''}
     <button class="ems-btn-p" onclick="emsDoAuth()">${r?'Create account':'Sign in'}</button>
     <div class="ems-sw">${r?'Already have an account? <span onclick="emsSwAuth(\'login\')">Sign in</span>':"No account? <span onclick=\"emsSwAuth('register')\">Register</span>"}</div>
+    ${r?'':'<div class="ems-sw" style="margin-top:6px"><span onclick="emsForgotPass()">Forgot password?</span></div>'}
   </div></div>`;
 }
 
 function emsSwAuth(m){ EMS.authMode=m; EMS.authErr=null; EMS.authOk=null; emsRender(); }
+
+/* Sends Firebase's password-reset link to the address typed in the form.
+   Needed by people returning after their profile was deleted, and by reviewers
+   who never kept the password the editor generated. The reply is the same
+   whether or not the address has a login, so the form cannot be used to find
+   out who is registered. */
+async function emsForgotPass(){
+  const email=(document.getElementById('eaE')?.value||'').trim().toLowerCase();
+  if(!email){ EMS.authOk=null; EMS.authErr='Type your email address in the Email box, then click "Forgot password?" again.'; emsRender(); return; }
+  try{ await firebase.auth().sendPasswordResetEmail(email); }
+  catch(err){
+    if(!(err && err.code==='auth/user-not-found')){ EMS.authOk=null; EMS.authErr=emsAuthMsg(err); emsRender(); return; }
+  }
+  EMS.authErr=null;
+  EMS.authOk=`If ${emsEsc(email)} has a login, a link to set a new password has been sent. Check your inbox (and spam folder), choose a new password, then sign in here.`;
+  emsRender();
+}
 
 /* Readable text for the Firebase Auth error codes a user can actually hit. */
 function emsAuthMsg(err){
@@ -1996,12 +2049,14 @@ async function emsDoAuth(){
     try{ isAuthor   = !(await db.collection(FS_USERS_COLL).where('uid','==',EMS.uid).limit(1).get()).empty; }catch(e){ console.warn('Author lookup failed:', e); }
     try{ isReviewer = !(await db.collection(FS_REVIEWERS_COLL).where('uid','==',EMS.uid).limit(1).get()).empty; }catch(e){ console.warn('Reviewer lookup failed:', e); }
 
-    if(!isAuthor && !isReviewer){
-      try{ await firebase.auth().signOut(); }catch(e){}
-      EMS.uid=null;
-      EMS.authErr='This account has no author or reviewer profile in the system.';
-      emsRender(); return;
-    }
+    /* A valid login with no profile behind it is, in practice, one whose
+       profile the editor deleted: the panel removes the profile but cannot
+       remove the Firebase login. Refusing it left the person stuck — unable to
+       register again (the address is taken) and unable to sign in (no
+       profile). Registration is open to anyone, so rebuilding an author profile
+       for a login that just proved its password grants nothing a fresh
+       registration would not. It falls through to emsPickRole('author') below,
+       which creates the profile. */
     EMS.authErr=null;
     /* Every reviewer is offered both panels, not only those who happen to have
        registered as an author first. A reviewer who has never submitted still
@@ -2025,8 +2080,11 @@ async function emsDoAuth(){
     /* The commonest way to land here is a reviewer whose login the editorial
        office already created, trying to register so they can submit. There is
        nothing for them to register — that login already submits. */
+    /* The address can also be taken by a login whose profile the editor
+       deleted — that login survives, and signing in with it rebuilds the
+       profile. Either way the answer is the same: sign in, not register. */
     EMS.authErr = (err && err.code==='auth/email-already-in-use')
-      ? 'An account with this email already exists — including reviewer logins issued by the editorial office. Sign in with it instead; the same login lets you submit manuscripts.'
+      ? 'This email already has a login — for example one issued by the editorial office, or one used here before. Please sign in with it instead of registering. If you do not remember the password, go to Sign in and use "Forgot password?".'
       : emsAuthMsg(err);
     emsRender(); return;
   }
@@ -2071,6 +2129,9 @@ async function emsEnsureAuthorProfile(email){
     name:seed.name||'', inst:seed.inst||'', email, uid:EMS.uid,
     role:'author', created:dateStr(), fromReviewer:true
   };
+  /* Nothing to seed from — typically someone returning after their profile was
+     deleted. emsPickRole sends them to the profile form to fill it in. */
+  EMS.profileIncomplete = !seed.name;
   await emsSaveUser(email);
 }
 
@@ -2082,11 +2143,14 @@ async function emsPickRole(role, email){
   if(role==='author') await emsEnsureAuthorProfile(addr);
   EMS.currentUser=addr; EMS.currentRole=role;
   EMS.roleChoice=null; EMS.roleChoiceHasAuthor=false; EMS.authErr=null; EMS.authOk=null;
+  const needsProfile = role==='author' && !!EMS.profileIncomplete;
+  EMS.profileIncomplete=false;
   if(role==='reviewer'){ EMS.view='rvdash'; EMS.activeTab='assignments'; }
-  else { EMS.view='dash'; EMS.activeTab='manuscripts'; }
+  else { EMS.view='dash'; EMS.activeTab = needsProfile ? 'profile' : 'manuscripts'; }
   emsRender();
   try{ await emsSyncData(); }catch(err){ console.error('Could not load your data:', err); }
   emsRender();
+  if(needsProfile) alert('Welcome. Your author profile has no name or institution yet. Please fill them in on this page and click Save, so they appear on your submissions.');
 }
 
 function emsLogout(){
@@ -3143,7 +3207,7 @@ async function emsEdSendInvite(){
 
   const own=emsMsAuthorEmails(ms);
 
-  let email, name, inst, freshPass=null;
+  let email, name, inst, freshPass=null, restored=false;
   if(d.sel){
     let r=EMS.reviewers[d.sel];
     if(!r){
@@ -3187,8 +3251,10 @@ async function emsEdSendInvite(){
       }catch(err){
         if(err && err.code==='auth/email-already-in-use'){
           freshPass=null;
-          ruid = await emsExistingUidFor(email);
-          if(!ruid){ alert('That address already has a login, but no profile could be found for it. Ask them to sign in once as an author first, then invite them again.'); return; }
+          const found = await emsFindUidFor(email);
+          ruid = found.uid;
+          if(!ruid){ alert(EMS_NO_UID_MSG); return; }
+          restored = found.source==='removed';
         } else {
           alert('Could not create the reviewer login: '+emsAuthMsg(err)); return;
         }
@@ -3197,6 +3263,11 @@ async function emsEdSendInvite(){
       EMS.reviewers[email]={email,name,inst,expertise:(d.expertise||'').trim(),uid:ruid,role:'reviewer',created:dateStr()};
       try{ await emsSaveReviewer(email); }
       catch(e){ delete EMS.reviewers[email]; return; }
+      /* The profile holds the UID again, so any removed-account record has done
+         its job. Someone brought back from removal gets a reset link, since
+         they rarely still have a password they remember. */
+      emsForgetRemoval(email);
+      if(restored) await emsSendReset(email);
     }
   }
 
@@ -3250,6 +3321,8 @@ async function emsEdSendInvite(){
        Password: <strong>${emsEsc(freshPass)}</strong></p>
     <p>Please change this password from the Profile tab after you first sign in.</p>
     <p>This login is also your author account: should you wish to submit your own work to PLMM, sign in with it and choose <strong>Continue as author</strong> — there is no separate registration.</p>`
+   : restored
+   ? `<p>You have been registered with us before, and your existing login has been reactivated. <strong>A separate email from Firebase contains a link to set a new password</strong> — please use it first. Then sign in at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>) and choose <strong>Continue as reviewer</strong> when asked.</p>`
    : (EMS.reviewers[email]&&EMS.reviewers[email].fromAuthor)
    ? `<p>You already have an account with us from registering as an author, and it is the same one you use here — there is no second login to keep track of. Sign in as usual at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>) and choose <strong>Continue as reviewer</strong> when asked. If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`
    : `<p>Sign in with your existing reviewer account at: <a href="${url}">${url}</a> (username: <strong>${emsEsc(email)}</strong>) and choose <strong>Continue as reviewer</strong> when asked. If you have forgotten your password, reply to this message and the editorial office will issue a new one.</p>`;
@@ -3453,14 +3526,16 @@ async function emsAddReviewer(){
      secondary app instance so the editor stays signed in. An address that
      already has a login (typically a registered author) reuses it. */
   let pass=emsRvGenPass();
-  let ruid=null;
+  let ruid=null, restored=false;
   try{
     ruid = await emsCreateAuthAccount(email, pass);
   }catch(err){
     if(err && err.code==='auth/email-already-in-use'){
       pass=null;
-      ruid = await emsExistingUidFor(email);
-      if(!ruid){ alert('That address already has a login, but no profile could be found for it. Ask them to sign in once as an author first, then add them again.'); return; }
+      const found = await emsFindUidFor(email);
+      ruid = found.uid;
+      if(!ruid){ alert(EMS_NO_UID_MSG); return; }
+      restored = found.source==='removed';
     } else {
       alert('Could not create the reviewer login: '+emsAuthMsg(err)); return;
     }
@@ -3468,6 +3543,8 @@ async function emsAddReviewer(){
   EMS.reviewers[email]={email,name,inst,expertise,uid:ruid,role:'reviewer',created:dateStr()};
   try{ await emsSaveReviewer(email); }
   catch(e){ delete EMS.reviewers[email]; return; }
+  emsForgetRemoval(email);
+  if(restored) await emsSendReset(email);
 
   EMS.newReviewerCreds={name,email,pass,mailed:mail};
   if(mail) emsSendEmail(email, 'Your PLMM reviewer account', `
@@ -3475,7 +3552,7 @@ async function emsAddReviewer(){
     <p>You have been added to the reviewer panel of <em>Physical Limnology: Monitoring &amp; Methods</em>. An account has been created for you so that you can receive and respond to review invitations.</p>
     <p>Sign in at: <a href="${emsSystemUrl()}">${emsSystemUrl()}</a><br>
        Email: <strong>${emsEsc(email)}</strong><br>
-       ${pass?`Password: <strong>${emsEsc(pass)}</strong>`:`Use the password you already have for this address. If you have forgotten it, ask the editorial office to send you a reset link.`}</p>
+       ${pass?`Password: <strong>${emsEsc(pass)}</strong>`:restored?`Your earlier login has been reactivated. A separate email from Firebase contains a link to set a new password — please use it before signing in.`:`Use the password you already have for this address. If you have forgotten it, use "Forgot password?" on the sign-in screen.`}</p>
     <p>${pass?"Please change this password from the Profile tab after you first sign in.":""} You will receive a separate message whenever a manuscript is assigned to you, and you are free to decline any invitation.</p>
     <p>Thank you for supporting the journal.</p>
     <p>Sincerely,<br>${EDITOR.name}<br>PLMM Editorial Office</p>`);

@@ -136,52 +136,269 @@ Licence URI: http://www.os-templates.com/template-terms
         <div class="one_half first">
           <p>The continuous and excessive water use due to the developing industry and agricultural activities creates a strong pressure on water resources, leaving the aquatic ecosystem vulnerable to large-scale degradation. Water resources management and protection are at the core of sustainable development, and require constant monitoring and assessing, being a key element to minimizing the negative impacts on these ecosystems. One of the most important indicators of water quality is the relative cloudiness of water caused by chemical precipitates, organic and inorganic compounds, and microorganisms. </p>
         </div>
-        <div class="one_half"> </div>
-        <figure>
+        <div class="one_half">
+          <figure>
           <img class="imgr borderedbox inspace-5" src="img/laser-turb.png" alt="">
           <figcaption><b>Fig 1.</b>Low cost turbidity meter: a first attempt. </figcaption>
-        </figure>
+          </figure>
 
+        </div>
       </div>
 
       <div class="group btmspace-50 demo" style="text-align:justify">
-        <div class="one_half first">
+        <div class="one_third first">
           <figure>
             <img class="imgl borderedbox inspace-5" src="img/turb-method.gif" alt="">
             <figcaption><b>Fig 2.</b>Turbidity probe device (principle). </figcaption>
           </figure>
         </div>
-        <div class="one_half"></div>
-        <p> Although the increase of turbidity causes a reduction in water visibility, the effect on water quality is not limited to water cloudiness. Suspended particles present can serve as a refuge for pathogens, heavy metals, and pesticides, and for that reason, turbidity is one of the most important parameters to describe water quality.  </p>
-        <p> Turbidity meters work based on optical scatters and transmit-detection techniques. The light emitted by the light source is absorbed, reflected, and dispersed by suspended particles present in the water. The light detectors, mounted at different angles from the light source, are responsible to capture the light and correlate it with the amount of suspended particles present in the water sample (Fig 2). </p>
+        <div class="two_third">
+          <p> Although the increase of turbidity causes a reduction in water visibility, the effect on water quality is not limited to water cloudiness. Suspended particles present can serve as a refuge for pathogens, heavy metals, and pesticides, and for that reason, turbidity is one of the most important parameters to describe water quality.  </p>
+          <p> Turbidity meters work based on optical scatters and transmit-detection techniques. The light emitted by the light source is absorbed, reflected, and dispersed by suspended particles present in the water. The light detectors, mounted at different angles from the light source, are responsible to capture the light and correlate it with the amount of suspended particles present in the water sample (Fig 2). </p>
+        </div>
         <p>For example, if the light detector is positioned at 90° from the light source (C<sub>neph</sub>), the cell will have a higher light response under higher turbidity waters (this is known as the nephelometry principle). On the other hand, if the detector is positioned aligned with the light source (C<sub>turb</sub>), the cell will detect higher light intensity for lower water turbidity values, since most part of the light will not be scattered by suspended particles. </p>
-        <p>Commercial turbidimeters that perform continuous turbidity monitoring cost around 7000 Euros. Due to the high cost of commercial turbidity sensors, recently many low-cost turbidity meters have been proposed. The aim of this pair of studies is to describe the design and fabrication of a low-cost smart turbidity meters, and investigate the capability of this sensor to provides additional information about the water quality based essentially  optical scatters and transmit-detection techniques. Thus, in this section we do not pretend to mention previous observations conducted with analog turbidity sensors that uses ADC (Analog-to-digital converter) transmission to read signals and correlate with turbidity readings. For more information about this previous designed probes, <a href="../turbidity-adc/turbidity-adc.html">click here</a>.
+        <p>Commercial turbidimeters that perform continuous turbidity monitoring cost around 7000 Euros. Due to the high cost of commercial turbidity sensors, recently many low-cost turbidity meters have been proposed. The aim of this pair of studies is to describe the design and fabrication of a low-cost smart turbidity meters, and investigate the capability of this sensor to provides additional information about the water quality based essentially  optical scatters and transmit-detection techniques. Thus, in this section we do not pretend to mention previous observations conducted with analog turbidity sensors that uses ADC (Analog-to-digital converter) transmission to read signals and correlate with turbidity readings. For more information about this previous designed probes, <a href="../turbidity-adc/turbidity-adc.html">click here</a>.</p>
+
       </div>
 
       <hr>
 
-      <h1>Enhancing Eutrophication Analysis with an Advanced Turbidity Meter (Abu Dhabi probe)</h1>
+      <h1>Enhancing eutrophication analysis with an advanced turbidity meter (Abu Dhabi probe)</h1>
       <header>
         <figure class="avatar"><img src="../../colab/general.png" alt=""></figure>
         <address>
-        Research performed with the assistance of <a href="#">Marcos Dunajski</a>
+        Research performed with the assistance of <a href="#">Marcos Vinicius Lima Dunajski</a>
         </address>
-        <time>Collaborators: Luiz Henrique Ferreira Luz e Alessandro Enos Tulio</time>
+        <time>Collaborators: Dr. Andr&eacute; Luis Diniz dos Santos (LBNL) and Dr. Tobias Bleninger (UFPR). Preliminary tests: Karollyn Larissa de Quadros, Luiz Henrique Nestor Ferreira Luz and Alessandro Enos Tulio.</time>
       </header>
 
       <div class="group btmspace-50 demo" style="text-align:justify">
-        <div class="one_half first">
+        <div class="one_third first">
           <figure>
             <img class="imgl borderedbox inspace-5" src="img/abu-dhabi.jpg" alt="">
-            <figcaption><b>Fig 3.</b>Abu Dhabi turbidity probe. </figcaption>
+            <figcaption><b>Fig 3.</b> Abu Dhabi turbidity probe: the assembled submersible unit. </figcaption>
           </figure>
         </div>
-        <div class="one_half">        </div>
-        <p>To test light-to-frequency converter and analog sensors based on ADC transmission, we brought into existence the Bangkok turbidity meter, similar to Paris, but with only two light detectors (LDR and light-to-frequency converter), both mounted at 90° from the light source. Differently from the light-dependent resistor (LDR) that is a analog sensor that varies the internal resistance depending on the intensity of the light, the light-to-frequency converter works as a digital sensor capable to convert the light intensity that reaches the photodiodes in a continuous digital square wave, in which the light intensity is proportional to the wavelength.  </p>
-        <p>Differently from both probes, Abu Dhabi works through a similar principle of light-to-frequency converter mounted in Bangkok probe, the only difference is that it has 64 photodiodes with four different color filters (red, green, blue, and clean), which are responsible to identify the components of the RGB color space. </p>
-        <p>Firstly, our investigation has been conducted in the lab, we only inject standard turbidity solution into the probe interior. The standard turbidity solution was created similar as described before, based on a dillution of water and skimmed milk. In this next step we use a different composition of standard turbidity solution, varying the color and water composition, to check if the sensor is capable to identify other potential threats on water that may influence the water quality of aquatic systems. </p>
+        <div class="two_third">
+          <p>Abu Dhabi is the third generation of our turbidity probes and the first one built entirely around a digital light-to-frequency detector. Differently from the light-dependent resistor (LDR) used in Paris and Bangkok &mdash; an analog component whose resolution is capped by the 10-bit analog-to-digital converter of the microcontroller &mdash; the <b>TCS230 color-to-frequency converter</b> outputs a square wave (50&nbsp;% duty cycle) whose frequency is proportional to the incident light intensity. The module carries 64 photodiodes arranged in four arrays: red-, green-, blue-filtered and unfiltered (clear).</p>
+          <p>The RGB light-emitting diode is cycled through three emission colors (white, green and red), and for each of them the TCS230 is switched between its filter arrays. Every measurement cycle therefore returns a matrix of nine <b>emitter&ndash;receptor (E&amp;R) pairs</b> instead of a single intensity value. The emission colors were chosen from the absorption spectra of chlorophyll <i>a</i> and <i>b</i>, so that green algae blooms could in principle be separated from suspended particles unrelated to photosynthetic organisms (e.g. mineral sediment).</p>
+          <p>This section summarises the <b>completed study</b>: design, laboratory calibration over 0&ndash;200&nbsp;NTU, independent validation, chlorophyll-detection experiments with <i>Chlorella</i> sp., and continuous monitoring of a simulated turbidity plume in a recirculating tank. The whole sensing head costs approximately <b>US$&nbsp;50</b>.</p>
+        </div>
       </div>
 
+      <h2>Probe design</h2>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <div class="two_third first">
+          <p>The sensor housing was machined from a black 10&nbsp;cm diameter polyvinyl chloride (PVC) pipe, with the sampling area located inside the pipe wall so that water flows freely through it. The 5&nbsp;mm RGB light source is mounted at 90&deg; from the TCS230, at the same level (Fig 4), which means the probe reads under the <b>nephelometric principle</b>. The LED is covered with a polyethylene diffusion filter that homogenises the beam and damps the light-scattering noise generated by turbulence inside the chamber. A small circular glass window separates the sampling area from the electronic module, keeping the detector dry.</p>
+          <p>A 15&nbsp;cm diameter PVC pipe wraps the whole assembly and isolates the electrical circuit from direct contact with water. The submersible unit connects to the main station through 11 wires.</p>
+        </div>
+        <div class="one_third">
+          <figure>
+            <img class="imgr borderedbox inspace-5" src="img/tf-housing.png" alt="">
+            <figcaption><b>Fig 4.</b> Sensor housing design: RGB LED with the polyethylene diffusion filter, sampling area inside the PVC pipe, and the TCS230 behind its glass window. </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <div class="one_third first">
+          <figure>
+            <img class="imgl borderedbox inspace-5" src="img/tf-lightblocker.jpg" alt="">
+            <figcaption><b>Fig 5.</b> Light blocker design. The red mark indicates the orientation between the rubber membrane and the PVC socket cap. </figcaption>
+          </figure>
+        </div>
+        <div class="two_third">
+          <p>External light is the main source of error in low-cost optical turbidimeters. To suppress it, a rubber membrane and a PVC socket cap were installed at both ends of the internal tube (Fig 5). Both are regularly perforated with 5&nbsp;mm apertures and are spaced by roughly 2&nbsp;cm, but their holes are deliberately misaligned. The result is a <b>maze-like pattern</b>: water flows through, light does not.</p>
+          <p>This design solved the ambient-light problem, but &mdash; as the continuous experiments later showed &mdash; it also became the main limitation of the prototype, since it increases the residence time of suspended particles inside the measurement chamber.</p>
+        </div>
+      </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>The main station holds the microcontroller, the battery and the data logger. We used a Deek-Robot ID:8122 data logging board, which combines a DS1307 real-time clock with a microSD card reader. The logger stores the output frequency of all three RGB channels for each of the three emitted colors, that is, the full nine-output combination, sampled at 1&nbsp;Hz. The probe was powered by a computer during the laboratory experiments, but a regulated battery pack allows prolonged autonomous deployments in remote areas.</p>
+
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-wiring.png" alt="">
+          <figcaption><b>Fig 6.</b> Wiring diagram. The RGB LED and the TCS230 sit inside the submersible probe; the data logger, the battery and the microcontroller board are mounted together in the main station through a printed circuit board. </figcaption>
+        </figure>
+      </div>
+
+      <hr>
+
+      <h2>Calibration: 0&ndash;200 NTU</h2>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>Calibration was carried out in the laboratory by injecting a Formazin Turbidity Standard (4000&nbsp;NTU) into the interior of the probe with a syringe, progressively increasing the concentration of suspended particles from <b>0.8 to 200&nbsp;NTU</b>. The range was deliberately biased towards low turbidity values &mdash; including levels that the human eye cannot resolve &mdash; because the target application is water supply reservoirs, where turbidity rarely exceeds 100&nbsp;NTU. Each round was recorded for 3&nbsp;minutes at 1&nbsp;Hz (60 measurements per emitted color and per RGB component), after which a water sample was extracted from the chamber and read with a DLT-WV digital light-scattering turbidimeter (&plusmn;2&nbsp;% precision, 0.01&nbsp;NTU resolution below 10&nbsp;NTU). The procedure was repeated at least 19 times per experiment, and <b>five full calibration campaigns</b> were run between February and September 2025 to capture day-to-day variability.</p>
+
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-calibration.jpg" alt="">
+          <figcaption><b>Fig 7.</b> Relationship between output frequency and reference turbidity for the three emitted colors: a) white, b) green and c) red, all captured on the unfiltered channel of the TCS230. Markers B1&ndash;B7 denote different experimental days. </figcaption>
+        </figure>
+
+        <p>For every emitted color and every RGB channel the output frequency decreases <b>exponentially</b> with turbidity (Fig 7). This confirms that the probe operates nephelometrically: as suspended solids increase, more light is scattered and absorbed before reaching the single detector window, so fewer photons arrive and the output frequency drops.</p>
+        <p>A single exponential could not describe the whole range, so the calibration was split into two intervals and fitted with a double-exponential model:</p>
+        <p style="text-align:center; font-size:1.05em;"><i>T</i>(<i>f</i>) = <i>a</i> exp(<i>b f</i>) &nbsp;&nbsp;&nbsp; (1)</p>
+        <p>where <i>T</i> is turbidity (NTU), <i>f</i> is the TCS230 output frequency (Hz), and <i>a</i> and <i>b</i> are the two calibration parameters, fitted separately for 0&ndash;80&nbsp;NTU and 80&ndash;200&nbsp;NTU. Alternative models (four-parameter logistic, among others) were tested, but the exponential gave the best fit with the fewest parameters.</p>
+        <p>The fit is excellent and remarkably uniform across the E&amp;R pairs: <b>R&sup2; = 0.991 &plusmn; 0.002</b> for the low range and <b>R&sup2; = 0.995 &plusmn; 0.001</b> for the high range. Only the red&ndash;green pair had to be discarded: its output frequency exceeded the numerical limit of the counter register, wrapping the values to the negative end of the scale.</p>
+
+        <div class="table-scroll">
+        <table>
+          <caption style="caption-side:bottom; padding-top:.6rem; font-size:.9em; text-align:left;"><b>Table 1.</b> Calibration coefficient of determination (R&sup2;) and validation root mean square error (RMSE, in NTU) for each emitter&ndash;receptor pair, per turbidity range.</caption>
+          <thead>
+            <tr>
+              <th rowspan="2">Emitter</th>
+              <th rowspan="2">Receptor</th>
+              <th colspan="2">Curve 1 (0&ndash;80 NTU)</th>
+              <th colspan="2">Curve 2 (80&ndash;200 NTU)</th>
+              <th rowspan="2">Total RMSE</th>
+            </tr>
+            <tr>
+              <th>R&sup2;</th><th>RMSE</th><th>R&sup2;</th><th>RMSE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>White</td><td>Red</td><td>0.993</td><td>2.17</td><td>0.996</td><td>7.53</td><td>4.30</td></tr>
+            <tr><td>White</td><td>Green</td><td>0.990</td><td>1.39</td><td>0.994</td><td>9.36</td><td>5.06</td></tr>
+            <tr><td>White</td><td>Unfiltered</td><td>0.991</td><td>1.63</td><td>0.995</td><td>9.05</td><td>4.92</td></tr>
+            <tr><td>Green</td><td>Red</td><td>0.998</td><td>1.53</td><td>0.993</td><td>9.59</td><td>4.43</td></tr>
+            <tr><td>Green</td><td>Green</td><td>0.991</td><td>1.42</td><td>0.994</td><td>9.12</td><td>4.88</td></tr>
+            <tr><td>Green</td><td>Unfiltered</td><td>0.991</td><td>1.37</td><td>0.994</td><td>9.51</td><td>4.99</td></tr>
+            <tr><td>Red</td><td>Red</td><td>0.993</td><td>2.21</td><td>0.997</td><td>7.27</td><td>4.20</td></tr>
+            <tr><td>Red</td><td>Unfiltered</td><td>0.994</td><td>1.88</td><td>0.997</td><td>6.93</td><td><b>4.01</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <h2>Validation</h2>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>Two additional and fully independent experiments were used to validate the curves, with a new set of turbidity levels prepared from the Formazin standard over the same range (Fig 8).</p>
+
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-validation.jpg" alt="">
+          <figcaption><b>Fig 8.</b> Validation against the reference turbidimeter for emission in a) white, b) green and c) red, all on the unfiltered receptor. Markers are different experimental days; the black line is the 1:1 match. The colored solid line is the absolute error (right axis); the blue and red dashed lines mark the 5&nbsp;% threshold typical of commercial meters and the 10&nbsp;% threshold typical of low-cost probes. </figcaption>
+        </figure>
+
+        <p>Averaged over all valid E&amp;R pairs, the probe achieved an RMSE of <b>2.80 &plusmn; 0.75&nbsp;NTU</b> between 0 and 80&nbsp;NTU and <b>12.04 &plusmn; 0.76&nbsp;NTU</b> between 80 and 200&nbsp;NTU, giving <b>7.44 &plusmn; 0.53&nbsp;NTU</b> across the full scale &mdash; with less than 6&nbsp;% spread between pairs. The maximum absolute error rarely exceeded 11&nbsp;%, which places the prototype at the level of recently published low-cost probes and within a factor of two of commercial instruments.</p>
+        <p>The best overall performance came from the <b>red&ndash;unfiltered</b> pair (total RMSE 4.01&nbsp;NTU, mean relative error 2.9&nbsp;%), while the green&ndash;unfiltered pair was marginally better in the low range (RMSE 1.37&nbsp;NTU). Because the differences between pairs are small, we adopted the <b>white&ndash;unfiltered</b> pair for routine turbidity readings: it keeps the physical principle as simple as possible and minimises sensitivity to the color of the suspended particles.</p>
+      </div>
+
+      <hr>
+
+      <h2>Detecting algae: the frequency-ratio approach</h2>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>The second objective was to test whether the probe can tell <i>what</i> is making the water turbid. Five laboratory experiments were run with natural <i>Chlorella</i> sp. suspensions (spherical unicellular algae, 2&ndash;10&nbsp;&micro;m in diameter) at different background chlorophyll levels &mdash; 13, 40, 49, 133 and 259&nbsp;&micro;g&nbsp;L<sup>-1</sup> &mdash; while turbidity was raised with the Formazin standard exactly as in the calibration. Chlorophyll was quantified with an AquaFlash handheld active fluorometer, which measures total chlorophyll and photosynthetic efficiency by <i>in vivo</i> fluorescence.</p>
+        <p>The physical basis is shown in Fig 9: the green-filtered photodiode array of the TCS230 overlaps the absorption bands of chlorophyll <i>a</i> and <i>b</i>, whereas the unfiltered array integrates the whole visible range. The ratio between the two should therefore carry a pigment signal.</p>
+
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-spectrum.jpg" alt="">
+          <figcaption><b>Fig 9.</b> Visible light spectrum illustrating the wavelength range detected by the TCS230. The black, red, green and blue curves are the normalised responsivity of the unfiltered, red-, green- and blue-filtered photodiode arrays; the green area is the normalised absorption of chlorophyll <i>a</i> and <i>b</i>. </figcaption>
+        </figure>
+      </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>The result was not what a naive reading would suggest: <b>no single output frequency tracked chlorophyll</b>. Samples with higher chlorophyll did not show a proportionally higher green component. What did work was the <b>ratio</b> between the green-filtered and the unfiltered channel, <i>f<sub>G</sub></i>/<i>f<sub>C</sub></i>, and only under white illumination &mdash; green and red emission carried no diagnostic information (Fig 10a).</p>
+
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-chlorophyll.jpg" alt="">
+          <figcaption><b>Fig 10.</b> Algal detection under white emission. a) Turbidity, chlorophyll concentration and frequency ratio <i>f<sub>G</sub></i>/<i>f<sub>C</sub></i>. Each experiment (A1&ndash;A5) was run at a constant chlorophyll background while turbidity varied; the purple line is the calibration curve of Fig 7 normalised by the corresponding frequency ratio (baseline, no added chlorophyll), and the colored dashed lines are the exponential fits for each chlorophyll level. b) Calibrated map obtained with the double-exponential mixed model of Eq. 2. </figcaption>
+        </figure>
+
+        <p>Each chlorophyll level defines its own curve in the turbidity&ndash;ratio plane, shifted to the left of the chlorophyll-free baseline. In other words, for the same turbidity, greener water pushes the ratio down &mdash; a measurable and monotonic separation between algal and mineral turbidity. To turn this into a calibrated surface (Fig 10b) we fitted a double-exponential mixed model that captures both the nonlinear response and the interaction between ratio and turbidity:</p>
+        <p style="text-align:center; font-size:1.05em;"><i>C</i>(<i>f</i>,<i>T</i>) = <i>a</i><sub>0</sub> + <i>a</i><sub>1</sub>exp[&minus;<i>a</i><sub>2</sub>(<i>f</i>&minus;3.1)] + <i>a</i><sub>3</sub>exp(&minus;<i>a</i><sub>4</sub><i>T</i>) + <i>a</i><sub>5</sub>exp[&minus;<i>a</i><sub>6</sub><i>T</i>(<i>f</i>&minus;3.1)] &nbsp;&nbsp;&nbsp; (2)</p>
+        <p>where <i>T</i> is the turbidity obtained from Eq. 1 and <i>f</i> is the non-dimensional ratio <i>f<sub>G</sub></i>/<i>f<sub>C</sub></i>. The seven coefficients were obtained by nonlinear least squares with a Levenberg&ndash;Marquardt optimiser, and negative predictions were clipped to zero.</p>
+        <p>A control experiment replaced the algal suspension with green food dye containing almost no chlorophyll (at most 20&nbsp;&micro;g&nbsp;L<sup>-1</sup>). The probe reproduced a similar trend, although with different sensitivity. This is an important caveat: <b>the response is driven by color, not by pigment fluorescence</b>, so any substance with a comparable visible signature will bias the reading.</p>
+      </div>
+
+      <hr>
+
+      <h2>Continuous monitoring in a recirculating tank</h2>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <div class="one_half first">
+          <p>Bench calibration says little about how a probe behaves when conditions change in time. We therefore mounted the sensor on a 1&nbsp;m long glass tank (58&nbsp;cm high, 7000&nbsp;cm&sup2; surface area, filled to 10&nbsp;cm) with a pump circulating water through the probe chamber (Fig 11). A secondary reservoir above the tank fed a high-turbidity solution (20&nbsp;L of water with 800&nbsp;mL of 400&nbsp;NTU Formazin, mean turbidity 180&nbsp;NTU) by gravity at a constant 13.06&nbsp;mL&nbsp;s<sup>-1</sup>, while an equal volume was withdrawn at the opposite end to hold the water level constant. An air bubble generator kept the reservoir homogeneous and prevented settling.</p>
+          <p>After roughly 60&nbsp;min of injection, clean water was introduced for about 1.5&nbsp;h to flush the system, simulating the passage and decay of a turbidity plume. Reference samples were collected upstream and downstream of the probe throughout the experiment.</p>
+        </div>
+        <div class="one_half">
+          <figure>
+            <img class="imgr borderedbox inspace-5" src="img/tf-tank.jpg" alt="">
+            <figcaption><b>Fig 11.</b> Assembled system used for the continuous monitoring experiments. Arrows show the direction of water flow through the probe. </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-continuous1.jpg" alt="">
+          <figcaption><b>Fig 12.</b> Continuous monitoring of a turbidity plume. The solid line is the probe output (Eq. 1, white&ndash;unfiltered pair); dots and bars are the mean and standard deviation from the reference turbidimeter sampled in front of and behind the probe. Black dashed line: release of the turbidimetric solution. Red dashed line: injection of clean water. The photographs show the water inside the tank at each stage. </figcaption>
+        </figure>
+
+        <p>In the first experiment (turbidity only, Fig 12) the probe tracked the <b>rising limb</b> accurately &mdash; RMSE 8.91&nbsp;NTU, relative error 25&nbsp;% &mdash; and captured the peak concentration immediately before the clean-water flush. The <b>falling limb</b>, however, was not reproduced: the reference instrument recorded a much faster decline than the probe (RMSE 24&nbsp;NTU, relative error 79&nbsp;%). The probe kept reporting turbid water long after the tank had visibly cleared.</p>
+        <p>The explanation is hydrodynamic, not optical. The maze-like light blocker that so effectively excludes ambient light also retains suspended solids inside the measurement chamber, so the water seen by the detector lags the water in the tank. This is a design trade-off, and it defines the main improvement target for the next version.</p>
+
+        <figure>
+          <img class="borderedbox inspace-5" style="width:100%; height:auto;" src="img/tf-continuous2.jpg" alt="">
+          <figcaption><b>Fig 13.</b> Continuous monitoring of a combined turbidity and algae plume. a) Turbidity from Eq. 1 (solid line) against the reference probe (dots and bars). b) Green dots: chlorophyll measured by the reference fluorometer; green bars: maximum chlorophyll detected by the developed probe using Eq. 2 over each 15-min window. Black dashed line: turbidimetric solution release; green dashed line: algae release; red dashed line: clean water injection. </figcaption>
+        </figure>
+
+        <p>The second experiment added <i>Chlorella</i> to the reservoir after 23&nbsp;min, reaching 585.67&nbsp;&micro;g&nbsp;L<sup>-1</sup> of chlorophyll in the injected solution. Turbidity was again well captured during the rising limb (RMSE 6.0&nbsp;NTU, relative error 18&nbsp;%) and, importantly, <b>the turbidity signal was not corrupted by the presence of algae</b> (Fig 13a) &mdash; the two measurements remain independent.</p>
+        <p>The probe was programmed to report, every 15&nbsp;minutes, the maximum chlorophyll detected within the interval. It flagged the bloom <b>15&nbsp;minutes after the release</b> and correctly tracked both its growth and its decay once clean water entered the tank (Fig 13b). The concentrations themselves, however, did not match the fluorometer: a <b>59&nbsp;% difference</b> at the peak. The conclusion is clear and worth stating plainly &mdash; the probe is a reliable <b>detector</b> of algal turbidity, but not a <b>quantifier</b> of chlorophyll.</p>
+      </div>
+
+      <h2>What the prototype delivers, and where it fails</h2>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <div class="one_half first">
+          <p><b>Confirmed capabilities</b></p>
+          <ul>
+            <li>Turbidity over 0&ndash;200&nbsp;NTU with R&sup2;&nbsp;&gt;&nbsp;0.99 and relative error below 10&nbsp;%, for a sensing head of roughly <b>US$&nbsp;50</b>.</li>
+            <li>Accuracy equivalent to recently published low-cost probes, using a fully open-source and modular architecture.</li>
+            <li>Qualitative separation of algal turbidity from mineral turbidity through the <i>f<sub>G</sub></i>/<i>f<sub>C</sub></i> ratio under white illumination &mdash; something broadband LDR-based designs cannot achieve with the same spectral discrimination.</li>
+            <li>Turbidity and algal signals remain independent in a dynamic, time-varying experiment.</li>
+          </ul>
+        </div>
+        <div class="one_half">
+          <p><b>Open limitations</b></p>
+          <ul>
+            <li><b>Chamber hydrodynamics.</b> The maze light blocker retains particles and produces a long lag on the falling limb (79&nbsp;% relative error). Candidate fixes: internal wipers, or removal of the maze combined with ambient-light rejection by differencing LED-on and LED-off readings.</li>
+            <li><b>Chlorophyll is detected, not measured.</b> 59&nbsp;% error at the peak, and a 15-min reporting lag.</li>
+            <li><b>Color, not pigment.</b> The green food dye control shows that any similarly colored substance biases the response.</li>
+            <li><b>Single species, single target.</b> Calibrated for <i>Chlorella</i> only. Cyanobacteria, diatoms or mineral sediment would require new experiments and probably different E&amp;R pairs &mdash; the red channel is the natural candidate for sediment.</li>
+            <li><b>Four broad bands.</b> The TCS230 samples the visible range through only four filters, far from a spectral measurement.</li>
+          </ul>
+        </div>
+      </div>
+
+      <hr>
+
+      <h1>Next step: from three colors to a full spectrum</h1>
+      <header>
+        <figure class="avatar"><img src="../../colab/general.png" alt=""></figure>
+        <address>
+        Ongoing work &mdash; low-cost spectrometer probe
+        </address>
+        <time>Status: design stage. Open to students and collaborators.</time>
+      </header>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>Every limitation listed above traces back to the same root cause: <b>four broad filters are not a spectrum</b>. The TCS230 collapses the entire visible range into four responsivity curves (Fig 9), so any two constituents that reflect similar visible light become indistinguishable. Green food dye looks like <i>Chlorella</i>. Cyanobacteria, whose diagnostic pigment phycocyanin absorbs near 620&nbsp;nm, would look like green algae. And chlorophyll cannot be quantified, because a single ratio cannot invert a mixture of several optically active constituents.</p>
+        <p>The next study replaces the color-to-frequency converter with a <b>low-cost spectrometer front-end</b> &mdash; a multi-channel spectral sensor covering the visible and near-infrared range in narrow bands, rather than four broad ones. The optical geometry, the housing and the open-source logging architecture developed for Abu Dhabi are retained; only the detector and the inversion model change.</p>
+        <p>The cost penalty is real but bounded: such modules cost around <b>US$&nbsp;70</b> against <b>US$&nbsp;9</b> for the TCS230, which raises the sensing head from roughly US$&nbsp;50 to about US$&nbsp;110. That is still one to two orders of magnitude below a commercial multiparameter sonde (in excess of US$&nbsp;8000), and the additional spectral information is precisely what the turbidity-source problem requires.</p>
+      </div>
+
+      <div class="group btmspace-50 demo" style="text-align:justify">
+        <p>The study is organised around four objectives:</p>
+        <ol>
+          <li><b>Spectral signatures.</b> Characterise, inside the same housing and under controlled conditions, the spectral response of the main optically active constituents of inland waters: mineral sediment, green algae, cyanobacteria and coloured dissolved organic matter. This is the reference library that the current probe lacks.</li>
+          <li><b>Multivariate inversion.</b> Replace the single-ratio model of Eq. 2 with a multivariate retrieval &mdash; band ratios and partial least squares regression over the full set of channels &mdash; aiming at <i>quantitative</i> chlorophyll and phycocyanin rather than qualitative detection, and at the simultaneous separation of the mineral fraction.</li>
+          <li><b>Chamber redesign.</b> Remove the maze-like light blocker and reject ambient light by differencing measurements with the emitter switched on and off, an approach already validated in the literature. Evaluate an internal wiper for long deployments. The target is to eliminate the falling-limb lag documented in Fig 12.</li>
+          <li><b>Field deployment.</b> Move from the recirculating tank to a water supply reservoir, integrated with the <a href="../telemetry/telemetry.html">telemetry platform</a> developed in parallel, and benchmarked against a ruggedised commercial sonde over a full seasonal cycle.</li>
+        </ol>
+        <p>Two results from the completed study transfer directly and are worth carrying forward. First, the double-exponential turbidity calibration (Eq. 1) is robust and largely independent of the emitter&ndash;receptor pair, so the turbidity module needs recalibration but not redesign. Second, the ratio-based approach &mdash; normalising a pigment-sensitive channel by a broadband one &mdash; is what made pigment detection possible at all, and it generalises naturally to a spectrometer, where every band can be normalised against every other.</p>
+        <p>A manuscript describing the design, calibration protocols, supplementary experiments and full coefficient tables of the Abu Dhabi probe is in preparation. If you are interested in the hardware, in the calibration datasets, or in joining the spectrometer study, please <a href="../../../../pages/contact-me.html">get in touch</a>.</p>
+      </div>
     </div>
     <div class="clear"></div>
   </main>

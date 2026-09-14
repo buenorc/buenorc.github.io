@@ -523,6 +523,7 @@ main.container,section.container{padding-left:var(--gutter); padding-right:var(-
    narrow column — fall back to ragged right on small screens. */
 @media screen and (max-width:760px){
   [style*="justify"],[align="justify"]{text-align:left !important;}
+  .content figure > figcaption{text-align:left;}
 }
 
 /* A section heading with a bilingual secondary label:
@@ -927,6 +928,10 @@ table i.fa-trophy{color:#d9a300;}
   color:var(--muted);
   font-size:var(--step--1);
   line-height:1.6;
+  /* A figure legend is part of the running text, so it is justified like the
+     body copy around it — overriding the ragged-left default that the shared
+     figcaption rule sets for gallery and card captions. */
+  text-align:justify;
 }
 .content figure > figcaption b{color:var(--ink);}
 
@@ -943,21 +948,44 @@ table i.fa-trophy{color:#d9a300;}
 }
 .avatar img{border-radius:50%;}
 
-/* Call-out header block used on some research pages */
-.content > header{
+/* Call-out header block used on some research pages ("Research performed with
+   the assistance of ..."). Matched both as a direct child of .content and one
+   level down inside a .group, since the markup varies between pages. */
+.content > header,
+.content > .group > header{
   display:flex;
   flex-wrap:wrap;
   align-items:center;
-  gap:var(--sp-4);
+  gap:var(--sp-2) var(--sp-4);
   margin-bottom:var(--sp-5);
-  padding:var(--sp-5);
+  padding:var(--sp-4);
   border:1px solid var(--line);
   border-left:3px solid var(--brand-400);
   border-radius:var(--radius);
   background-color:var(--brand-050);
+  text-align:left;
 }
-.content > header .avatar{float:none; margin:0; flex:0 0 auto;}
-.content > header address{flex:1 1 16rem; color:var(--ink); font-size:var(--step-1); line-height:1.5;}
+.content > header .avatar,
+.content > .group > header .avatar{
+  float:none; margin:0; flex:0 0 auto;
+  width:44px; height:44px;
+}
+.content > header address,
+.content > .group > header address{
+  flex:1 1 16rem;
+  color:var(--body);
+  font-size:var(--step-0);
+  line-height:1.55;
+}
+.content > header time,
+.content > .group > header time{
+  flex:1 1 100%;
+  font-size:var(--step--1);
+  color:var(--muted);
+  line-height:1.5;
+}
+.content > header time:empty,
+.content > .group > header time:empty{display:none;}
 
 /* ============================================================================
    Gallery

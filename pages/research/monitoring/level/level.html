@@ -132,26 +132,28 @@ Licence URI: http://www.os-templates.com/template-terms
       <h1>Low-cost continuous water level monitoring system</h1>
 
       <div class="group btmspace-50 demo" style="text-align:justify">
-        <div class="one_half first">
+        <div class="two_third first">
           <p>Water level monitoring plays a crucial role in hydrological research and flood risk management, offering essential data for understanding precipitation, infiltration, and discharge processes. It also supports communities, especially in flood-prone regions, by providing early warnings and reducing disaster impacts. With climate change and human interventions intensifying flood events, accurate and continuous water level measurements have become increasingly necessary. Traditional methods such as staff gauges, while affordable, are prone to human error and do not provide real-time data. New technologies—like camera-based systems and high-frequency sensors—offer improved accuracy and automation but are often costly and energy-intensive, limiting their use in remote or economically challenged regions.</p>
           <p>To address these limitations, recent studies have focused on low-cost, energy-efficient alternatives using microcontroller-based systems integrated with ultrasonic and pressure sensors. These solutions offer a practical balance between affordability and functionality for large-scale deployment. However, despite promising results, the accuracy of ultrasonic sensors can be affected by surface disturbances and installation conditions, leading to measurement anomalies. This study aims to experimentally evaluate the performance of low-cost ultrasonic sensors under different hydrodynamic scenarios, focusing on the effects of surface variability on data accuracy. By testing the system in a controlled flume environment and comparing readings to reference measurements, the study seeks to identify and quantify systematic and random errors, contributing to more reliable water level monitoring solutions in resource-constrained contexts.</p>
         </div>
-        <div class="one_half"> </div>
-        <figure>
+        <div class="one_third">
+          <figure>
           <img class="imgr borderedbox inspace-5" src="img/Picture1.png" alt="">
           <figcaption><b>Fig 1.</b>Flood. </figcaption>
-        </figure>
+          </figure>
+        </div>
       </div>
 
       <div class="group btmspace-50 demo" style="text-align:justify">
-        <div class="one_half first">
+        <div class="one_third first">
           <figure>
             <img class="imgl borderedbox inspace-5" src="img/Picture2.png" alt="">
             <figcaption><b>Fig 2.</b>Low-cost water level sensor - Circuit </figcaption>
           </figure>
         </div>
-        <div class="one_half"></div>
-        <p> To evaluate the performance of different sensor technologies under variable surface and environmental conditions, the proposed monitoring system integrates four water level sensors—two acoustic (HC-SR04 and A02) and two pressure-based (ALS-MPM-2F)—alongside environmental sensors to enhance data accuracy. An infrared temperature sensor (MLX90614) measures surface water temperature to correct water density estimates for pressure readings, while a DHT-22 sensor records air temperature and humidity, enabling real-time adjustments to the speed of sound for acoustic measurements. At the core of the system is the ATmega328P microcontroller, selected for its low energy consumption and suitability for remote deployment. It manages sensor data acquisition and preliminary processing. For long-range communication, the system uses LoRa WAN modules (E32 433T20D) operating at 433 MHz, which transmit sensor data to a receiving unit equipped with a high-gain antenna. This setup ensures efficient, low-power communication over extended distances.</p>
+        <div class="two_third">
+          <p> To evaluate the performance of different sensor technologies under variable surface and environmental conditions, the proposed monitoring system integrates four water level sensors—two acoustic (HC-SR04 and A02) and two pressure-based (ALS-MPM-2F)—alongside environmental sensors to enhance data accuracy. An infrared temperature sensor (MLX90614) measures surface water temperature to correct water density estimates for pressure readings, while a DHT-22 sensor records air temperature and humidity, enabling real-time adjustments to the speed of sound for acoustic measurements. At the core of the system is the ATmega328P microcontroller, selected for its low energy consumption and suitability for remote deployment. It manages sensor data acquisition and preliminary processing. For long-range communication, the system uses LoRa WAN modules (E32 433T20D) operating at 433 MHz, which transmit sensor data to a receiving unit equipped with a high-gain antenna. This setup ensures efficient, low-power communication over extended distances.</p>
+        </div>
       </div>
 
       <div class="group btmspace-50 demo" style="text-align:justify">
@@ -159,11 +161,12 @@ Licence URI: http://www.os-templates.com/template-terms
         <div class="one_half first">
           <p>The system applies distinct measurement principles to determine water levels. Acoustic sensors, mounted above the water surface, estimate the distance to the surface using the time-of-flight of ultrasonic pulses, with corrections based on real-time air temperature and humidity. Pressure sensors, installed at the bottom of the river or reservoir, directly measure hydrostatic pressure and convert it into water level using the fluid's temperature-adjusted density and atmospheric pressure. By combining both methods, the system enables cross-validation of measurements and captures the influence of surface disturbances and environmental variability. Operating in a controlled environment, the system provides a comprehensive assessment of sensor accuracy, energy efficiency, and reliability, supporting the development of low-cost, adaptable water level monitoring technologies.</p>
         </div>
-        <div class="one_half"> </div>
-        <figure>
+        <div class="one_half">
+          <figure>
           <img class="imgr borderedbox inspace-5" src="img/laser-turb.png" alt="">
           <figcaption><b>Fig 3.</b> </figcaption>
-        </figure>
+          </figure>
+        </div>
       </div>
 
       <hr>

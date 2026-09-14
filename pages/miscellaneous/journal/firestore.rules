@@ -21,7 +21,7 @@ service cloud.firestore {
 
     function signedIn()  { return request.auth != null; }
     function uid()       { return request.auth.uid; }
-    function isEditor()  { return signedIn() && uid() == 'x1kgb92m3dVRgja5ahiGoPeDNeg1'; }
+    function isEditor()  { return signedIn() && uid() == 'WuoFvwlkSJXyvrT9pYJvQ7TLP8A3'; }
 
     /* Is this account assigned to review that manuscript? Review documents are
        keyed `${msId}_${reviewerUid}`, so this is a single existence check.
@@ -66,6 +66,16 @@ service cloud.firestore {
       allow update: if isEditor() || (signedIn() && resource.data.uid == uid()
                                       && request.resource.data.uid == resource.data.uid);
       allow delete: if isEditor();
+    }
+
+    /* ── Removed accounts ─────────────────────────────
+       Deleting a profile cannot delete the Firebase Authentication login behind
+       it — the browser SDK is not allowed to remove another user's account. The
+       login therefore outlives the profile, and without its UID the editor has
+       no way to attach a new profile to it. This record keeps only the address
+       and the UID, so the same person can be added back. Editor only. */
+    match /plmm_removed/{email} {
+      allow read, write: if isEditor();
     }
 
     /* ── Manuscripts ──────────────────────────────────
