@@ -21,7 +21,7 @@ service cloud.firestore {
 
     function signedIn()  { return request.auth != null; }
     function uid()       { return request.auth.uid; }
-    function isEditor()  { return signedIn() && uid() == 'WuoFvwlkSJXyvrT9pYJvQ7TLP8A3'; }
+    function isEditor()  { return signedIn() && uid() == 'e87ylfaH6ScmgTa07k79ZrVtMH73'; }
 
     /* Is this account assigned to review that manuscript? Review documents are
        keyed `${msId}_${reviewerUid}`, so this is a single existence check.
