@@ -1657,6 +1657,8 @@ textarea.input{padding:.85rem 1.2rem; min-height:150px; border-radius:var(--radi
   transition:background-color .2s var(--ease),transform .2s var(--ease);
 }
 .btn-tool:hover{background-color:var(--brand-700); color:#fff; transform:translateY(-1px);}
+.tool-actions{display:flex; flex-wrap:wrap; gap:var(--sp-3); margin-top:auto;}
+.tool-actions .btn-tool{margin-top:0;}
 
 @media screen and (max-width:700px){
   .tool{flex-direction:column;}
